@@ -26,9 +26,9 @@
    (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
 ;; hidpi
-(set-face-attribute 'default nil :font "IBM Plex Mono" :height 170)
+;;(set-face-attribute 'default nil :font "IBM Plex Mono" :height 170)
 ;; normal screens
-;; (set-face-attribute 'default nil :font "IBM Plex Mono" :height 16)
+ (set-face-attribute 'default nil :font "IBM Plex Mono" :height 135)
 
 
 ;; Make ESC quit prompts
@@ -114,3 +114,6 @@
 (use-package magit
   :bind (("C-x g" . magit-status)
          ("C-x C-g" . magit-status)))
+
+(setq org-todo-keywords
+      '((sequence "TODO" "IN PROGRESS" "BLOCKED STUCK" "VERIFY" "|" "DONE" "DELEGATED")))
