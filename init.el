@@ -1,13 +1,16 @@
 ;; some basics
 
-(scroll-bar-mode -1)        ; Disable visible scrollbar
-(tool-bar-mode -1)          ; Disable the toolbar
-(tooltip-mode -1)           ; Disable tooltips
-(set-fringe-mode 10)        ; Give some breathing room
+(scroll-bar-mode -1)          ; Disable visible scrollbar
+(tool-bar-mode -1)            ; Disable the toolbar
+(tooltip-mode -1)             ; Disable tooltips
+(set-fringe-mode 10)          ; Give some breathing room
 (menu-bar-mode -1)            ; Disable the menu bar
+(set-face-background hl-line-face "pink4")
+(global-hl-line-mode 1)       ; HL Lines globally on
+
 
 ;; python3 
-(setq python-shell-interpreter "/Library/Frameworks/Python.framework/Versions/3.10/bin/python3")
+(setq python-shell-interpreter "python3")
 
 ;; send backsups to one specific directory
 (setq backup-directory-alist '(("." . "~/Organization/EmacsBackups")))
@@ -20,7 +23,6 @@
    (getenv "PATH")
   )
 )
-
 
 ;; Set up the visible bell
 ;; (setq visible-bell t) ;; linux windows
@@ -87,6 +89,8 @@
   :config
   (ivy-mode 1))
 
+
+
 (use-package doom-modeline
   :ensure t
   :init (doom-modeline-mode 1)
@@ -132,3 +136,16 @@
 
 (setq org-todo-keywords
       '((sequence "TODO" "IN PROGRESS" "BLOCKED STUCK" "VERIFY" "|" "DONE" "DELEGATED")))
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   '(magit helpful counsel ivy-rich which-key rainbow-delimiters doom-themes doom-modeline ivy command-log-mode use-package)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
