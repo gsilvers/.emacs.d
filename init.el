@@ -6,8 +6,21 @@
 (set-fringe-mode 10)        ; Give some breathing room
 (menu-bar-mode -1)            ; Disable the menu bar
 
+;; python3 
+(setq python-shell-interpreter "/Library/Frameworks/Python.framework/Versions/3.10/bin/python3")
+
 ;; send backsups to one specific directory
 (setq backup-directory-alist '(("." . "~/Organization/EmacsBackups")))
+
+;; Path
+
+(setenv "PATH"
+  (concat
+   "/Library/Frameworks/Python.framework/Versions/3.10/bin/" ";"
+   (getenv "PATH")
+  )
+)
+
 
 ;; Set up the visible bell
 ;; (setq visible-bell t) ;; linux windows
