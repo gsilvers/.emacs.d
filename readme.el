@@ -28,14 +28,6 @@
 ;; send backsups to one specific directory
 (setq backup-directory-alist '(("." . "~/Organization/EmacsBackups")))
 
-;; Path
-(setenv "PATH"
-  (concat
-   "/Library/Frameworks/Python.framework/Versions/3.10/bin/" ";"
-   (getenv "PATH")
-  )
-)
-
 ;; Set up the visible bell
 ;; (setq visible-bell t) ;; linux windows
 ;; (setq visible-bell nil)
@@ -58,7 +50,6 @@
 ;;(set-face-attribute 'default nil :font "IBM Plex Mono" :height 170)
 ;; normal screens
 (set-face-attribute 'default nil :font "IBM Plex Mono" :height 135)
-
 
 ;; Make ESC quit prompts
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
