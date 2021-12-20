@@ -1,179 +1,267 @@
 * Emacs Configuration
   
-** This document is an overview of my emacs configuration with notes explaining the why and how of each bit of code
+  This document is an overview of my emacs configuration with notes explaining the why and how of each bit of code works. This document can be cloned in along with this repo if you would like to emulate my emacs config.
+
+  I would however recomend you arive 
+
+** Overview and References
 
 *** How it works
-The intent of this file is to use org-babel to have org mode generate my init.el and other files as needed while providing documentation in place.
 
-See: https://orgmode.org/worg/org-contrib/babel/index.html
+    The intent of this file is to use org-babel to have org mode generate my init.el and other files as needed while providing documentation in place.
+    See: https://orgmode.org/worg/org-contrib/babel/index.html
 
-Code can be embedded using code blocks with both syntax highlighting and export instructions this code below for example will set the python mode interpreter to python3 not the default python.
+    Code can be embedded using code blocks with both syntax highlighting and export instructions this code below for example will set the python mode interpreter to python3 not the default python.
 
-#+begin_src emacs-lisp
-  ;; example
-#+end_src
-
+    #+begin_src emacs-lisp
+      ;; example
+    #+end_src
+    
 *** Conventions
-For this document configuration changes will be seperated into related groups for ease of understanding for example all items related to python could be together as will all org mode items. 
+
+    For this document configuration changes will be seperated into related groups for ease of understanding for example all items related to python could be together as will all org mode items. 
+
+*** References and Good Information
+
+    For my emacs adventure I am following along with one major source of information which is the emacs from scratch series by "system crafters". You can find these here.
+
+    https://www.youtube.com/watch?v=74zOY-vgkyw&list=PLEoMzSkcN8oPH1au7H6B7bBJ4ZO7BXjSZ&t=0s
+
+    There are tons of snippets in my code which are borrowed from this series and if you are looking for a good tour of emacs features this is great. I also am following along with these books.
+
+    https://www.oreilly.com/library/view/gnu-emacs-pocket/1565924967/
+
+    and
+
+    https://masteringemacs.org/book
+
+    I am a professional software engineer but I am mainly looking at emacs for its documentation and org mode. If I can fit it in with my professional activities (python, sql, plsql) even better.
+
+** Configuration
+
+*** Use Package
+
+    Since we will use use-package to easily include and require packages lets get use-package very first. We also will point packages to elpa and melpa.
+
+    #+begin_src emacs-lisp
+      ;; Initialize package sources
+      (require 'package)
+
+      (setq package-archives '(("melpa" . "https://melpa.org/packages/")
+			       ("org" . "https://orgmode.org/elpa/")
+			       ("elpa" . "https://elpa.gnu.org/packages/")))
+
+      (package-initialize)
+      (unless package-archive-contents
+	(package-refresh-contents))
+
+      ;; Initialize use-package on non-Linux platforms
+      (unless (package-installed-p 'use-package)
+	(package-install 'use-package))
+
+      (require 'use-package)
+      (setq use-package-always-ensure t)
+    #+end_src
+
+    
+*** Basic Settings
+
+    We will turn off a number of things to make the window smaller. These settings just remove much of the window padding as well as memu bars. We will also turn the bell of and make it visible flash on the screen instead.
+
+    The very last bit is to default our backups to a special folder. Emacs keeps temp files and if you do not do this you'll end up with ~ named files in every directory. Alternatively you can turn these backups off BUT its a great feature.
+
+    #+begin_src emacs-lisp
+      ;; some basics
+      (scroll-bar-mode -1)          ; Disable visible scrollbar
+      (tool-bar-mode -1)            ; Disable the toolbar
+      (tooltip-mode -1)             ; Disable tooltips
+      (set-fringe-mode 10)          ; Give some breathing room
+      (menu-bar-mode -1)
+
+      ;; Set up the visible bell
+      ;; (setq visible-bell t) ;; linux windows
+      ;; (setq visible-bell nil)
+      (setq ring-bell-function (lambda ()  ;; macos
+				 (invert-face 'mode-line)
+				 (run-with-timer 0.1 nil 'invert-face 'mode-line)))
+
+      ;; send backsups to one specific directory
+      (setq backup-directory-alist '(("." . "~/Organization/EmacsBackups")))
+    #+end_src
 
 
+*** Keyboard Changes
+
+    Any simple keymap changes are here there can be more specific key binds per package which will be stored with their associated package.
+
+    #+begin_src emacs-lisp
+      (global-set-key (kbd "<escape>") 'keyboard-escape-quit) ;; Make ESC quit prompts
+    #+end_src
+
+*** Appearance
+
+    I am using evil emacs bar as well as a theme from there for basic appearnance as well as some specific fonts. Please ensure you have IBM Plex Mono fonts installed if you want to use this.
+
+    Please note I have some lines here commented in and out to account for different machines. I use emacs mostly in a Debian VM but I also use it on Macos and Windows natively for work. Font height and $PATH work different for macs.
+
+    #+begin_src emacs-lisp
+      (global-hl-line-mode 1)       ; HL Lines globally on
+      (set-face-background hl-line-face "gray23")
+      ;; hidpi
+      ;;(set-face-attribute 'default nil :font "IBM Plex Mono" :height 170)
+      ;; normal screens
+      (set-face-attribute 'default nil :font "IBM Plex Mono" :height 135)
+
+      (use-package doom-modeline
+	:ensure t
+	:init (doom-modeline-mode 1)
+	:custom ((doom-modeline-height 13)))
+
+      ;; NOTE: The first time you load your configuration on a new machine, you'll
+      ;; need to run the following command interactively so that mode line icons
+      ;; display correctly:
+      ;;
+      ;; M-x all-the-icons-install-fonts
+      ;; icons 
+      (use-package all-the-icons)
+
+      (use-package doom-themes
+	:init (load-theme 'doom-monokai-classic t))
+
+      (use-package rainbow-delimiters
+	:hook (prog-mode . rainbow-delimiters-mode))
+
+    #+end_src
+
+**** Line Numbers
+
+     We turn on line numbers but turn them off in various modes like terminal and dired.
+
+    #+begin_src emacs-lisp
+      (column-number-mode)
+      (global-display-line-numbers-mode t)
+
+      ;; Disable line numbers for some modes
+      (dolist (mode '(org-mode-hook
+		      term-mode-hook
+		      dired-mode-hook
+		      shell-mode-hook
+		      eshell-mode-hook))
+	(add-hook mode (lambda () (display-line-numbers-mode 0))))
+    #+end_src
+    
+*** Python
+
+    Here we set the python to python 3. My Mac has both python 2 and python 3 installed so this keeps it on the right one.
+
+    
+    #+begin_src emacs-lisp
+      ;; python3 
+      (setq python-shell-interpreter "python3")
+    #+end_src
+
+
+*** Mac Specific
+
+    Here we use a package to force emacs to use the bash path on macos.
+
+    #+begin_src emacs-lisp
+      (use-package exec-path-from-shell)
+      (when (memq window-system '(mac ns x))
+	(exec-path-from-shell-initialize))
+      (use-package command-log-mode)
+    #+end_src
+
+*** Exploration Aids
+
+    These packages Ivy Which Key and Helpful provide aid to the user in using emacs.
+
+    Ivy has some usefull key shortcuts that are better than default.
+    Which Key will show a context menu as you hit a key sequence. For example if you hit C-C you will then see all of the org mode options.
+    Helpful is simply better help. It gives you hints on all sorts of menus.
+
+    #+begin_src emacs-lisp
+      (use-package ivy
+	:diminish
+	:bind (("C-s" . swiper)
+	       :map ivy-minibuffer-map
+	       ("TAB" . ivy-alt-done)	
+	       ("C-l" . ivy-alt-done)
+	       ("C-j" . ivy-next-line)
+	       ("C-k" . ivy-previous-line)
+	       :map ivy-switch-buffer-map
+	       ("C-k" . ivy-previous-line)
+	       ("C-l" . ivy-done)
+	       ("C-d" . ivy-switch-buffer-kill)
+	       :map ivy-reverse-i-search-map
+	       ("C-k" . ivy-previous-line)
+	       ("C-d" . ivy-reverse-i-search-kill))
+	:config
+	(ivy-mode 1))
+
+      (use-package which-key
+	:init (which-key-mode)
+	:diminish which-key-mode
+	:config
+	(setq which-key-idle-delay 1))
+
+      (use-package ivy-rich
+	:init
+	(ivy-rich-mode 1))
+
+      (use-package counsel
+	:ensure t  
+	:bind (("M-x" . counsel-M-x)
+	       ("C-x b" . counsel-ibuffer)
+	       ("C-x C-f" . counsel-find-file)
+	       :map minibuffer-local-map
+	       ("C-r" . 'counsel-minibuffer-history)))
+
+      (use-package helpful
+	:custom
+	(counsel-describe-function-function #'helpful-callable)
+	(counsel-describe-variable-function #'helpful-variable)
+	:bind
+	([remap describe-function] . counsel-describe-function)
+	([remap describe-command] . helpful-command)
+	([remap describe-variable] . counsel-describe-variable)
+	([remap describe-key] . helpful-key))
+    #+end_src
+
+*** Org Mode
+
+    This is my settings block for org mode.
+
+    This gives our todos a custom list of possible status codes.
+
+    #+begin_src emacs-lisp
+      (setq org-todo-keywords
+	    '((sequence "TODO" "IN PROGRESS" "BLOCKED STUCK" "VERIFY" "|" "DONE" "DELEGATED")))
+    #+end_src
+    
+*** Everything Else
+
+    Anything else random will be here. Right now this is just the git client which I have not configured fully for myself. This is sort of a "work in progress area" of my config.
+    
+    #+begin_src emacs-lisp
+    	 (use-package magit
+	   :bind (("C-x g" . magit-status)
+		  ("C-x C-g" . magit-status)))
+    #+end_src
+
+    
 #+begin_src emacs-lisp
-
-   ;; some basics
-   (scroll-bar-mode -1)          ; Disable visible scrollbar
-   (tool-bar-mode -1)            ; Disable the toolbar
-   (tooltip-mode -1)             ; Disable tooltips
-   (set-fringe-mode 10)          ; Give some breathing room
-   (menu-bar-mode -1)            ; Disable the menu bar
-   (global-hl-line-mode 1)       ; HL Lines globally on
-   (set-face-background hl-line-face "gray23")
-
-   ;; Make ESC quit prompts
-   (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
-
-
-
-   ;; python3 
-   (setq python-shell-interpreter "python3")
-
-   ;; send backsups to one specific directory
-   (setq backup-directory-alist '(("." . "~/Organization/EmacsBackups")))
-
-   ;; Set up the visible bell
-   ;; (setq visible-bell t) ;; linux windows
-   ;; (setq visible-bell nil)
-   (setq ring-bell-function (lambda ()  ;; macos
-   (invert-face 'mode-line)
-   (run-with-timer 0.1 nil 'invert-face 'mode-line)))
-
-   (column-number-mode)
-    (global-display-line-numbers-mode t)
-
-    ;; Disable line numbers for some modes
-   (dolist (mode '(org-mode-hook
-		    term-mode-hook
-		    dired-mode-hook
-		    shell-mode-hook
-		    eshell-mode-hook))
-      (add-hook mode (lambda () (display-line-numbers-mode 0))))
-
-   ;; hidpi
-   ;;(set-face-attribute 'default nil :font "IBM Plex Mono" :height 170)
-   ;; normal screens
-   (set-face-attribute 'default nil :font "IBM Plex Mono" :height 135)
-
-   ;; Make ESC quit prompts
-   (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
-
-   ;; Initialize package sources
-   (require 'package)
-
-   (setq package-archives '(("melpa" . "https://melpa.org/packages/")
-			    ("org" . "https://orgmode.org/elpa/")
-			    ("elpa" . "https://elpa.gnu.org/packages/")))
-
-   (package-initialize)
-   (unless package-archive-contents
-    (package-refresh-contents))
-
-   ;; Initialize use-package on non-Linux platforms
-   (unless (package-installed-p 'use-package)
-     (package-install 'use-package))
-
-   (require 'use-package)
-   (setq use-package-always-ensure t)
-
-
-  (use-package exec-path-from-shell)
-(when (memq window-system '(mac ns x))
-  (exec-path-from-shell-initialize))
-   (use-package command-log-mode)
-
-   (use-package ivy
-     :diminish
-     :bind (("C-s" . swiper)
-	    :map ivy-minibuffer-map
-	    ("TAB" . ivy-alt-done)	
-	    ("C-l" . ivy-alt-done)
-	    ("C-j" . ivy-next-line)
-	    ("C-k" . ivy-previous-line)
-	    :map ivy-switch-buffer-map
-	    ("C-k" . ivy-previous-line)
-	    ("C-l" . ivy-done)
-	    ("C-d" . ivy-switch-buffer-kill)
-	    :map ivy-reverse-i-search-map
-	    ("C-k" . ivy-previous-line)
-	    ("C-d" . ivy-reverse-i-search-kill))
-     :config
-     (ivy-mode 1))
-
-
-
-   (use-package doom-modeline
-     :ensure t
-     :init (doom-modeline-mode 1)
-     :custom ((doom-modeline-height 13)))
-
-   (use-package doom-themes
-     :init (load-theme 'doom-monokai-classic t))
-
-    (use-package rainbow-delimiters
-      :hook (prog-mode . rainbow-delimiters-mode))
-
-    (use-package which-key
-      :init (which-key-mode)
-      :diminish which-key-mode
-      :config
-      (setq which-key-idle-delay 1))
-
-    (use-package ivy-rich
-      :init
-      (ivy-rich-mode 1))
-
-   (use-package counsel
-      :ensure t  
-      :bind (("M-x" . counsel-M-x)
-	     ("C-x b" . counsel-ibuffer)
-	     ("C-x C-f" . counsel-find-file)
-	     :map minibuffer-local-map
-	     ("C-r" . 'counsel-minibuffer-history)))
-
-    (use-package helpful
-      :custom
-      (counsel-describe-function-function #'helpful-callable)
-      (counsel-describe-variable-function #'helpful-variable)
-      :bind
-      ([remap describe-function] . counsel-describe-function)
-      ([remap describe-command] . helpful-command)
-      ([remap describe-variable] . counsel-describe-variable)
-      ([remap describe-key] . helpful-key))
-
-   (use-package magit
-     :bind (("C-x g" . magit-status)
-	    ("C-x C-g" . magit-status)))
-
-
-   ;; NOTE: The first time you load your configuration on a new machine, you'll
-   ;; need to run the following command interactively so that mode line icons
-   ;; display correctly:
-   ;;
-   ;; M-x all-the-icons-install-fonts
-   ;; icons 
-   (use-package all-the-icons)
-
-   (setq org-todo-keywords
-	 '((sequence "TODO" "IN PROGRESS" "BLOCKED STUCK" "VERIFY" "|" "DONE" "DELEGATED")))
-   (custom-set-variables
-    ;; custom-set-variables was added by Custom.
-    ;; If you edit it by hand, you could mess it up, so be careful.
-    ;; Your init file should contain only one such instance.
-    ;; If there is more than one, they won't work right.
-    '(package-selected-packages
-      '(magit helpful counsel ivy-rich which-key rainbow-delimiters doom-themes doom-modeline ivy command-log-mode use-package)))
-   (custom-set-faces
-    ;; custom-set-faces was added by Custom.
-    ;; If you edit it by hand, you could mess it up, so be careful.
-    ;; Your init file should contain only one such instance.
-    ;; If there is more than one, they won't work right.
-    )
+  (custom-set-variables
+   ;; custom-set-variables was added by Custom.
+   ;; If you edit it by hand, you could mess it up, so be careful.
+   ;; Your init file should contain only one such instance.
+   ;; If there is more than one, they won't work right.
+   '(package-selected-packages
+     '(magit helpful counsel ivy-rich which-key rainbow-delimiters doom-themes doom-modeline ivy command-log-mode use-package)))
+  (custom-set-faces
+   ;; custom-set-faces was added by Custom.
+   ;; If you edit it by hand, you could mess it up, so be careful.
+   ;; Your init file should contain only one such instance.
+   ;; If there is more than one, they won't work right.
+   )
 #+end_src
