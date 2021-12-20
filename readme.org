@@ -104,6 +104,16 @@
 
     Please note I have some lines here commented in and out to account for different machines. I use emacs mostly in a Debian VM but I also use it on Macos and Windows natively for work. Font height and $PATH work different for macs.
 
+    For all the icons fonts on windows you will need to "install" them. To do this follow the details 
+
+    https://github.com/hlissner/doom-emacs/issues/2575
+
+    The powershell commands are
+     cd $tempFonts
+     $destination = (New-Object -ComObject Shell.Application).Namespace(0x14)
+     ls *.ttf | % { $destination.CopyHere($_.FullName, 0x10) }     
+    
+
     #+begin_src emacs-lisp
       (global-hl-line-mode 1)       ; HL Lines globally on
       (set-face-background hl-line-face "gray23")
@@ -130,6 +140,7 @@
 
       (use-package rainbow-delimiters
 	:hook (prog-mode . rainbow-delimiters-mode))
+
 
     #+end_src
 
