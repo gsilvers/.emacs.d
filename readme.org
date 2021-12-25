@@ -160,7 +160,26 @@
 		      eshell-mode-hook))
 	(add-hook mode (lambda () (display-line-numbers-mode 0))))
     #+end_src
-    
+
+*** Enviornment Variables
+
+    In this section I am including some enviornment variables that sometimes are not loaded. For example on a mac if you launch emacs from spotlight it will not inherit your enviornment variables from your .zshrc or .bash_profile.
+
+    This will ensure some things are present for me. In my case I'm ensuring paths for Oracle SQL Plus and TNS files are picked up as well as the python I prefer
+
+    This is wrapped in a mac conditional this is not needed on my windows enviornment. 
+
+    #+begin_src emacs-lisp
+       (when (memq window-system '(mac ns x))
+	    (setenv "PATH" (concat "/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:" (getenv "PATH"))) ;; gets my homebrew installed python
+	    (setenv "PATH" (concat "/Users/gregsilverstein/Oracle/instantclient:" (getenv "PATH"))) ;; gets sqlplus and oracle directory in
+	    (setenv "ORACLE_HOME"  "/Users/gregsilverstein/Oracle/instantclient") ;; oracle stuff
+	    (setenv "DYLD_LIBRARY_PATH"  "/Users/gregsilverstein/Oracle/instantclient") ;; oracle stuff
+	    (setenv "OCI_LIB_DIR"  "/Users/gregsilverstein/Oracle/instantclient") ;; oracle stuff
+	    (setenv "OCI_INC_DIR"  "/Users/gregsilverstein/Oracle/instantclient/sdk/include") ;; oracle stuff
+	    (setenv "TNS_ADMIN"  "/Users/gregsilverstein/Oracle/network/wallet") ;; oracle stuff
+	    )
+    #+end_src
 *** Python
 
     Here we set the python to python 3. My Mac has both python 2 and python 3 installed so this keeps it on the right one.
