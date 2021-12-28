@@ -1,0 +1,22 @@
+* Until Loop
+
+  This comes from an article https://emacstil.com/til/2021/12/19/my-first-macro-until-loop/
+
+  The user deines an untill loop
+
+  #+begin_src emacs-lisp
+
+    (defmacro until (test &rest body)
+      `(while (not ,test)
+	 ,@body))
+
+    (setq jz/counter 1)
+    (setq jz/res '())
+    (until (>= jz/counter 5)
+	   (setq jz/counter (+ 1 jz/counter))
+	   (setq jz/res (cons jz/counter jz/res)))
+
+    ;; jz/res => (5 4 3 2)
+  #+end_src
+
+  This is very cool to me much like macros in sas you can do macros in here and meta program and extend the language.

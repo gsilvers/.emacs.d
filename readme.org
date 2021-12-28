@@ -61,7 +61,10 @@
 
       (require 'use-package)
       (setq use-package-always-ensure t)
-    #+end_src
+
+      ;; uncomment this as needed or run manually
+      ;;(package-refresh-contents ) ;; also update from melpa etc
+      #+end_src
 
     
 *** Basic Settings
@@ -76,7 +79,6 @@
       (tool-bar-mode -1)            ; Disable the toolbar
       (tooltip-mode -1)             ; Disable tooltips
       (set-fringe-mode 10)          ; Give some breathing room
-      (menu-bar-mode -1)
 
       ;; Set up the visible bell
       ;; (setq visible-bell t) ;; linux windows
@@ -90,17 +92,71 @@
     #+end_src
 
 
+*** Clojure
+
+    I will be spending time this year learning clojure and making a terminal app in it here are some ext for it
+
+
+    #+begin_src emacs-lisp
+      (defvar my-packages '(better-defaults
+			    projectile
+			    clojure-mode
+			    cider))
+
+      (dolist (p my-packages)
+	(unless (package-installed-p p)
+	  (package-install p)))
+    #+end_src
+
 *** Keyboard Changes
 
     Any simple keymap changes are here there can be more specific key binds per package which will be stored with their associated package.
 
     #+begin_src emacs-lisp
       (global-set-key (kbd "<escape>") 'keyboard-escape-quit) ;; Make ESC quit prompts
+
+      (use-package general
+	:after evil
+	:config
+	(general-create-definer efs/leader-keys
+				:keymaps '(normal insert visual emacs)
+				:prefix "SPC"
+				:global-prefix "C-SPC")
+
+	(efs/leader-keys
+	 "t"  '(:ignore t :which-key "toggles")
+	 "tt" '(counsel-load-theme :which-key "choose theme")
+	 "fde" '(lambda () (interactive) (find-file (expand-file-name "~/.emacs.d/Emacs.org")))))
+
+      (use-package evil
+	:init
+	(setq evil-want-integration t)
+	(setq evil-want-keybinding nil)
+	(setq evil-want-C-u-scroll t)
+	(setq evil-want-C-i-jump nil)
+	:config
+	(evil-mode 1)
+	(define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
+	(define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+
+	;; Use visual line motions even outside of visual-line-mode buffers
+	(evil-global-set-key 'motion "j" 'evil-next-visual-line)
+	(evil-global-set-key 'motion "k" 'evil-previous-visual-line)
+
+	(evil-set-initial-state 'messages-buffer-mode 'normal)
+	(evil-set-initial-state 'dashboard-mode 'normal))
+
+      (use-package evil-collection
+	:after evil
+	:config
+	(evil-collection-init))
+
+
     #+end_src
 
 *** Appearance
 
-    I am using evil emacs bar as well as a theme from there for basic appearnance as well as some specific fonts. Please ensure you have IBM Plex Mono fonts installed if you want to use this.
+    I am using doom emacs bar as well as a theme from there for basic appearnance as well as some specific fonts. Please ensure you have IBM Plex Mono fonts installed if you want to use this.
 
     Please note I have some lines here commented in and out to account for different machines. I use emacs mostly in a Debian VM but I also use it on Macos and Windows natively for work. Font height and $PATH work different for macs.
 
@@ -115,32 +171,33 @@
     
 
     #+begin_src emacs-lisp
-      (global-hl-line-mode 1)       ; HL Lines globally on
-      (set-face-background hl-line-face "gray23")
-      ;; hidpi
-      ;;(set-face-attribute 'default nil :font "IBM Plex Mono" :height 170)
-      ;; normal screens
-      (set-face-attribute 'default nil :font "IBM Plex Mono" :height 135)
+	    (global-hl-line-mode 1)       ; HL Lines globally on
+	    (set-face-background hl-line-face "gray23")
+	    ;; hidpi
+	    ;;(set-face-attribute 'default nil :font "IBM Plex Mono" :height 170)
+	    ;; normal screens
+	    (set-face-attribute 'default nil :font "IBM Plex Mono" :height 135)
 
-      (use-package doom-modeline
-	:ensure t
-	:init (doom-modeline-mode 1)
-	:custom ((doom-modeline-height 13)))
+	    (use-package doom-modeline
+	      :ensure t
+	      :init (doom-modeline-mode 1)
+	      :custom ((doom-modeline-height 13)))
 
-      ;; NOTE: The first time you load your configuration on a new machine, you'll
-      ;; need to run the following command interactively so that mode line icons
-      ;; display correctly:
-      ;;
-      ;; M-x all-the-icons-install-fonts
-      ;; icons 
-      (use-package all-the-icons)
+	    ;; NOTE: The first time you load your configuration on a new machine, you'll
+	    ;; need to run the following command interactively so that mode line icons
+	    ;; display correctly:
+	    ;;
+	    ;; M-x all-the-icons-install-fonts
+	    ;; icons 
+	    (use-package all-the-icons)
 
-      (use-package doom-themes
-	:init (load-theme 'doom-monokai-classic t))
+	    (use-package doom-themes
+	      :init (load-theme 'doom-dracula t))
 
-      (use-package rainbow-delimiters
-	:hook (prog-mode . rainbow-delimiters-mode))
+	    (use-package rainbow-delimiters
+	      :hook (prog-mode . rainbow-delimiters-mode))
 
+      (setq doom-modeline-modal-icon nil)
 
     #+end_src
 
@@ -167,18 +224,23 @@
 
     This will ensure some things are present for me. In my case I'm ensuring paths for Oracle SQL Plus and TNS files are picked up as well as the python I prefer
 
-    This is wrapped in a mac conditional this is not needed on my windows enviornment. 
+    This is wrapped in a mac conditional this is not needed on my windows enviornment.
+
+    Frankly homebrew and macs are a mess
 
     #+begin_src emacs-lisp
-       (when (memq window-system '(mac ns x))
-	    (setenv "PATH" (concat "/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:" (getenv "PATH"))) ;; gets my homebrew installed python
-	    (setenv "PATH" (concat "/Users/gregsilverstein/Oracle/instantclient:" (getenv "PATH"))) ;; gets sqlplus and oracle directory in
-	    (setenv "ORACLE_HOME"  "/Users/gregsilverstein/Oracle/instantclient") ;; oracle stuff
-	    (setenv "DYLD_LIBRARY_PATH"  "/Users/gregsilverstein/Oracle/instantclient") ;; oracle stuff
-	    (setenv "OCI_LIB_DIR"  "/Users/gregsilverstein/Oracle/instantclient") ;; oracle stuff
-	    (setenv "OCI_INC_DIR"  "/Users/gregsilverstein/Oracle/instantclient/sdk/include") ;; oracle stuff
-	    (setenv "TNS_ADMIN"  "/Users/gregsilverstein/Oracle/network/wallet") ;; oracle stuff
-	    )
+      (when (memq window-system '(mac ns x))
+	   (setenv "PATH" (concat "/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:" (getenv "PATH"))) ;; gets my homebrew installed python
+	   (setenv "PATH" (concat "/Users/gregsilverstein/Oracle/instantclient:" (getenv "PATH"))) ;; gets sqlplus and oracle directory in
+	   (setenv "PATH" (concat "/opt/homebrew/opt/openjdk:" (getenv "PATH"))) ;; stuff for java
+	   (setenv "PATH" (concat "/opt/homebrew/opt/openjdk/include:" (getenv "PATH"))) ;; stuff for java
+	   (setenv "PATH" (concat "/opt/homebrew/opt/openjdk/bin:" (getenv "PATH"))) ;; stuff for java
+	   (setenv "ORACLE_HOME"  "/Users/gregsilverstein/Oracle/instantclient") ;; oracle stuff
+	   (setenv "DYLD_LIBRARY_PATH"  "/Users/gregsilverstein/Oracle/instantclient") ;; oracle stuff
+	   (setenv "OCI_LIB_DIR"  "/Users/gregsilverstein/Oracle/instantclient") ;; oracle stuff
+	   (setenv "OCI_INC_DIR"  "/Users/gregsilverstein/Oracle/instantclient/sdk/include") ;; oracle stuff
+	   (setenv "TNS_ADMIN"  "/Users/gregsilverstein/Oracle/network/wallet") ;; oracle stuff
+	   )
     #+end_src
 *** Python
 
@@ -211,11 +273,12 @@
     Helpful is simply better help. It gives you hints on all sorts of menus.
 
     #+begin_src emacs-lisp
+
       (use-package ivy
 	:diminish
 	:bind (("C-s" . swiper)
 	       :map ivy-minibuffer-map
-	       ("TAB" . ivy-alt-done)	
+	       ("TAB" . ivy-alt-done)
 	       ("C-l" . ivy-alt-done)
 	       ("C-j" . ivy-next-line)
 	       ("C-k" . ivy-previous-line)
@@ -233,6 +296,7 @@
 	:init (which-key-mode)
 	:diminish which-key-mode
 	:config
+
 	(setq which-key-idle-delay 1))
 
       (use-package ivy-rich
@@ -240,12 +304,13 @@
 	(ivy-rich-mode 1))
 
       (use-package counsel
-	:ensure t  
-	:bind (("M-x" . counsel-M-x)
-	       ("C-x b" . counsel-ibuffer)
-	       ("C-x C-f" . counsel-find-file)
+	:bind (("C-M-j" . 'counsel-switch-buffer)
 	       :map minibuffer-local-map
-	       ("C-r" . 'counsel-minibuffer-history)))
+	       ("C-r" . 'counsel-minibuffer-history))
+	:custom
+	(counsel-linux-app-format-function #'counsel-linux-app-format-function-name-only)
+	:config
+	(counsel-mode 1))
 
       (use-package helpful
 	:custom

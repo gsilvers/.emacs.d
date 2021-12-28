@@ -18,12 +18,14 @@
 (require 'use-package)
 (setq use-package-always-ensure t)
 
+;; uncomment this as needed or run manually
+;;(package-refresh-contents ) ;; also update from melpa etc
+
 ;; some basics
 (scroll-bar-mode -1)          ; Disable visible scrollbar
 (tool-bar-mode -1)            ; Disable the toolbar
 (tooltip-mode -1)             ; Disable tooltips
 (set-fringe-mode 10)          ; Give some breathing room
-(menu-bar-mode -1)
 
 ;; Set up the visible bell
 ;; (setq visible-bell t) ;; linux windows
@@ -35,33 +37,80 @@
 ;; send backsups to one specific directory
 (setq backup-directory-alist '(("." . "~/Organization/EmacsBackups")))
 
+(defvar my-packages '(better-defaults
+		      projectile
+		      clojure-mode
+		      cider))
+
+(dolist (p my-packages)
+  (unless (package-installed-p p)
+    (package-install p)))
+
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit) ;; Make ESC quit prompts
 
+(use-package general
+  :after evil
+  :config
+  (general-create-definer efs/leader-keys
+			  :keymaps '(normal insert visual emacs)
+			  :prefix "SPC"
+			  :global-prefix "C-SPC")
+
+  (efs/leader-keys
+   "t"  '(:ignore t :which-key "toggles")
+   "tt" '(counsel-load-theme :which-key "choose theme")
+   "fde" '(lambda () (interactive) (find-file (expand-file-name "~/.emacs.d/Emacs.org")))))
+
+(use-package evil
+  :init
+  (setq evil-want-integration t)
+  (setq evil-want-keybinding nil)
+  (setq evil-want-C-u-scroll t)
+  (setq evil-want-C-i-jump nil)
+  :config
+  (evil-mode 1)
+  (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
+  (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+
+  ;; Use visual line motions even outside of visual-line-mode buffers
+  (evil-global-set-key 'motion "j" 'evil-next-visual-line)
+  (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
+
+  (evil-set-initial-state 'messages-buffer-mode 'normal)
+  (evil-set-initial-state 'dashboard-mode 'normal))
+
+(use-package evil-collection
+  :after evil
+  :config
+  (evil-collection-init))
+
 (global-hl-line-mode 1)       ; HL Lines globally on
-(set-face-background hl-line-face "gray23")
-;; hidpi
-;;(set-face-attribute 'default nil :font "IBM Plex Mono" :height 170)
-;; normal screens
-(set-face-attribute 'default nil :font "IBM Plex Mono" :height 135)
+      (set-face-background hl-line-face "gray23")
+      ;; hidpi
+      ;;(set-face-attribute 'default nil :font "IBM Plex Mono" :height 170)
+      ;; normal screens
+      (set-face-attribute 'default nil :font "IBM Plex Mono" :height 135)
 
-(use-package doom-modeline
-  :ensure t
-  :init (doom-modeline-mode 1)
-  :custom ((doom-modeline-height 13)))
+      (use-package doom-modeline
+	:ensure t
+	:init (doom-modeline-mode 1)
+	:custom ((doom-modeline-height 13)))
 
-;; NOTE: The first time you load your configuration on a new machine, you'll
-;; need to run the following command interactively so that mode line icons
-;; display correctly:
-;;
-;; M-x all-the-icons-install-fonts
-;; icons 
-(use-package all-the-icons)
+      ;; NOTE: The first time you load your configuration on a new machine, you'll
+      ;; need to run the following command interactively so that mode line icons
+      ;; display correctly:
+      ;;
+      ;; M-x all-the-icons-install-fonts
+      ;; icons 
+      (use-package all-the-icons)
 
-(use-package doom-themes
-  :init (load-theme 'doom-monokai-classic t))
+      (use-package doom-themes
+	:init (load-theme 'doom-dracula t))
 
-(use-package rainbow-delimiters
-  :hook (prog-mode . rainbow-delimiters-mode))
+      (use-package rainbow-delimiters
+	:hook (prog-mode . rainbow-delimiters-mode))
+
+(setq doom-modeline-modal-icon nil)
 
 (column-number-mode)
 (global-display-line-numbers-mode t)
@@ -77,6 +126,9 @@
 (when (memq window-system '(mac ns x))
      (setenv "PATH" (concat "/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:" (getenv "PATH"))) ;; gets my homebrew installed python
      (setenv "PATH" (concat "/Users/gregsilverstein/Oracle/instantclient:" (getenv "PATH"))) ;; gets sqlplus and oracle directory in
+     (setenv "PATH" (concat "/opt/homebrew/opt/openjdk:" (getenv "PATH"))) ;; stuff for java
+     (setenv "PATH" (concat "/opt/homebrew/opt/openjdk/include:" (getenv "PATH"))) ;; stuff for java
+     (setenv "PATH" (concat "/opt/homebrew/opt/openjdk/bin:" (getenv "PATH"))) ;; stuff for java
      (setenv "ORACLE_HOME"  "/Users/gregsilverstein/Oracle/instantclient") ;; oracle stuff
      (setenv "DYLD_LIBRARY_PATH"  "/Users/gregsilverstein/Oracle/instantclient") ;; oracle stuff
      (setenv "OCI_LIB_DIR"  "/Users/gregsilverstein/Oracle/instantclient") ;; oracle stuff
@@ -96,7 +148,7 @@
   :diminish
   :bind (("C-s" . swiper)
 	 :map ivy-minibuffer-map
-	 ("TAB" . ivy-alt-done)	
+	 ("TAB" . ivy-alt-done)
 	 ("C-l" . ivy-alt-done)
 	 ("C-j" . ivy-next-line)
 	 ("C-k" . ivy-previous-line)
@@ -114,6 +166,7 @@
   :init (which-key-mode)
   :diminish which-key-mode
   :config
+
   (setq which-key-idle-delay 1))
 
 (use-package ivy-rich
@@ -121,12 +174,13 @@
   (ivy-rich-mode 1))
 
 (use-package counsel
-  :ensure t  
-  :bind (("M-x" . counsel-M-x)
-	 ("C-x b" . counsel-ibuffer)
-	 ("C-x C-f" . counsel-find-file)
+  :bind (("C-M-j" . 'counsel-switch-buffer)
 	 :map minibuffer-local-map
-	 ("C-r" . 'counsel-minibuffer-history)))
+	 ("C-r" . 'counsel-minibuffer-history))
+  :custom
+  (counsel-linux-app-format-function #'counsel-linux-app-format-function-name-only)
+  :config
+  (counsel-mode 1))
 
 (use-package helpful
   :custom
