@@ -51,12 +51,12 @@
 (use-package general
   :after evil
   :config
-  (general-create-definer efs/leader-keys
+  (general-create-definer old_greg/leader-keys
 			  :keymaps '(normal insert visual emacs)
 			  :prefix "SPC"
 			  :global-prefix "C-SPC")
 
-  (efs/leader-keys
+  (old_greg/leader-keys
    "t"  '(:ignore t :which-key "toggles")
    "tt" '(counsel-load-theme :which-key "choose theme")
    "fde" '(lambda () (interactive) (find-file (expand-file-name "~/.emacs.d/Emacs.org")))))
