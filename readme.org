@@ -332,6 +332,10 @@
     #+begin_src emacs-lisp
       (setq org-todo-keywords
 	    '((sequence "TODO" "IN PROGRESS" "BLOCKED STUCK" "VERIFY" "|" "DONE" "DELEGATED")))
+
+      (custom-set-faces
+	'(org-block-begin-line ((t (:background "#bd93f9" :foreground "#f8f8f2"))))
+	'(org-block-end-line   ((t (:background "#bd93f9" :foreground "#f8f8f2")))))
     #+end_src
     
 *** Everything Else

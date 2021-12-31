@@ -51,12 +51,12 @@
 (use-package general
   :after evil
   :config
-  (general-create-definer old_greg/leader-keys
+  (general-create-definer efs/leader-keys
 			  :keymaps '(normal insert visual emacs)
 			  :prefix "SPC"
 			  :global-prefix "C-SPC")
 
-  (old_greg/leader-keys
+  (efs/leader-keys
    "t"  '(:ignore t :which-key "toggles")
    "tt" '(counsel-load-theme :which-key "choose theme")
    "fde" '(lambda () (interactive) (find-file (expand-file-name "~/.emacs.d/Emacs.org")))))
@@ -194,6 +194,10 @@
 
 (setq org-todo-keywords
       '((sequence "TODO" "IN PROGRESS" "BLOCKED STUCK" "VERIFY" "|" "DONE" "DELEGATED")))
+
+(custom-set-faces
+  '(org-block-begin-line ((t (:background "#bd93f9" :foreground "#f8f8f2"))))
+  '(org-block-end-line   ((t (:background "#bd93f9" :foreground "#f8f8f2")))))
 
 (use-package magit
   :bind (("C-x g" . magit-status)
