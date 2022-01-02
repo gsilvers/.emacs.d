@@ -113,11 +113,11 @@
 (setq doom-modeline-modal-icon nil)
 
 (column-number-mode)
+(setq display-line-numbers-type 'relative)
 (global-display-line-numbers-mode t)
 
 ;; Disable line numbers for some modes
-(dolist (mode '(org-mode-hook
-		term-mode-hook
+(dolist (mode '(term-mode-hook
 		dired-mode-hook
 		shell-mode-hook
 		eshell-mode-hook))
