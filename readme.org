@@ -139,6 +139,7 @@
 	(define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
 	(define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
 
+
 	;; Use visual line motions even outside of visual-line-mode buffers
 	(evil-global-set-key 'motion "j" 'evil-next-visual-line)
 	(evil-global-set-key 'motion "k" 'evil-previous-visual-line)
@@ -154,6 +155,21 @@
 
     #+end_src
 
+*** Cursors
+
+    I am using the multiple cursor package. In emacs 28 I believe I can remove this but for now
+
+    https://github.com/magnars/multiple-cursors.el
+    
+    M-x package-install multiple-cursors
+
+    #+begin_src emacs-lisp
+      (require 'multiple-cursors)
+      (global-set-key (kbd "C-S-c C-S-c") 'mc/edit-lines)
+      (global-set-key (kbd "C->") 'mc/mark-next-like-this)
+      (global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
+      (global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this)
+    #+end_src 
 *** Appearance
 
     I am using doom emacs bar as well as a theme from there for basic appearnance as well as some specific fonts. Please ensure you have IBM Plex Mono fonts installed if you want to use this.
