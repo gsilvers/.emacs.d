@@ -1,0 +1,16 @@
+
+;; ----- smex-history -----
+(
+ term
+ cd
+ 5x5
+ arp
+ dbx
+ dig
+ erc
+)
+
+;; ----- smex-data -----
+(
+ (term . 1)
+)
