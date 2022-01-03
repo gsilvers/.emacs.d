@@ -99,6 +99,18 @@
     #+end_src
 
 
+*** Powershell Windows Only
+
+    Please note to run this on windows machines manually for now 
+
+    M-x package-install RET powershell RET
+
+    to get powershell working then you simply run M-x powershell 
+
+    see https://www.reddit.com/r/emacs/comments/op8ue1/how_set_powershell_as_the_default_shell_which_mx/
+
+    or https://docs.microsoft.com/en-us/archive/blogs/dotnetinterop/run-powershell-as-a-shell-within-emacs
+
 *** Clojure
 
     I will be spending time this year learning clojure and making a terminal app in it here are some ext for it

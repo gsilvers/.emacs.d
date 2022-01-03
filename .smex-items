@@ -1,16 +1,17 @@
 
 ;; ----- smex-history -----
 (
+ package-install
  term
  cd
  5x5
  arp
  dbx
  dig
- erc
 )
 
 ;; ----- smex-data -----
 (
  (term . 2)
+ (package-install . 1)
 )
