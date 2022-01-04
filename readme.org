@@ -111,6 +111,18 @@
 
     or https://docs.microsoft.com/en-us/archive/blogs/dotnetinterop/run-powershell-as-a-shell-within-emacs
 
+*** Org Mode Changes
+    
+    Various configs for org mode
+
+    #+begin_src emacs-lisp
+      (setq org-log-done t)
+      (setq org-agenda-files '("~/Organization/todo.org"
+                               "~/Organization/scratchpad.org"
+                               "C:\\Organization\\todo.org"))
+      (global-set-key (kbd "C-c a") 'org-agenda)
+    #+end_src
+
 *** Clojure
 
     I will be spending time this year learning clojure and making a terminal app in it here are some ext for it

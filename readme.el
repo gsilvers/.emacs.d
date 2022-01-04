@@ -43,6 +43,12 @@
 ;; send backsups to one specific directory
 (setq backup-directory-alist '(("." . "~/Organization/EmacsBackups")))
 
+(setq org-log-done t)
+(setq org-agenda-files '("~/Organization/todo.org"
+                         "~/Organization/scratchpad.org"
+                         "C:\\Organization\\todo.org"))
+(global-set-key (kbd "C-c a") 'org-agenda)
+
 ;; The packages you want installed. You can also install these
 ;; manually with M-x package-install
 ;; Add in your own as you wish:
