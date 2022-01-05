@@ -1,20 +1,28 @@
 
 ;; ----- smex-history -----
 (
- cider-jack-in
- cider-quit
- describe-function
+ diredp-dired-plus-help
+ dired
+ eval-buffer
+ compile
  package-install
- term
- cd
- 5x5
+ powershell
+ kill-buffer
 )
 
 ;; ----- smex-data -----
 (
- (term . 2)
- (package-install . 1)
+ (term . 3)
+ (package-install . 3)
  (describe-function . 2)
  (cider-jack-in . 2)
  (cider-quit . 1)
+ (powershell . 4)
+ (load-file . 1)
+ (kill-buffer . 1)
+ (dired . 5)
+ (eval-buffer . 4)
+ (diredp-mark . 1)
+ (compile . 1)
+ (diredp-dired-plus-help . 2)
 )

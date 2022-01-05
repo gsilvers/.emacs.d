@@ -123,6 +123,16 @@
       (global-set-key (kbd "C-c a") 'org-agenda)
     #+end_src
 
+
+*** SQL and Oracle
+
+    #+begin_src emacs-lisp
+     (add-to-list 'load-path "~/.emacs.d/customizations")
+     (load "sqlplus.el")
+     (load "plsql.el")
+
+    #+end_src
+
 *** Clojure
 
     I will be spending time this year learning clojure and making a terminal app in it here are some ext for it
@@ -142,42 +152,42 @@
       ;; manually with M-x package-install
       ;; Add in your own as you wish:
       (defvar my-packages
-	'(;; makes handling lisp expressions much, much easier
-	  ;; Cheatsheet: http://www.emacswiki.org/emacs/PareditCheatsheet
-	  paredit
+        '(;; makes handling lisp expressions much, much easier
+          ;; Cheatsheet: http://www.emacswiki.org/emacs/PareditCheatsheet
+          paredit
 
-	  ;; key bindings and code colorization for Clojure
-	  ;; https://github.com/clojure-emacs/clojure-mode
-	  clojure-mode
+          ;; key bindings and code colorization for Clojure
+          ;; https://github.com/clojure-emacs/clojure-mode
+          clojure-mode
 
-	  ;; extra syntax highlighting for clojure
-	  clojure-mode-extra-font-locking
+          ;; extra syntax highlighting for clojure
+          clojure-mode-extra-font-locking
 
-	  ;; integration with a Clojure REPL
-	  ;; https://github.com/clojure-emacs/cider
-	  cider
+          ;; integration with a Clojure REPL
+          ;; https://github.com/clojure-emacs/cider
+          cider
 
-	  ;; allow ido usage in as many contexts as possible. see
-	  ;; customizations/navigation.el line 23 for a description
-	  ;; of ido
-	  ido-completing-read+
+          ;; allow ido usage in as many contexts as possible. see
+          ;; customizations/navigation.el line 23 for a description
+          ;; of ido
+          ido-completing-read+
 
-	  ;; Enhances M-x to allow easier execution of commands. Provides
-	  ;; a filterable list of possible commands in the minibuffer
-	  ;; http://www.emacswiki.org/emacs/Smex
-	  smex
+          ;; Enhances M-x to allow easier execution of commands. Provides
+          ;; a filterable list of possible commands in the minibuffer
+          ;; http://www.emacswiki.org/emacs/Smex
+          smex
 
-	  ;; project navigation
-	  projectile
+          ;; project navigation
+          projectile
 
-	  ;; colorful parenthesis matching
-	  rainbow-delimiters
+          ;; colorful parenthesis matching
+          rainbow-delimiters
 
-	  ;; edit html tags like sexps
-	  tagedit
+          ;; edit html tags like sexps
+          tagedit
 
-	  ;; git integration
-	  magit))
+          ;; git integration
+          magit))
 
       ;; On OS X, an Emacs instance started from the graphical user
       ;; interface will have a different environment than a shell in a
@@ -188,11 +198,11 @@
       ;; environment variables from the user's shell.
       ;; https://github.com/purcell/exec-path-from-shell
       (if (eq system-type 'darwin)
-	  (add-to-list 'my-packages 'exec-path-from-shell))
+          (add-to-list 'my-packages 'exec-path-from-shell))
 
       (dolist (p my-packages)
-	(when (not (package-installed-p p))
-	  (package-install p)))
+        (when (not (package-installed-p p))
+          (package-install p)))
 
 
       (add-to-list 'load-path "~/.emacs.d/vendor")
@@ -204,11 +214,12 @@
 
       ;; Add a directory to our load path so that when you `load` things
       ;; below, Emacs knows where to look for the corresponding file.
-      (add-to-list 'load-path "~/.emacs.d/customizations")
+      ;; (add-to-list 'load-path "~/.emacs.d/customizations")
 
       ;; Sets up exec-path-from-shell so that Emacs will use the correct
       ;; environment variables
       (load "shell-integration.el")
+      (load "dired+.el")
 
       ;; These customizations make it easier for you to navigate files,
       ;; switch buffers, and choose options from the minibuffer.
@@ -237,8 +248,8 @@
        ;; If there is more than one, they won't work right.
        '(coffee-tab-width 2)
        '(package-selected-packages
-	 (quote
-	  (magit tagedit rainbow-delimiters projectile smex ido-completing-read+ cider clojure-mode-extra-font-locking clojure-mode paredit exec-path-from-shell))))
+         (quote
+          (magit tagedit rainbow-delimiters projectile smex ido-completing-read+ cider clojure-mode-extra-font-locking clojure-mode paredit exec-path-from-shell))))
       (custom-set-faces
        ;; custom-set-faces was added by Custom.
        ;; If you edit it by hand, you could mess it up, so be careful.
@@ -284,7 +295,11 @@
 	(evil-global-set-key 'motion "k" 'evil-previous-visual-line)
 
 	(evil-set-initial-state 'messages-buffer-mode 'normal)
-	(evil-set-initial-state 'dashboard-mode 'normal))
+	(evil-set-initial-state 'dashboard-mode 'normal)
+        (evil-set-initial-state 'ibuffer-mode 'normal)
+        (evil-set-initial-state 'bookmark-bmenu-mode 'normal)
+        (evil-set-initial-state 'dired-mode 'emacs)
+        (evil-set-initial-state 'sunrise-mode 'emacs))
 
       (use-package evil-collection
 	:after evil

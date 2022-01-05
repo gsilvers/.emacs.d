@@ -1,1 +1,1 @@
-("~/Source/Clojure/clojure-noob/clojure-noob/" "~/.emacs.d/" "~/Library/Mobile Documents/com~apple~CloudDocs/Organization/")
+("~/.emacs.d/" "c:/Users/csusggsn/source/repos/US_SQL/" "c:/Organization/")

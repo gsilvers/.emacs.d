@@ -3,19 +3,20 @@
 
 (setq mc/cmds-to-run-for-all
       '(
-	evil-append-line
-	evil-backward-word-begin
-	evil-forward-WORD-begin
-	evil-forward-char
-	evil-forward-word-begin
-	evil-forward-word-end
-	evil-insert
-	evil-normal-state
-	))
+        evil-append-line
+        evil-backward-word-begin
+        evil-emacs-state
+        evil-forward-WORD-begin
+        evil-forward-char
+        evil-forward-word-begin
+        evil-forward-word-end
+        evil-insert
+        evil-normal-state
+        ))
 
 (setq mc/cmds-to-run-once
       '(
-	evil-mouse-drag-region
-	keyboard-escape-quit
-	mouse-set-region
-	))
+        evil-mouse-drag-region
+        keyboard-escape-quit
+        mouse-set-region
+        ))

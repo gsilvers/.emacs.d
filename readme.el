@@ -49,6 +49,10 @@
                          "C:\\Organization\\todo.org"))
 (global-set-key (kbd "C-c a") 'org-agenda)
 
+(add-to-list 'load-path "~/.emacs.d/customizations")
+(load "sqlplus.el")
+(load "plsql.el")
+
 ;; The packages you want installed. You can also install these
 ;; manually with M-x package-install
 ;; Add in your own as you wish:
@@ -115,11 +119,12 @@
 
 ;; Add a directory to our load path so that when you `load` things
 ;; below, Emacs knows where to look for the corresponding file.
-(add-to-list 'load-path "~/.emacs.d/customizations")
+;; (add-to-list 'load-path "~/.emacs.d/customizations")
 
 ;; Sets up exec-path-from-shell so that Emacs will use the correct
 ;; environment variables
 (load "shell-integration.el")
+(load "dired+.el")
 
 ;; These customizations make it easier for you to navigate files,
 ;; switch buffers, and choose options from the minibuffer.
@@ -189,7 +194,11 @@
   (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
 
   (evil-set-initial-state 'messages-buffer-mode 'normal)
-  (evil-set-initial-state 'dashboard-mode 'normal))
+  (evil-set-initial-state 'dashboard-mode 'normal)
+  (evil-set-initial-state 'ibuffer-mode 'normal)
+  (evil-set-initial-state 'bookmark-bmenu-mode 'normal)
+  (evil-set-initial-state 'dired-mode 'emacs)
+  (evil-set-initial-state 'sunrise-mode 'emacs))
 
 (use-package evil-collection
   :after evil
