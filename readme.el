@@ -44,9 +44,14 @@
 (setq backup-directory-alist '(("." . "~/Organization/EmacsBackups")))
 
 (setq org-log-done t)
-(setq org-agenda-files '("~/Organization/todo.org"
-                         "~/Organization/scratchpad.org"
-                         "C:\\Organization\\todo.org"))
+(cond (eq system-type 'windows-nt) 
+(setq org-agenda-files '("C:\\Organization\\Users\\csusggsn\\todo.org"))
+)
+
+(cond (eq system-type 'darwin) 
+(setq org-agenda-files '("~/Organization/todo.org"))
+)
+
 (global-set-key (kbd "C-c a") 'org-agenda)
 
 (add-to-list 'load-path "~/.emacs.d/customizations")
