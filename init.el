@@ -12,7 +12,6 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(coffee-tab-width 2)
- '(org-agenda-files '("~/Organization/todo.org"))
  '(package-selected-packages
    '(powershell multiple-cursors nyan-mode magit helpful counsel ivy-rich which-key rainbow-delimiters doom-themes doom-modeline ivy command-log-mode use-package)))
 (custom-set-faces
