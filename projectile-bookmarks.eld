@@ -1,1 +1,0 @@
-("~/.emacs.d/" "c:/Users/csusggsn/Organization/" "c:/Users/csusggsn/source/repos/US_SQL/")
