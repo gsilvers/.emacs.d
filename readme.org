@@ -112,6 +112,13 @@
 
     or https://docs.microsoft.com/en-us/archive/blogs/dotnetinterop/run-powershell-as-a-shell-within-emacs
 
+    in order to make magit work on windows i needed to run
+    
+    $>  ssh-add C:\Users\csusggsn\.ssh\new_bb
+    
+    Manually on the command line after adding my git root directory to my path otherwise windows would error on this
+
+    In order for git to use ssh keys properly. This may need to be turned into a init script or something I run on boot
     
     #+begin_src emacs-lisp
 
