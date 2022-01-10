@@ -21,6 +21,9 @@
 (unless (package-installed-p 'use-package)
   (package-install 'use-package))
 
+(unless (package-installed-p 'multtiple-cursors)
+  (package-install 'multiple-cursors))
+
 (require 'use-package)
 (setq use-package-always-ensure t)
 
@@ -42,6 +45,18 @@
 
 ;; send backsups to one specific directory
 (setq backup-directory-alist '(("." . "~/Organization/EmacsBackups")))
+
+(if
+(eq system-type 'windows-nt) 
+  (progn
+   (prefer-coding-system 'utf-8)
+   (setq explicit-shell-file-name
+    "C:/Users/csusggsn/AppData/Local/Programs/Git/bin/bash.exe")
+   (setq shell-file-name explicit-shell-file-name)
+   (add-to-list 'exec-path 
+    "C:/Users/csusggsn/AppData/Local/Programs/Git/bin/bash.exe")
+  ) 
+)
 
 (defun old_greg/org-mode-setup ()
   (org-indent-mode)
@@ -106,7 +121,13 @@
           ("publish" . ?P)
           ("batch" . ?b)
           ("note" . ?n)
-          ("idea" . ?i)))
+          ("idea" . ?i)
+          ("Database Core" . ?c)
+          ("Database Web" . ?w)
+          ("Datavault" . ?v)
+          ("Misc Creditsafe" . ?m)
+
+          ))
 
   ;; Configure custom agenda views
   (setq org-agenda-custom-commands

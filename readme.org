@@ -112,6 +112,23 @@
 
     or https://docs.microsoft.com/en-us/archive/blogs/dotnetinterop/run-powershell-as-a-shell-within-emacs
 
+    
+    #+begin_src emacs-lisp
+
+    (if
+    (eq system-type 'windows-nt) 
+      (progn
+       (prefer-coding-system 'utf-8)
+       (setq explicit-shell-file-name
+        "C:/Users/csusggsn/AppData/Local/Programs/Git/bin/bash.exe")
+       (setq shell-file-name explicit-shell-file-name)
+       (add-to-list 'exec-path 
+        "C:/Users/csusggsn/AppData/Local/Programs/Git/bin/bash.exe")
+      ) 
+    )
+
+    #+end_src
+
 *** Org Mode Changes
     
     Various configs for org mode
