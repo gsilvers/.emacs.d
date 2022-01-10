@@ -2,3 +2,7 @@ elpa/*
 melpa/*
 transient/*
 auto-save-list/*
+.recentf
+.smex_items
+backups/*
+projectile_bookmarks.old

@@ -8,7 +8,7 @@
 (menu-bar-mode -1)
 
 ;; Show line numbers
-(global-linum-mode)
+;; (global-linum-mode)
 
 ;; You can uncomment this to remove the graphical toolbar at the top. After
 ;; awhile, you won't need the toolbar.
@@ -63,4 +63,5 @@
 (global-set-key (kbd "s-t") '(lambda () (interactive)))
 
 ;; no bell
-(setq ring-bell-function 'ignore)
+;;(setq ring-bell-function 'ignore)
+
