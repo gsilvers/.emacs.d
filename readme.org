@@ -193,7 +193,6 @@
                 (:endgroup)
                 ("@errand" . ?E)
                 ("@home" . ?H)
-                ("@work" . ?W)
                 ("agenda" . ?a)
                 ("planning" . ?p)
                 ("publish" . ?P)
