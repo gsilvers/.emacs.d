@@ -59,7 +59,7 @@
 )
 
 (defun old_greg/org-mode-setup ()
-  (org-indent-mode)
+  ;; (org-indent-mode) ;;Currently debating this bit
   (variable-pitch-mode 0)
   (visual-line-mode 1))
 
@@ -110,7 +110,6 @@
           (:endgroup)
           ("@errand" . ?E)
           ("@home" . ?H)
-          ("@work" . ?W)
           ("agenda" . ?a)
           ("planning" . ?p)
           ("publish" . ?P)
