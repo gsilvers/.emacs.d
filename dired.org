@@ -1,0 +1,12 @@
+* Dired Mode Config
+
+This file contains just specific configurations for Dired. Most of these are just keymaps. Much of this was inspired by Prot's configuration here 
+
+https://protesilaos.com/emacs/dotemacs
+
+#+begin_src emacs-lisp
+  (let ((map dired-mode-map))
+    (define-key map (kbd "C-+") #'dired-create-empty-file)
+    (define-key map (kbd "M-s f") #'nil)
+    (define-key map (kbd "C-x v v") #'dired-vc-next-action)) 
+#+end_src

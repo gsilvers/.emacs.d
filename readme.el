@@ -31,20 +31,39 @@
 ;;(package-refresh-contents ) ;; also update from melpa etc
 
 ;; some basics
-(scroll-bar-mode -1)          ; Disable visible scrollbar
-(tool-bar-mode -1)            ; Disable the toolbar
-(tooltip-mode -1)             ; Disable tooltips
-(set-fringe-mode 10)          ; Give some breathing room
+      (scroll-bar-mode -1)          ; Disable visible scrollbar
+      (tool-bar-mode -1)            ; Disable the toolbar
+      (tooltip-mode -1)             ; Disable tooltips
+      (set-fringe-mode 10)          ; Give some breathing room
+      (server-start)
 
-;; Set up the visible bell
-;; (setq visible-bell t) ;; linux windows
-;; (setq visible-bell nil)
-(setq ring-bell-function (lambda ()  ;; macos
-			   (invert-face 'mode-line)
-			   (run-with-timer 0.1 nil 'invert-face 'mode-line)))
+      ;; Set up the visible bell
+      ;; (setq visible-bell t) ;; linux windows
+      ;; (setq visible-bell nil)
+      (setq ring-bell-function (lambda ()  ;; macos
+                                 (invert-face 'mode-line)
+                                 (run-with-timer 0.1 nil 'invert-face 'mode-line)))
 
-;; send backsups to one specific directory
-(setq backup-directory-alist '(("." . "~/Organization/EmacsBackups")))
+      ;; send backsups to one specific directory
+      (setq backup-directory-alist '(("." . "~/Organization/EmacsBackups")))
+
+(use-package term
+  :config
+  (setq explicit-shell-file-name "bash") ;; Change this to zsh, etc
+  ;;(setq explicit-zsh-args '())         ;; Use 'explicit-<shell>-args for shell-specific args
+
+  ;; Match the default Bash shell prompt.  Update this if you have a custom prompt
+  (setq term-prompt-regexp ".*>\s\]"))
+
+
+(use-package eterm-256color
+  :hook (term-mode . eterm-256color-mode))
+
+(use-package vterm
+  :commands vterm
+  :config
+  (setq term-prompt-regexp ".*>\s\]")  ;; Set this to match your custom shell prompt
+  (setq vterm-max-scrollback 10000))
 
 (if
 (eq system-type 'windows-nt) 

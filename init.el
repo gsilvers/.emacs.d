@@ -1,8 +1,27 @@
-;; Read org file with axtual settings in blocks
 
+;; -*- lexical-binding: t; -*-
+
+;; The default is 800 kilobytes.  Measured in bytes.
+(setq gc-cons-threshold (* 50 1000 1000))
+
+;; Profile emacs startup
+(add-hook 'emacs-startup-hook
+          (lambda ()
+            (message "*** Emacs loaded in %s seconds with %d garbage collections."
+                     (emacs-init-time)
+                     gcs-done)))
+
+;; Read org file with axtual settings in blocks
 (require 'org)
 (org-babel-load-file
  (expand-file-name "readme.org"
+                   user-emacs-directory))
+(org-babel-load-file
+ (expand-file-name "dired.org"
+                   user-emacs-directory))
+
+(org-babel-load-file
+ (expand-file-name "lsp.org"
                    user-emacs-directory))
 
 
@@ -21,3 +40,6 @@
  ;; If there is more than one, they won't work right.
  '(org-block-begin-line ((t (:background "#bd93f9" :foreground "#f8f8f2"))))
  '(org-block-end-line ((t (:background "#bd93f9" :foreground "#f8f8f2")))))
+
+
+(setq gc-cons-threshold (* 2 1000 1000))
