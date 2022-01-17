@@ -138,6 +138,10 @@
     Manually on the command line after adding my git root directory to my path otherwise windows would error on this
 
     In order for git to use ssh keys properly. This may need to be turned into a init script or something I run on boot
+
+    After rebooting this week i can see that this does need to happen automatically. It seems like magit is using powershell or cmd
+
+    to perform my git pushes. 
     
     #+begin_src emacs-lisp
 
