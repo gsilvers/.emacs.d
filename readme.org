@@ -141,8 +141,11 @@
 
     After rebooting this week i can see that this does need to happen automatically. It seems like magit is using powershell or cmd
 
-    to perform my git pushes. 
-    
+    to perform my git pushes. The process is to run
+
+      C:\Windows\System32\OpenSSH>ssh-agent.exe
+      C:\Windows\System32\OpenSSH>ssh-add.exe C:\Users\<username>\.ssh\new_bb    
+
     #+begin_src emacs-lisp
 
     (if
