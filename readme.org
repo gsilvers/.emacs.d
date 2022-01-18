@@ -678,6 +678,26 @@
         (message "Keycast enabled"))))
 
 
+  (use-package yasnippet
+    :ensure t
+    :config
+    (use-package yasnippet-snippets
+      :ensure t)
+    (yas-global-mode t)
+    (add-to-list #'yas-snippet-dirs "my-personal-snippets")
+    :diminish yas-minor-mode)
+
+
+  (use-package company
+    :bind (:map company-active-map
+                ("C-n" . company-select-next)
+                ("C-p" . company-select-previous))
+    :config
+    (setq company-idle-delay 0.3)
+    (global-company-mode t)
+    )
+
+  (global-set-key (kbd "C-<tab>") 'company-yasnippet)
 
   (custom-set-variables
    ;; custom-set-variables was added by Custom.
