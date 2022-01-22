@@ -7,3 +7,9 @@ auto-save-list/*
 .smex_items
 backups/*
 projectile_bookmarks.old
+.lsp-session-v1
+.smex-items
+eshell/*
+ido.last
+projectile-bookmarks.eld
+url/*

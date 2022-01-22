@@ -98,7 +98,7 @@
                                  (run-with-timer 0.1 nil 'invert-face 'mode-line)))
 
       ;; send backsups to one specific directory
-      (setq backup-directory-alist '(("." . "~/Organization/EmacsBackups")))
+      (setq backup-directory-alist '(("." . "~/Organization/98_Emacs_Backups")))
 
 (use-package term
   :config
@@ -698,6 +698,7 @@
     )
 
   (global-set-key (kbd "C-<tab>") 'company-yasnippet)
+  (global-set-key (kbd "C-x <C-return>") 'window-swap-states)
 
   (custom-set-variables
    ;; custom-set-variables was added by Custom.
