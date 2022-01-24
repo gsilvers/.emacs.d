@@ -202,6 +202,24 @@
 (load "sqlplus.el")
 (load "plsql.el")
 
+(require 'sqlplus)
+(add-to-list 'auto-mode-alist '("\\.sqp\\'" . sqlplus-mode))
+
+;;  If you want PL/SQL support also, try something like this:
+;;
+(require 'plsql)
+(setq auto-mode-alist
+      (append '(("\\.pls\\'" . plsql-mode) ("\\.pkg\\'" . plsql-mode)
+                ("\\.pks\\'" . plsql-mode) ("\\.pkb\\'" . plsql-mode)
+                ("\\.sql\\'" . plsql-mode) ("\\.PLS\\'" . plsql-mode) 
+                ("\\.PKG\\'" . plsql-mode) ("\\.PKS\\'" . plsql-mode)
+                ("\\.PKB\\'" . plsql-mode) ("\\.SQL\\'" . plsql-mode)
+                ("\\.prc\\'" . plsql-mode) ("\\.fnc\\'" . plsql-mode)
+                ("\\.trg\\'" . plsql-mode) ("\\.vw\\'" . plsql-mode)
+                ("\\.PRC\\'" . plsql-mode) ("\\.FNC\\'" . plsql-mode)
+                ("\\.TRG\\'" . plsql-mode) ("\\.VW\\'" . plsql-mode))
+              auto-mode-alist ))
+
 ;; The packages you want installed. You can also install these
 ;; manually with M-x package-install
 ;; Add in your own as you wish:
