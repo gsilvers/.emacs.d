@@ -31,21 +31,22 @@
 ;;(package-refresh-contents ) ;; also update from melpa etc
 
 ;; some basics
-      (scroll-bar-mode -1)          ; Disable visible scrollbar
-      (tool-bar-mode -1)            ; Disable the toolbar
-      (tooltip-mode -1)             ; Disable tooltips
-      (set-fringe-mode 10)          ; Give some breathing room
-      (server-start)
+;;(scroll-bar-mode -1)          ; Disable visible scrollbar
+(tool-bar-mode -1)            ; Disable the toolbar
+;;(tooltip-mode -1)             ; Disable tooltips
+(set-fringe-mode 10)          ; Give some breathing room
+(server-start)
+(tab-bar-mode)
+(add-to-list 'default-frame-alist '(fullscreen . maximized))
+;; Set up the visible bell
+;; (setq visible-bell t) ;; linux windows
+;; (setq visible-bell nil)
+(setq ring-bell-function (lambda ()  ;; macos
+                           (invert-face 'mode-line)
+                           (run-with-timer 0.1 nil 'invert-face 'mode-line)))
 
-      ;; Set up the visible bell
-      ;; (setq visible-bell t) ;; linux windows
-      ;; (setq visible-bell nil)
-      (setq ring-bell-function (lambda ()  ;; macos
-                                 (invert-face 'mode-line)
-                                 (run-with-timer 0.1 nil 'invert-face 'mode-line)))
-
-      ;; send backsups to one specific directory
-      (setq backup-directory-alist '(("." . "~/Organization/EmacsBackups")))
+;; send backsups to one specific directory
+(setq backup-directory-alist '(("." . "~/Organization/98_Emacs_Backups")))
 
 (use-package term
   :config
@@ -129,12 +130,11 @@
           (:endgroup)
           ("@errand" . ?E)
           ("@home" . ?H)
-          ("agenda" . ?a)
           ("planning" . ?p)
-          ("publish" . ?P)
-          ("batch" . ?b)
           ("note" . ?n)
           ("idea" . ?i)
+          ("Personal" . ?x)
+          ("Misc" . ?X)
           ("@Database Core" . ?C)
           ("@Database Web" . ?W)
           ("@Datavault" . ?D)
@@ -145,7 +145,7 @@
   (old_greg/org-font-setup))
 
 (defun old_greg/org-mode-visual-fill ()
-  (setq visual-fill-column-width 145
+  (setq visual-fill-column-width 200 
         visual-fill-column-center-text t)
   (visual-fill-column-mode 1))
 
@@ -384,7 +384,7 @@
 (dolist (mode '(term-mode-hook
                 dired-mode-hook
                 shell-mode-hook
-                org-mode-hook
+                ;;org-mode-hook
                 eshell-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
@@ -492,6 +492,7 @@
   )
 
 (global-set-key (kbd "C-<tab>") 'company-yasnippet)
+(global-set-key (kbd "C-x <C-return>") 'window-swap-states)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.

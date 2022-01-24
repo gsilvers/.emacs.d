@@ -84,12 +84,13 @@
 
     #+begin_src emacs-lisp
       ;; some basics
-      (scroll-bar-mode -1)          ; Disable visible scrollbar
+      ;;(scroll-bar-mode -1)          ; Disable visible scrollbar
       (tool-bar-mode -1)            ; Disable the toolbar
-      (tooltip-mode -1)             ; Disable tooltips
+      ;;(tooltip-mode -1)             ; Disable tooltips
       (set-fringe-mode 10)          ; Give some breathing room
       (server-start)
-
+      (tab-bar-mode)
+      (add-to-list 'default-frame-alist '(fullscreen . maximized))
       ;; Set up the visible bell
       ;; (setq visible-bell t) ;; linux windows
       ;; (setq visible-bell nil)
@@ -100,23 +101,23 @@
       ;; send backsups to one specific directory
       (setq backup-directory-alist '(("." . "~/Organization/98_Emacs_Backups")))
 
-(use-package term
-  :config
-  (setq explicit-shell-file-name "bash") ;; Change this to zsh, etc
-  ;;(setq explicit-zsh-args '())         ;; Use 'explicit-<shell>-args for shell-specific args
+      (use-package term
+        :config
+        (setq explicit-shell-file-name "bash") ;; Change this to zsh, etc
+        ;;(setq explicit-zsh-args '())         ;; Use 'explicit-<shell>-args for shell-specific args
 
-  ;; Match the default Bash shell prompt.  Update this if you have a custom prompt
-  (setq term-prompt-regexp ".*>\s\]"))
+        ;; Match the default Bash shell prompt.  Update this if you have a custom prompt
+        (setq term-prompt-regexp ".*>\s\]"))
 
 
-(use-package eterm-256color
-  :hook (term-mode . eterm-256color-mode))
+      (use-package eterm-256color
+        :hook (term-mode . eterm-256color-mode))
 
-(use-package vterm
-  :commands vterm
-  :config
-  (setq term-prompt-regexp ".*>\s\]")  ;; Set this to match your custom shell prompt
-  (setq vterm-max-scrollback 10000))
+      (use-package vterm
+        :commands vterm
+        :config
+        (setq term-prompt-regexp ".*>\s\]")  ;; Set this to match your custom shell prompt
+        (setq vterm-max-scrollback 10000))
     #+end_src
 
 *** Powershell Windows Only
@@ -167,92 +168,91 @@
     Various configs for org mode
 
     #+begin_src emacs-lisp
-      (defun old_greg/org-mode-setup ()
-        ;; (org-indent-mode) ;;Currently debating this bit
-        (variable-pitch-mode 0)
-        (visual-line-mode 1))
+            (defun old_greg/org-mode-setup ()
+              ;; (org-indent-mode) ;;Currently debating this bit
+              (variable-pitch-mode 0)
+              (visual-line-mode 1))
 
-      ;; Org Mode Configuration ------------------------------------------------------
+            ;; Org Mode Configuration ------------------------------------------------------
 
-      (defun old_greg/org-font-setup ()
-        ;; Replace list hyphen with dot
-        (font-lock-add-keywords 'org-mode
-                                '(("^ *\\([-]\\) "
-                                   (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•")))))))
+            (defun old_greg/org-font-setup ()
+              ;; Replace list hyphen with dot
+              (font-lock-add-keywords 'org-mode
+                                      '(("^ *\\([-]\\) "
+                                         (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•")))))))
 
-      ;; Set faces for heading levels
-      (dolist (face '((org-level-1 . 1.2)
-                      (org-level-2 . 1.1)
-                      (org-level-3 . 1.05)
-                      (org-level-4 . 1.0)
-                      (org-level-5 . 1.1)
-                      (org-level-6 . 1.1)
-                      (org-level-7 . 1.1)
-                      (org-level-8 . 1.1)))
-        )
+            ;; Set faces for heading levels
+            (dolist (face '((org-level-1 . 1.2)
+                            (org-level-2 . 1.1)
+                            (org-level-3 . 1.05)
+                            (org-level-4 . 1.0)
+                            (org-level-5 . 1.1)
+                            (org-level-6 . 1.1)
+                            (org-level-7 . 1.1)
+                            (org-level-8 . 1.1)))
+              )
 
-      (use-package org
-        :hook (org-mode . old_greg/org-mode-setup)
-        :config
-        (setq org-ellipsis " ▾")
+            (use-package org
+              :hook (org-mode . old_greg/org-mode-setup)
+              :config
+              (setq org-ellipsis " ▾")
 
-        (setq org-agenda-start-with-log-mode t)
-        (setq org-log-done 'time)
-        (setq org-log-into-drawer t)
+              (setq org-agenda-start-with-log-mode t)
+              (setq org-log-done 'time)
+              (setq org-log-into-drawer t)
 
-        (custom-set-faces
-         '(org-block-begin-line ((t (:background "#bd93f9" :foreground "#f8f8f2"))))
-         '(org-block-end-line   ((t (:background "#bd93f9" :foreground "#f8f8f2")))))
-        (require 'org-habit)
-        (add-to-list 'org-modules 'org-habit)
-        (setq org-habit-graph-column 60)
+              (custom-set-faces
+               '(org-block-begin-line ((t (:background "#bd93f9" :foreground "#f8f8f2"))))
+               '(org-block-end-line   ((t (:background "#bd93f9" :foreground "#f8f8f2")))))
+              (require 'org-habit)
+              (add-to-list 'org-modules 'org-habit)
+              (setq org-habit-graph-column 60)
 
-        (setq org-todo-keywords
-              '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
-                (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "|" "COMPLETED(c)" "CANC(k@)")))
+              (setq org-todo-keywords
+                    '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
+                      (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "|" "COMPLETED(c)" "CANC(k@)")))
 
-        ;; Save Org buffers after refiling!
-        (advice-add 'org-refile :after 'org-save-all-org-buffers)
+              ;; Save Org buffers after refiling!
+              (advice-add 'org-refile :after 'org-save-all-org-buffers)
 
-        (setq org-tag-alist
-              '((:startgroup)
-                (:endgroup)
-                ("@errand" . ?E)
-                ("@home" . ?H)
-                ("agenda" . ?a)
-                ("planning" . ?p)
-                ("publish" . ?P)
-                ("batch" . ?b)
-                ("note" . ?n)
-                ("idea" . ?i)
-                ("@Database Core" . ?C)
-                ("@Database Web" . ?W)
-                ("@Datavault" . ?D)
-                ("@Misc Creditsafe" . ?M)
-                ))
+              (setq org-tag-alist
+                    '((:startgroup)
+                      (:endgroup)
+                      ("@errand" . ?E)
+                      ("@home" . ?H)
+                      ("planning" . ?p)
+                      ("note" . ?n)
+                      ("idea" . ?i)
+                      ("Personal" . ?x)
+                      ("Misc" . ?X)
+                      ("@Database Core" . ?C)
+                      ("@Database Web" . ?W)
+                      ("@Datavault" . ?D)
+                      ("@Misc Creditsafe" . ?M)
+                      ))
 
 
-        (old_greg/org-font-setup))
+              (old_greg/org-font-setup))
 
-      (defun old_greg/org-mode-visual-fill ()
-        (setq visual-fill-column-width 145
-              visual-fill-column-center-text t)
-        (visual-fill-column-mode 1))
+            (defun old_greg/org-mode-visual-fill ()
+              (setq visual-fill-column-width 200 
+                    visual-fill-column-center-text t)
+              (visual-fill-column-mode 1))
 
-      (use-package visual-fill-column
-        :hook (org-mode . old_greg/org-mode-visual-fill))
+            (use-package visual-fill-column
+              :hook (org-mode . old_greg/org-mode-visual-fill))
 
-      (if
-          (eq system-type 'windows-nt) 
-          (setq org-agenda-files '("C:\\Users\\csusggsn\\Organization\\todo.org"))
-        )
+            (if
+                (eq system-type 'windows-nt) 
+                (setq org-agenda-files '("C:\\Users\\csusggsn\\Organization\\todo.org"))
+              )
 
-      (if
-          (eq system-type 'darwin) 
-          (setq org-agenda-files '("~/Organization/todo.org"))
-        )
+            (if
+                (eq system-type 'darwin) 
+                (setq org-agenda-files '("~/Organization/todo.org"))
+              )
 
-      (global-set-key (kbd "C-c a") 'org-agenda)
+            (global-set-key (kbd "C-c a") 'org-agenda)
     #+end_src
 
 *** Magit and Projectile
@@ -546,7 +546,7 @@
             (dolist (mode '(term-mode-hook
                             dired-mode-hook
                             shell-mode-hook
-                            org-mode-hook
+                            ;;org-mode-hook
                             eshell-mode-hook))
               (add-hook mode (lambda () (display-line-numbers-mode 0))))
     #+end_src
