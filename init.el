@@ -24,7 +24,7 @@
  (expand-file-name "lsp.org"
                    user-emacs-directory))
 
-
+(setq gc-cons-threshold (* 2 1000 1000))
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -32,14 +32,10 @@
  ;; If there is more than one, they won't work right.
  '(coffee-tab-width 2)
  '(package-selected-packages
-   '(yasnippet-snippets yasnippet keycast markdown-mode powershell multiple-cursors nyan-mode magit helpful counsel ivy-rich which-key rainbow-delimiters doom-themes doom-modeline ivy command-log-mode use-package)))
+   '(marginalia yasnippet-snippets which-key vterm visual-fill-column vertico use-package typescript-mode tagedit smex rainbow-delimiters paredit orderless nyan-mode multiple-cursors modus-themes magit lsp-ui lsp-treemacs lsp-ivy keycast ivy-rich ido-completing-read+ helpful general exec-path-from-shell evil-collection eterm-256color doom-themes doom-modeline counsel-projectile company-box command-log-mode clojure-mode-extra-font-locking cider better-defaults)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(org-block-begin-line ((t (:background "#bd93f9" :foreground "#f8f8f2"))))
- '(org-block-end-line ((t (:background "#bd93f9" :foreground "#f8f8f2")))))
-
-
-(setq gc-cons-threshold (* 2 1000 1000))
+ '(vertico-current ((t (:background "#3a3f5a")))))

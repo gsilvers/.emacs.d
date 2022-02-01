@@ -194,92 +194,83 @@
     Various configs for org mode
 
     #+begin_src emacs-lisp
-            (defun old_greg/org-mode-setup ()
-              ;; (org-indent-mode) ;;Currently debating this bit
-              (variable-pitch-mode 0)
-              (visual-line-mode 1))
+      (defun old_greg/org-mode-setup ()
+        ;; (org-indent-mode) ;;Currently debating this bit
+        (variable-pitch-mode 0)
+        (visual-line-mode 1))
 
-            ;; Org Mode Configuration ------------------------------------------------------
+      ;; Org Mode Configuration ------------------------------------------------------
 
-            (defun old_greg/org-font-setup ()
-              ;; Replace list hyphen with dot
-              (font-lock-add-keywords 'org-mode
-                                      '(("^ *\\([-]\\) "
-                                         (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•")))))))
+      (defun old_greg/org-font-setup ()
+        ;; Replace list hyphen with dot
+        (font-lock-add-keywords 'org-mode
+                                '(("^ *\\([-]\\) "
+                                   (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•")))))))
 
-            ;; Set faces for heading levels
-            (dolist (face '((org-level-1 . 1.2)
-                            (org-level-2 . 1.1)
-                            (org-level-3 . 1.05)
-                            (org-level-4 . 1.0)
-                            (org-level-5 . 1.1)
-                            (org-level-6 . 1.1)
-                            (org-level-7 . 1.1)
-                            (org-level-8 . 1.1)))
-              )
+      ;; Set faces for heading levels
+      (dolist (face '((org-level-1 . 1.2)
+                      (org-level-2 . 1.1)
+                      (org-level-3 . 1.05)
+                      (org-level-4 . 1.0)
+                      (org-level-5 . 1.1)
+                      (org-level-6 . 1.1)
+                      (org-level-7 . 1.1)
+                      (org-level-8 . 1.1)))
+        )
 
-            (use-package org
-              :hook (org-mode . old_greg/org-mode-setup)
-              :config
-              (setq org-ellipsis " ▾")
+      (use-package org
+        :hook (org-mode . old_greg/org-mode-setup)
+        :config
+        (setq org-ellipsis " ▾")
 
-              (setq org-agenda-start-with-log-mode t)
-              (setq org-log-done 'time)
-              (setq org-log-into-drawer t)
+        (setq org-agenda-start-with-log-mode t)
+        (setq org-log-done 'time)
+        (setq org-log-into-drawer t)
 
-              (custom-set-faces
-               '(org-block-begin-line ((t (:background "#bd93f9" :foreground "#f8f8f2"))))
-               '(org-block-end-line   ((t (:background "#bd93f9" :foreground "#f8f8f2")))))
-              (require 'org-habit)
-              (add-to-list 'org-modules 'org-habit)
-              (setq org-habit-graph-column 60)
+        (setq org-todo-keywords
+              '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
+                (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "|" "COMPLETED(c)" "CANC(k@)")))
 
-              (setq org-todo-keywords
-                    '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
-                      (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "|" "COMPLETED(c)" "CANC(k@)")))
-
-              ;; Save Org buffers after refiling!
-              (advice-add 'org-refile :after 'org-save-all-org-buffers)
-
-              (setq org-tag-alist
-                    '((:startgroup)
-                      (:endgroup)
-                      ("@errand" . ?E)
-                      ("@home" . ?H)
-                      ("planning" . ?p)
-                      ("note" . ?n)
-                      ("idea" . ?i)
-                      ("Personal" . ?x)
-                      ("Misc" . ?X)
-                      ("@Database Core" . ?C)
-                      ("@Database Web" . ?W)
-                      ("@Datavault" . ?D)
-                      ("@Misc Creditsafe" . ?M)
-                      ))
+        (setq org-tag-alist
+              '((:startgroup)
+                (:endgroup)
+                ("@errand" . ?E)
+                ("@home" . ?H)
+                ("planning" . ?p)
+                ("note" . ?n)
+                ("idea" . ?i)
+                ("Personal" . ?x)
+                ("Misc" . ?X)
+                ("@Database Core" . ?C)
+                ("@Database Web" . ?W)
+                ("@Datavault" . ?D)
+                ("@Misc Creditsafe" . ?M)
+                ))
 
 
-              (old_greg/org-font-setup))
+        (old_greg/org-font-setup))
 
-            (defun old_greg/org-mode-visual-fill ()
-              (setq visual-fill-column-width 200 
-                    visual-fill-column-center-text t)
-              (visual-fill-column-mode 1))
+      (defun old_greg/org-mode-visual-fill ()
+        (setq visual-fill-column-width 200 
+              visual-fill-column-center-text t)
+        (visual-fill-column-mode 1))
 
-            (use-package visual-fill-column
-              :hook (org-mode . old_greg/org-mode-visual-fill))
+      (use-package visual-fill-column
+        :hook (org-mode . old_greg/org-mode-visual-fill))
 
-            (if
-                (eq system-type 'windows-nt) 
-                (setq org-agenda-files '("C:\\Users\\csusggsn\\Organization\\todo.org"))
-              )
+      (if
+          (eq system-type 'windows-nt) 
+          (setq org-agenda-files '("C:\\Users\\csusggsn\\Organization\\todo.org"))
+        )
 
-            (if
-                (eq system-type 'darwin) 
-                (setq org-agenda-files '("~/Organization/todo.org"))
-              )
+      (if
+          (eq system-type 'darwin) 
+          (setq org-agenda-files '("~/Organization/todo.org"))
+        )
 
-            (global-set-key (kbd "C-c a") 'org-agenda)
-    #+end_src
+      (global-set-key (kbd "C-c a") 'org-agenda)
+
+        #+end_src
 
 *** Magit and Projectile
 
@@ -290,7 +281,6 @@
       (use-package projectile
         :diminish projectile-mode
         :config (projectile-mode)
-        :custom ((projectile-completion-system 'ivy))
         :bind-keymap
         ("C-c p" . projectile-command-map)
         :init
@@ -299,8 +289,6 @@
           (setq projectile-project-search-path '("~/Projects/Code")))
         (setq projectile-switch-project-action #'projectile-dired))
 
-      (use-package counsel-projectile
-        :config (counsel-projectile-mode))
 
       (use-package magit
         :bind (("C-x g" . magit-status)
@@ -375,7 +363,7 @@
           ;; allow ido usage in as many contexts as possible. see
           ;; customizations/navigation.el line 23 for a description
           ;; of ido
-          ido-completing-read+
+          ;;ido-completing-read+
 
           ;; Enhances M-x to allow easier execution of commands. Provides
           ;; a filterable list of possible commands in the minibuffer
@@ -429,8 +417,6 @@
 
       ;; These customizations make it easier for you to navigate files,
       ;; switch buffers, and choose options from the minibuffer.
-      (load "navigation.el")
-
       ;; These customizations change the way emacs looks and disable/enable
       ;; some user interface elements
       (load "ui.el")
@@ -447,21 +433,6 @@
       ;; Langauage-specific
       (load "setup-clojure.el")
       (load "setup-js.el")
-      (custom-set-variables
-       ;; custom-set-variables was added by Custom.
-       ;; If you edit it by hand, you could mess it up, so be careful.
-       ;; Your init file should contain only one such instance.
-       ;; If there is more than one, they won't work right.
-       '(coffee-tab-width 2)
-       '(package-selected-packages
-         (quote
-          (magit tagedit rainbow-delimiters projectile smex ido-completing-read+ cider clojure-mode-extra-font-locking clojure-mode paredit exec-path-from-shell))))
-      (custom-set-faces
-       ;; custom-set-faces was added by Custom.
-       ;; If you edit it by hand, you could mess it up, so be careful.
-       ;; Your init file should contain only one such instance.
-       ;; If there is more than one, they won't work right.
-       )
     #+end_src
 
 *** Keyboard Changes
@@ -469,20 +440,6 @@
     Any simple keymap changes are here there can be more specific key binds per package which will be stored with their associated package.
 
     #+begin_src emacs-lisp
-      (global-set-key (kbd "<escape>") 'keyboard-escape-quit) ;; Make ESC quit prompts
-
-      (use-package general
-	:after evil
-	:config
-	(general-create-definer old_greg/leader-keys
-				:keymaps '(normal insert visual emacs)
-				:prefix "SPC"
-				:global-prefix "C-SPC")
-
-	(old_greg/leader-keys
-	 "t"  '(:ignore t :which-key "toggles")
-	 "tt" '(counsel-load-theme :which-key "choose theme")
-	 "fde" '(lambda () (interactive) (find-file (expand-file-name "~/.emacs.d/Emacs.org")))))
 
       (use-package evil
 	:init
@@ -548,33 +505,19 @@
     
 
     #+begin_src emacs-lisp
-	    (global-hl-line-mode 1)       ; HL Lines globally on
-	    (set-face-background hl-line-face "gray23")
-	    ;; hidpi
-	    ;;(set-face-attribute 'default nil :font "IBM Plex Mono" :height 170)
-	    ;; normal screens
-	    (set-face-attribute 'default nil :font "IBM Plex Mono" :height 135)
+      (global-hl-line-mode 1)       ; HL Lines globally on
+      (set-face-background hl-line-face "gray22")
+      ;; hidpi
+      ;;(set-face-attribute 'default nil :font "IBM Plex Mono" :height 170)
+      ;; normal screens
+      (set-face-attribute 'default nil :font "IBM Plex Mono" :height 135)
 
-	    (use-package doom-modeline
-	      :ensure t
-	      :init (doom-modeline-mode 1)
-	      :custom ((doom-modeline-height 13)))
+      (use-package all-the-icons)
 
-	    ;; NOTE: The first time you load your configuration on a new machine, you'll
-	    ;; need to run the following command interactively so that mode line icons
-	    ;; display correctly:
-	    ;;
-	    ;; M-x all-the-icons-install-fonts
-	    ;; icons 
-	    (use-package all-the-icons)
+      (modus-themes-load-vivendi)
 
-	    (use-package doom-themes
-	      :init (load-theme 'doom-dracula t))
-
-	    (use-package rainbow-delimiters
-	      :hook (prog-mode . rainbow-delimiters-mode))
-
-      (setq doom-modeline-modal-icon nil)
+      (use-package rainbow-delimiters
+        :hook (prog-mode . rainbow-delimiters-mode))
 
     #+end_src
 
@@ -618,69 +561,12 @@
       (use-package command-log-mode)
     #+end_src
 
-*** Exploration Aids
-
-    These packages Ivy Which Key and Helpful provide aid to the user in using emacs.
-
-    Ivy has some usefull key shortcuts that are better than default.
-    Which Key will show a context menu as you hit a key sequence. For example if you hit C-C you will then see all of the org mode options.
-    Helpful is simply better help. It gives you hints on all sorts of menus.
-
-    #+begin_src emacs-lisp
-
-      (use-package ivy
-	:diminish
-	:bind (("C-s" . swiper)
-	       :map ivy-minibuffer-map
-	       ("TAB" . ivy-alt-done)
-	       ("C-l" . ivy-alt-done)
-	       ("C-j" . ivy-next-line)
-	       ("C-k" . ivy-previous-line)
-	       :map ivy-switch-buffer-map
-	       ("C-k" . ivy-previous-line)
-	       ("C-l" . ivy-done)
-	       ("C-d" . ivy-switch-buffer-kill)
-	       :map ivy-reverse-i-search-map
-	       ("C-k" . ivy-previous-line)
-	       ("C-d" . ivy-reverse-i-search-kill))
-	:config
-	(ivy-mode 1))
-
-      (use-package which-key
-	:init (which-key-mode)
-	:diminish which-key-mode
-	:config
-
-	(setq which-key-idle-delay 1))
-
-      (use-package ivy-rich
-	:init
-	(ivy-rich-mode 1))
-
-      (use-package counsel
-	:bind (("C-M-j" . 'counsel-switch-buffer)
-	       :map minibuffer-local-map
-	       ("C-r" . 'counsel-minibuffer-history))
-	:custom
-	(counsel-linux-app-format-function #'counsel-linux-app-format-function-name-only)
-	:config
-	(counsel-mode 1))
-
-      (use-package helpful
-	:custom
-	(counsel-describe-function-function #'helpful-callable)
-	(counsel-describe-variable-function #'helpful-variable)
-	:bind
-	([remap describe-function] . counsel-describe-function)
-	([remap describe-command] . helpful-command)
-	([remap describe-variable] . counsel-describe-variable)
-	([remap describe-key] . helpful-key))
-    #+end_src
-
 *** Everything Else
 
     Anything else random will be here. Right now this is just the git client which I have not configured fully for myself. This is sort of a "work in progress area" of my config.
-    
+
+
+
     
 #+begin_src emacs-lisp
 
@@ -708,31 +594,60 @@
     (add-to-list #'yas-snippet-dirs "my-personal-snippets")
     :diminish yas-minor-mode)
 
-
-  (use-package company
-    :bind (:map company-active-map
-                ("C-n" . company-select-next)
-                ("C-p" . company-select-previous))
-    :config
-    (setq company-idle-delay 0.3)
-    (global-company-mode t)
-    )
-
-  (global-set-key (kbd "C-<tab>") 'company-yasnippet)
   (global-set-key (kbd "C-x <C-return>") 'window-swap-states)
 
-  (custom-set-variables
-   ;; custom-set-variables was added by Custom.
-   ;; If you edit it by hand, you could mess it up, so be careful.
-   ;; Your init file should contain only one such instance.
-   ;; If there is more than one, they won't work right.
-   '(package-selected-packages
-     '(magit helpful counsel ivy-rich which-key rainbow-delimiters doom-themes doom-modeline ivy command-log-mode use-package)))
-  (custom-set-faces
-   ;; custom-set-faces was added by Custom.
-   ;; If you edit it by hand, you could mess it up, so be careful.
-   ;; Your init file should contain only one such instance.
-   ;; If there is more than one, they won't work right.
-   )
 
+(use-package corfu
+  :bind (:map corfu-map
+         ("C-j" . corfu-next)
+         ("C-k" . corfu-previous)
+         ("C-f" . corfu-insert))
+  :custom
+  (corfu-cycle t)
+  :config
+  (corfu-global-mode))
+
+
+(use-package vertico
+  :bind (:map vertico-map
+         ("C-j" . vertico-next)
+         ("C-k" . vertico-previous)
+         ("C-f" . vertico-exit)
+         :map minibuffer-local-map
+         ("M-h" . dw/minibuffer-backward-kill))
+  :custom
+  (vertico-cycle t)
+  :custom-face
+  (vertico-current ((t (:background "#3a3f5a"))))
+  :init
+  (vertico-mode))
+
+
+(use-package orderless
+  :init
+  (setq completion-styles '(orderless)
+        completion-category-defaults nil
+        completion-category-overrides '((file (styles . (partial-completion))))))
+
+(defun dw/get-project-root ()
+  (when (fboundp 'projectile-project-root)
+    (projectile-project-root)))
+
+(use-package consult
+  :demand t
+  :bind (("C-s" . consult-line)
+         ("C-M-l" . consult-imenu)
+         ("C-M-j" . persp-switch-to-buffer*)
+         :map minibuffer-local-map
+         ("C-r" . consult-history))
+  :custom
+  (consult-project-root-function #'dw/get-project-root)
+  (completion-in-region-function #'consult-completion-in-region))
+
+(use-package marginalia
+  :after vertico
+  :custom
+  (marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil))
+  :init
+  (marginalia-mode))
 #+end_src

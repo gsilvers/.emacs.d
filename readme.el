@@ -124,19 +124,9 @@
   (setq org-log-done 'time)
   (setq org-log-into-drawer t)
 
-  (custom-set-faces
-   '(org-block-begin-line ((t (:background "#bd93f9" :foreground "#f8f8f2"))))
-   '(org-block-end-line   ((t (:background "#bd93f9" :foreground "#f8f8f2")))))
-  (require 'org-habit)
-  (add-to-list 'org-modules 'org-habit)
-  (setq org-habit-graph-column 60)
-
   (setq org-todo-keywords
         '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
           (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "|" "COMPLETED(c)" "CANC(k@)")))
-
-  ;; Save Org buffers after refiling!
-  (advice-add 'org-refile :after 'org-save-all-org-buffers)
 
   (setq org-tag-alist
         '((:startgroup)
@@ -180,7 +170,6 @@
 (use-package projectile
   :diminish projectile-mode
   :config (projectile-mode)
-  :custom ((projectile-completion-system 'ivy))
   :bind-keymap
   ("C-c p" . projectile-command-map)
   :init
@@ -189,8 +178,6 @@
     (setq projectile-project-search-path '("~/Projects/Code")))
   (setq projectile-switch-project-action #'projectile-dired))
 
-(use-package counsel-projectile
-  :config (counsel-projectile-mode))
 
 (use-package magit
   :bind (("C-x g" . magit-status)
@@ -242,7 +229,7 @@
     ;; allow ido usage in as many contexts as possible. see
     ;; customizations/navigation.el line 23 for a description
     ;; of ido
-    ido-completing-read+
+    ;;ido-completing-read+
 
     ;; Enhances M-x to allow easier execution of commands. Provides
     ;; a filterable list of possible commands in the minibuffer
@@ -296,8 +283,6 @@
 
 ;; These customizations make it easier for you to navigate files,
 ;; switch buffers, and choose options from the minibuffer.
-(load "navigation.el")
-
 ;; These customizations change the way emacs looks and disable/enable
 ;; some user interface elements
 (load "ui.el")
@@ -314,36 +299,6 @@
 ;; Langauage-specific
 (load "setup-clojure.el")
 (load "setup-js.el")
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(coffee-tab-width 2)
- '(package-selected-packages
-   (quote
-    (magit tagedit rainbow-delimiters projectile smex ido-completing-read+ cider clojure-mode-extra-font-locking clojure-mode paredit exec-path-from-shell))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
-
-(global-set-key (kbd "<escape>") 'keyboard-escape-quit) ;; Make ESC quit prompts
-
-(use-package general
-  :after evil
-  :config
-  (general-create-definer old_greg/leader-keys
-			  :keymaps '(normal insert visual emacs)
-			  :prefix "SPC"
-			  :global-prefix "C-SPC")
-
-  (old_greg/leader-keys
-   "t"  '(:ignore t :which-key "toggles")
-   "tt" '(counsel-load-theme :which-key "choose theme")
-   "fde" '(lambda () (interactive) (find-file (expand-file-name "~/.emacs.d/Emacs.org")))))
 
 (use-package evil
   :init
@@ -380,32 +335,18 @@
 (global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this)
 
 (global-hl-line-mode 1)       ; HL Lines globally on
-      (set-face-background hl-line-face "gray23")
-      ;; hidpi
-      ;;(set-face-attribute 'default nil :font "IBM Plex Mono" :height 170)
-      ;; normal screens
-      (set-face-attribute 'default nil :font "IBM Plex Mono" :height 135)
+(set-face-background hl-line-face "gray22")
+;; hidpi
+;;(set-face-attribute 'default nil :font "IBM Plex Mono" :height 170)
+;; normal screens
+(set-face-attribute 'default nil :font "IBM Plex Mono" :height 135)
 
-      (use-package doom-modeline
-	:ensure t
-	:init (doom-modeline-mode 1)
-	:custom ((doom-modeline-height 13)))
+(use-package all-the-icons)
 
-      ;; NOTE: The first time you load your configuration on a new machine, you'll
-      ;; need to run the following command interactively so that mode line icons
-      ;; display correctly:
-      ;;
-      ;; M-x all-the-icons-install-fonts
-      ;; icons 
-      (use-package all-the-icons)
+(modus-themes-load-vivendi)
 
-      (use-package doom-themes
-	:init (load-theme 'doom-dracula t))
-
-      (use-package rainbow-delimiters
-	:hook (prog-mode . rainbow-delimiters-mode))
-
-(setq doom-modeline-modal-icon nil)
+(use-package rainbow-delimiters
+  :hook (prog-mode . rainbow-delimiters-mode))
 
 (column-number-mode)
 (setq display-line-numbers-type 'relative)
@@ -427,101 +368,83 @@
   (exec-path-from-shell-initialize))
 (use-package command-log-mode)
 
-(use-package ivy
-  :diminish
-  :bind (("C-s" . swiper)
-	 :map ivy-minibuffer-map
-	 ("TAB" . ivy-alt-done)
-	 ("C-l" . ivy-alt-done)
-	 ("C-j" . ivy-next-line)
-	 ("C-k" . ivy-previous-line)
-	 :map ivy-switch-buffer-map
-	 ("C-k" . ivy-previous-line)
-	 ("C-l" . ivy-done)
-	 ("C-d" . ivy-switch-buffer-kill)
-	 :map ivy-reverse-i-search-map
-	 ("C-k" . ivy-previous-line)
-	 ("C-d" . ivy-reverse-i-search-kill))
-  :config
-  (ivy-mode 1))
-
-(use-package which-key
-  :init (which-key-mode)
-  :diminish which-key-mode
-  :config
-
-  (setq which-key-idle-delay 1))
-
-(use-package ivy-rich
-  :init
-  (ivy-rich-mode 1))
-
-(use-package counsel
-  :bind (("C-M-j" . 'counsel-switch-buffer)
-	 :map minibuffer-local-map
-	 ("C-r" . 'counsel-minibuffer-history))
-  :custom
-  (counsel-linux-app-format-function #'counsel-linux-app-format-function-name-only)
-  :config
-  (counsel-mode 1))
-
-(use-package helpful
-  :custom
-  (counsel-describe-function-function #'helpful-callable)
-  (counsel-describe-variable-function #'helpful-variable)
-  :bind
-  ([remap describe-function] . counsel-describe-function)
-  ([remap describe-command] . helpful-command)
-  ([remap describe-variable] . counsel-describe-variable)
-  ([remap describe-key] . helpful-key))
-
 (use-package keycast
-  :bind ("C-c t k" . +toggle-keycast)
+    :bind ("C-c t k" . +toggle-keycast)
+    :config
+
+    (defun +toggle-keycast()
+      (interactive)
+      (if (member '("" mode-line-keycast " ") global-mode-string)
+          (progn (setq global-mode-string (delete '("" mode-line-keycast " ") global-mode-string))
+                 (remove-hook 'pre-command-hook 'keycast--update)
+                 (message "Keycast disabled"))
+        (add-to-list 'global-mode-string '("" mode-line-keycast " "))
+        (add-hook 'pre-command-hook 'keycast--update t)
+        (message "Keycast enabled"))))
+
+
+  (use-package yasnippet
+    :ensure t
+    :config
+    (use-package yasnippet-snippets
+      :ensure t)
+    (yas-global-mode t)
+    (add-to-list #'yas-snippet-dirs "my-personal-snippets")
+    :diminish yas-minor-mode)
+
+  (global-set-key (kbd "C-x <C-return>") 'window-swap-states)
+
+
+(use-package corfu
+  :bind (:map corfu-map
+         ("C-j" . corfu-next)
+         ("C-k" . corfu-previous)
+         ("C-f" . corfu-insert))
+  :custom
+  (corfu-cycle t)
   :config
-
-  (defun +toggle-keycast()
-    (interactive)
-    (if (member '("" mode-line-keycast " ") global-mode-string)
-        (progn (setq global-mode-string (delete '("" mode-line-keycast " ") global-mode-string))
-               (remove-hook 'pre-command-hook 'keycast--update)
-               (message "Keycast disabled"))
-      (add-to-list 'global-mode-string '("" mode-line-keycast " "))
-      (add-hook 'pre-command-hook 'keycast--update t)
-      (message "Keycast enabled"))))
+  (corfu-global-mode))
 
 
-(use-package yasnippet
-  :ensure t
-  :config
-  (use-package yasnippet-snippets
-    :ensure t)
-  (yas-global-mode t)
-  (add-to-list #'yas-snippet-dirs "my-personal-snippets")
-  :diminish yas-minor-mode)
+(use-package vertico
+  :bind (:map vertico-map
+         ("C-j" . vertico-next)
+         ("C-k" . vertico-previous)
+         ("C-f" . vertico-exit)
+         :map minibuffer-local-map
+         ("M-h" . dw/minibuffer-backward-kill))
+  :custom
+  (vertico-cycle t)
+  :custom-face
+  (vertico-current ((t (:background "#3a3f5a"))))
+  :init
+  (vertico-mode))
 
 
-(use-package company
-  :bind (:map company-active-map
-              ("C-n" . company-select-next)
-              ("C-p" . company-select-previous))
-  :config
-  (setq company-idle-delay 0.3)
-  (global-company-mode t)
-  )
+(use-package orderless
+  :init
+  (setq completion-styles '(orderless)
+        completion-category-defaults nil
+        completion-category-overrides '((file (styles . (partial-completion))))))
 
-(global-set-key (kbd "C-<tab>") 'company-yasnippet)
-(global-set-key (kbd "C-x <C-return>") 'window-swap-states)
+(defun dw/get-project-root ()
+  (when (fboundp 'projectile-project-root)
+    (projectile-project-root)))
 
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   '(magit helpful counsel ivy-rich which-key rainbow-delimiters doom-themes doom-modeline ivy command-log-mode use-package)))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
+(use-package consult
+  :demand t
+  :bind (("C-s" . consult-line)
+         ("C-M-l" . consult-imenu)
+         ("C-M-j" . persp-switch-to-buffer*)
+         :map minibuffer-local-map
+         ("C-r" . consult-history))
+  :custom
+  (consult-project-root-function #'dw/get-project-root)
+  (completion-in-region-function #'consult-completion-in-region))
+
+(use-package marginalia
+  :after vertico
+  :custom
+  (marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil))
+  :init
+  (marginalia-mode))
