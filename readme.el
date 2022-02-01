@@ -300,6 +300,8 @@
 (load "setup-clojure.el")
 (load "setup-js.el")
 
+(global-set-key (kbd "C-M-j") 'buffer-menu)
+
 (use-package evil
   :init
   (setq evil-want-integration t)
