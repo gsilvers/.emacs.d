@@ -3,20 +3,34 @@
 
 (setq mc/cmds-to-run-for-all
       '(
+        evil-append
         evil-append-line
+        evil-backward-char
         evil-backward-word-begin
+        evil-beginning-of-line
+        evil-delete-char
         evil-emacs-state
+        evil-end-of-line
         evil-forward-WORD-begin
         evil-forward-char
         evil-forward-word-begin
         evil-forward-word-end
+        evil-goto-mark-line
         evil-insert
         evil-normal-state
+        evil-paste-after
+        evil-undo
+        evil-visual-char
+        evil-yank
+        sqlplus-buffer-scroll-right
         ))
 
 (setq mc/cmds-to-run-once
       '(
         evil-mouse-drag-region
+        evil-next-line
+        evil-previous-line
+        evil-visual-line
         keyboard-escape-quit
         mouse-set-region
         ))

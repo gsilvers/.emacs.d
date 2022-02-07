@@ -15,3 +15,5 @@ projectile-bookmarks.eld
 url/*
 history
 server/*
+.mc-lists.el
+cider-history

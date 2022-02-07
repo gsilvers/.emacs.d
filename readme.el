@@ -167,6 +167,15 @@
 
 (global-set-key (kbd "C-c a") 'org-agenda)
 
+(custom-set-faces
+'(org-block-begin-line
+((t (:background "#212121" :extend t))))
+'(org-block
+((t (:background "#252525" :extend t))))
+'(org-block-end-line
+((t (:background "#212121" :extend t))))
+)
+
 (use-package projectile
   :diminish projectile-mode
   :config (projectile-mode)
@@ -450,3 +459,17 @@
   (marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil))
   :init
   (marginalia-mode))
+
+(defun window-split-toggle ()
+  "Toggle between horizontal and vertical split with two windows."
+  (interactive)
+  (if (> (length (window-list)) 2)
+      (error "Can't toggle with more than 2 windows!")
+    (let ((func (if (window-full-height-p)
+                    #'split-window-vertically
+                  #'split-window-horizontally)))
+      (delete-other-windows)
+      (funcall func)
+      (save-selected-window
+        (other-window 1)
+        (switch-to-buffer (other-buffer))))))

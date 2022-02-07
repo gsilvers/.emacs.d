@@ -38,4 +38,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(org-block ((t (:background "#252525" :extend t))))
+ '(org-block-begin-line ((t (:background "#212121" :extend t))))
+ '(org-block-end-line ((t (:background "#212121" :extend t))))
  '(vertico-current ((t (:background "#3a3f5a")))))
