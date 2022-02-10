@@ -480,9 +480,5 @@
       (save-selected-window
         (other-window 1)
         (switch-to-buffer (other-buffer))))))
-<<<<<<< HEAD
-
 (use-package doom-modeline)
 (doom-modeline-mode)
-=======
->>>>>>> 8cd3cc8558c022a0fe65fa7c92e7dd9bc29bd352
