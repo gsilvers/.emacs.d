@@ -167,6 +167,15 @@
 
 (global-set-key (kbd "C-c a") 'org-agenda)
 
+(custom-set-faces
+'(org-block-begin-line
+((t (:background "#212121" :extend t))))
+'(org-block
+((t (:background "#252525" :extend t))))
+'(org-block-end-line
+((t (:background "#212121" :extend t))))
+)
+
 (use-package projectile
   :diminish projectile-mode
   :config (projectile-mode)
@@ -371,9 +380,10 @@
 (use-package command-log-mode)
 
 (use-package keycast
-    :bind ("C-c t k" . +toggle-keycast)
-    :config
-
+  :bind ("C-c t k" . +toggle-keycast)
+  :config
+  (define-minor-mode keycast-mode
+    "Show current command and its key binding in the mode line (fix for use with doom-mode-line)."
     (defun +toggle-keycast()
       (interactive)
       (if (member '("" mode-line-keycast " ") global-mode-string)
@@ -382,26 +392,32 @@
                  (message "Keycast disabled"))
         (add-to-list 'global-mode-string '("" mode-line-keycast " "))
         (add-hook 'pre-command-hook 'keycast--update t)
-        (message "Keycast enabled"))))
+        (message "Keycast enabled")))
+    :global t
+    (if keycast-mode
+        (add-hook 'pre-command-hook 'keycast--update t)
+      (remove-hook 'pre-command-hook 'keycast--update)))
+  (add-to-list 'global-mode-string '("" mode-line-keycast))
+  )
 
 
-  (use-package yasnippet
-    :ensure t
-    :config
-    (use-package yasnippet-snippets
-      :ensure t)
-    (yas-global-mode t)
-    (add-to-list #'yas-snippet-dirs "my-personal-snippets")
-    :diminish yas-minor-mode)
+(use-package yasnippet
+  :ensure t
+  :config
+  (use-package yasnippet-snippets
+    :ensure t)
+  (yas-global-mode t)
+  (add-to-list #'yas-snippet-dirs "my-personal-snippets")
+  :diminish yas-minor-mode)
 
-  (global-set-key (kbd "C-x <C-return>") 'window-swap-states)
+(global-set-key (kbd "C-x <C-return>") 'window-swap-states)
 
 
 (use-package corfu
   :bind (:map corfu-map
-         ("C-j" . corfu-next)
-         ("C-k" . corfu-previous)
-         ("C-f" . corfu-insert))
+              ("C-j" . corfu-next)
+              ("C-k" . corfu-previous)
+              ("C-f" . corfu-insert))
   :custom
   (corfu-cycle t)
   :config
@@ -410,11 +426,11 @@
 
 (use-package vertico
   :bind (:map vertico-map
-         ("C-j" . vertico-next)
-         ("C-k" . vertico-previous)
-         ("C-f" . vertico-exit)
-         :map minibuffer-local-map
-         ("M-h" . dw/minibuffer-backward-kill))
+              ("C-j" . vertico-next)
+              ("C-k" . vertico-previous)
+              ("C-f" . vertico-exit)
+              :map minibuffer-local-map
+              ("M-h" . dw/minibuffer-backward-kill))
   :custom
   (vertico-cycle t)
   :custom-face
@@ -450,3 +466,20 @@
   (marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil))
   :init
   (marginalia-mode))
+
+(defun window-split-toggle ()
+  "Toggle between horizontal and vertical split with two windows."
+  (interactive)
+  (if (> (length (window-list)) 2)
+      (error "Can't toggle with more than 2 windows!")
+    (let ((func (if (window-full-height-p)
+                    #'split-window-vertically
+                  #'split-window-horizontally)))
+      (delete-other-windows)
+      (funcall func)
+      (save-selected-window
+        (other-window 1)
+        (switch-to-buffer (other-buffer))))))
+
+(use-package doom-modeline)
+(doom-modeline-mode)
