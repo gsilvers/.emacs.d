@@ -1,4 +1,4 @@
-;;; dired+.el --- Extensions to Dired.
+;; dired+.el --- Extensions to Dired.
 ;;
 ;; Filename: dired+.el
 ;; Description: Extensions to Dired.
@@ -2313,6 +2313,8 @@ of that nature."
 
 (provide 'dired+)
 (require 'dired+)                       ; Ensure loaded before compile this.
+
+(setq dired-kill-when-opening-new-dired-buffer t) ;stop opening many buffers dired
 
 ;; Quiet the byte-compiler.
 (defvar bmkp-copied-tags)                         ; In `bookmark+-1.el'

@@ -274,7 +274,7 @@
     (package-install p)))
 
 
-(add-to-list 'load-path "~/.emacs.d/vendor")
+(add-to-list 'load-path "~/.emacs.d/customizations")
 
 
 ;;;;
@@ -288,7 +288,6 @@
 ;; Sets up exec-path-from-shell so that Emacs will use the correct
 ;; environment variables
 (load "shell-integration.el")
-(load "dired+.el")
 
 ;; These customizations make it easier for you to navigate files,
 ;; switch buffers, and choose options from the minibuffer.
@@ -380,105 +379,108 @@
 (use-package command-log-mode)
 
 (use-package keycast
-  :bind ("C-c t k" . +toggle-keycast)
-  :config
-  (define-minor-mode keycast-mode
-    "Show current command and its key binding in the mode line (fix for use with doom-mode-line)."
-    (defun +toggle-keycast()
-      (interactive)
-      (if (member '("" mode-line-keycast " ") global-mode-string)
-          (progn (setq global-mode-string (delete '("" mode-line-keycast " ") global-mode-string))
-                 (remove-hook 'pre-command-hook 'keycast--update)
-                 (message "Keycast disabled"))
-        (add-to-list 'global-mode-string '("" mode-line-keycast " "))
-        (add-hook 'pre-command-hook 'keycast--update t)
-        (message "Keycast enabled")))
-    :global t
-    (if keycast-mode
-        (add-hook 'pre-command-hook 'keycast--update t)
-      (remove-hook 'pre-command-hook 'keycast--update)))
-  (add-to-list 'global-mode-string '("" mode-line-keycast))
-  )
+    :bind ("C-c t k" . +toggle-keycast)
+    :config
+    (define-minor-mode keycast-mode
+      "Show current command and its key binding in the mode line (fix for use with doom-mode-line)."
+      (defun +toggle-keycast()
+        (interactive)
+        (if (member '("" mode-line-keycast " ") global-mode-string)
+            (progn (setq global-mode-string (delete '("" mode-line-keycast " ") global-mode-string))
+                   (remove-hook 'pre-command-hook 'keycast--update)
+                   (message "Keycast disabled"))
+          (add-to-list 'global-mode-string '("" mode-line-keycast " "))
+          (add-hook 'pre-command-hook 'keycast--update t)
+          (message "Keycast enabled")))
+      :global t
+      (if keycast-mode
+          (add-hook 'pre-command-hook 'keycast--update t)
+        (remove-hook 'pre-command-hook 'keycast--update)))
+    (add-to-list 'global-mode-string '("" mode-line-keycast))
+    )
 
 
-(use-package yasnippet
-  :ensure t
-  :config
-  (use-package yasnippet-snippets
-    :ensure t)
-  (yas-global-mode t)
-  (add-to-list #'yas-snippet-dirs "my-personal-snippets")
-  :diminish yas-minor-mode)
+  (use-package yasnippet
+    :ensure t
+    :config
+    (use-package yasnippet-snippets
+      :ensure t)
+    (yas-global-mode t)
+    (add-to-list #'yas-snippet-dirs "my-personal-snippets")
+    :diminish yas-minor-mode)
 
-(global-set-key (kbd "C-x <C-return>") 'window-swap-states)
-
-
-(use-package corfu
-  :bind (:map corfu-map
-              ("C-j" . corfu-next)
-              ("C-k" . corfu-previous)
-              ("C-f" . corfu-insert))
-  :custom
-  (corfu-cycle t)
-  :config
-  (corfu-global-mode))
+  (global-set-key (kbd "C-x <C-return>") 'window-swap-states)
 
 
-(use-package vertico
-  :bind (:map vertico-map
-              ("C-j" . vertico-next)
-              ("C-k" . vertico-previous)
-              ("C-f" . vertico-exit)
-              :map minibuffer-local-map
-              ("M-h" . dw/minibuffer-backward-kill))
-  :custom
-  (vertico-cycle t)
-  :custom-face
-  (vertico-current ((t (:background "#3a3f5a"))))
-  :init
-  (vertico-mode))
+  (use-package corfu
+    :bind (:map corfu-map
+                ("C-j" . corfu-next)
+                ("C-k" . corfu-previous)
+                ("C-f" . corfu-insert))
+    :custom
+    (corfu-cycle t)
+    :config
+    (corfu-global-mode))
 
 
-(use-package orderless
-  :init
-  (setq completion-styles '(orderless)
-        completion-category-defaults nil
-        completion-category-overrides '((file (styles . (partial-completion))))))
+  (use-package vertico
+    :bind (:map vertico-map
+                ("C-j" . vertico-next)
+                ("C-k" . vertico-previous)
+                ("C-f" . vertico-exit)
+                :map minibuffer-local-map
+                ("M-h" . dw/minibuffer-backward-kill))
+    :custom
+    (vertico-cycle t)
+    :custom-face
+    (vertico-current ((t (:background "#3a3f5a"))))
+    :init
+    (vertico-mode))
 
-(defun dw/get-project-root ()
-  (when (fboundp 'projectile-project-root)
-    (projectile-project-root)))
 
-(use-package consult
-  :demand t
-  :bind (("C-s" . consult-line)
-         ("C-M-l" . consult-imenu)
-         ("C-M-j" . persp-switch-to-buffer*)
-         :map minibuffer-local-map
-         ("C-r" . consult-history))
-  :custom
-  (consult-project-root-function #'dw/get-project-root)
-  (completion-in-region-function #'consult-completion-in-region))
+  (use-package orderless
+    :init
+    (setq completion-styles '(orderless)
+          completion-category-defaults nil
+          completion-category-overrides '((file (styles . (partial-completion))))))
 
-(use-package marginalia
-  :after vertico
-  :custom
-  (marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil))
-  :init
-  (marginalia-mode))
+  (defun dw/get-project-root ()
+    (when (fboundp 'projectile-project-root)
+      (projectile-project-root)))
 
-(defun window-split-toggle ()
-  "Toggle between horizontal and vertical split with two windows."
-  (interactive)
-  (if (> (length (window-list)) 2)
-      (error "Can't toggle with more than 2 windows!")
-    (let ((func (if (window-full-height-p)
-                    #'split-window-vertically
-                  #'split-window-horizontally)))
-      (delete-other-windows)
-      (funcall func)
-      (save-selected-window
-        (other-window 1)
-        (switch-to-buffer (other-buffer))))))
-(use-package doom-modeline)
-(doom-modeline-mode)
+  (use-package consult
+    :demand t
+    :bind (("C-s" . consult-line)
+           ("C-M-l" . consult-imenu)
+           ("C-M-j" . persp-switch-to-buffer*)
+           :map minibuffer-local-map
+           ("C-r" . consult-history))
+    :custom
+    (consult-project-root-function #'dw/get-project-root)
+    (completion-in-region-function #'consult-completion-in-region))
+
+  (use-package marginalia
+    :after vertico
+    :custom
+    (marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil))
+    :init
+    (marginalia-mode))
+
+  (defun window-split-toggle ()
+    "Toggle between horizontal and vertical split with two windows."
+    (interactive)
+    (if (> (length (window-list)) 2)
+        (error "Can't toggle with more than 2 windows!")
+      (let ((func (if (window-full-height-p)
+                      #'split-window-vertically
+                    #'split-window-horizontally)))
+        (delete-other-windows)
+        (funcall func)
+        (save-selected-window
+          (other-window 1)
+          (switch-to-buffer (other-buffer))))))
+
+  (use-package doom-modeline)
+  (doom-modeline-mode)
+
+(setq dired-kill-when-opening-new-dired-buffer t)

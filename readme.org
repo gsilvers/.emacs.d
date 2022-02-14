@@ -408,7 +408,7 @@
           (package-install p)))
 
 
-      (add-to-list 'load-path "~/.emacs.d/vendor")
+      (add-to-list 'load-path "~/.emacs.d/customizations")
 
 
       ;;;;
@@ -422,7 +422,6 @@
       ;; Sets up exec-path-from-shell so that Emacs will use the correct
       ;; environment variables
       (load "shell-integration.el")
-      (load "dired+.el")
 
       ;; These customizations make it easier for you to navigate files,
       ;; switch buffers, and choose options from the minibuffer.
@@ -682,4 +681,7 @@
 
   (use-package doom-modeline)
   (doom-modeline-mode)
+
+(setq dired-kill-when-opening-new-dired-buffer t) 
+
 #+end_src
