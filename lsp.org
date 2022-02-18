@@ -1,6 +1,0 @@
-* Configuration for LSP Mode
-  This is right now a copy from https://github.com/daviwil/emacs-from-scratch/blob/6d078217a41134cc667f969430d150c50d03f448/init.el
-
-  #+begin_src emacs-lisp
-  #+end_src
-

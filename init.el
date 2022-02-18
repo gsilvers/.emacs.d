@@ -16,13 +16,6 @@
 (org-babel-load-file
  (expand-file-name "readme.org"
                    user-emacs-directory))
-(org-babel-load-file
- (expand-file-name "dired.org"
-                   user-emacs-directory))
-
-(org-babel-load-file
- (expand-file-name "lsp.org"
-                   user-emacs-directory))
 
 (setq gc-cons-threshold (* 2 1000 1000))
 (custom-set-variables
