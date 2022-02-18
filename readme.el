@@ -593,11 +593,6 @@
 
 (global-set-key (kbd "C-x <C-return>") 'window-swap-states)
 
-
-(defun dw/get-project-root ()
-  (when (fboundp 'projectile-project-root)
-    (projectile-project-root)))
-
 (defun window-split-toggle ()
   "Toggle between horizontal and vertical split with two windows."
   (interactive)
