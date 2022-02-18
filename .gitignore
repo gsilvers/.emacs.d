@@ -17,3 +17,7 @@ history
 server/*
 .mc-lists.el
 cider-history
+image-dired
+image-dired/*
+.cache
+.cache/*
