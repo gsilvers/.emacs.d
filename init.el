@@ -13,6 +13,9 @@
 
 ;; Read org file with axtual settings in blocks
 (require 'org)
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((sql . t)))
 (org-babel-load-file
  (expand-file-name "readme.org"
                    user-emacs-directory))
