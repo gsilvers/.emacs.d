@@ -81,11 +81,11 @@
 (eq system-type 'windows-nt) 
   (progn
    (prefer-coding-system 'utf-8)
-   (setq explicit-shell-file-name
-    "C:/Users/csusggsn/AppData/Local/Programs/Git/bin/bash.exe")
+       (setenv "PATH" (concat "C:\\Users\\csusggsn\\AppData\\Local\\Programs\\Python\\Python39" (getenv "PATH"))) ;; gets my homebrew installed python
+   (setq explicit-shell-file-name        "C:\\Users\\csusggsn\\AppData\\Local\\Programs\\Git\\bin\\bash.exe")
    (setq shell-file-name explicit-shell-file-name)
    (add-to-list 'exec-path 
-    "C:/Users/csusggsn/AppData/Local/Programs/Git/bin/bash.exe")
+    "C:\\Users\\csusggsn\\AppData\\Local\\Programs\\Git\\bin\\bash.exe")
   ) 
 )
 
@@ -566,6 +566,7 @@
   :config
   (use-package yasnippet-snippets
     :ensure t)
+    (global-set-key (kbd "C-TAB") 'yas-expand)
   (yas-global-mode t)
   (add-to-list #'yas-snippet-dirs "my-personal-snippets")
   :diminish yas-minor-mode)
@@ -688,3 +689,8 @@
   ;; (add-hook 'prog-mode-hook #'tempel-abbrev-mode)
   ;; (tempel-global-abbrev-mode)
 )
+
+(defun git-bash () (interactive)
+(prefer-coding-system 'utf-8)
+  (let ((explicit-shell-file-name "C:\\Users\\csusggsn\\AppData\\Local\\Programs\\Git\\bin\\bash")) (setq explicit-bash.exe-args '("--login" "-i"))
+    (call-interactively 'shell)))
