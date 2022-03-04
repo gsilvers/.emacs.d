@@ -81,6 +81,7 @@
 (eq system-type 'windows-nt) 
   (progn
    (prefer-coding-system 'utf-8)
+   (setq python-shell-interpreter "C:\\Users\\csusggsn\\AppData\\Local\\Programs\\Python\\Python39\\python.exe")
        (setenv "PATH" (concat "C:\\Users\\csusggsn\\AppData\\Local\\Programs\\Python\\Python39" (getenv "PATH"))) ;; gets my homebrew installed python
    (setq explicit-shell-file-name        "C:\\Users\\csusggsn\\AppData\\Local\\Programs\\Git\\bin\\bash.exe")
    (setq shell-file-name explicit-shell-file-name)
