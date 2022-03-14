@@ -745,6 +745,7 @@
                ("C-r" . 'counsel-minibuffer-history)))
 
       (use-package company
+        :ensure t
         :after lsp-mode
         :hook (lsp-mode . company-mode)
         :bind (:map company-active-map
@@ -755,6 +756,8 @@
         (company-minimum-prefix-length 1)
         (company-idle-delay 0.0))
 
+      (add-hook 'after-init-hook 'global-company-mode)
+
       (use-package company-box
         :hook (company-mode . company-box-mode))
 
@@ -763,12 +766,17 @@
       (use-package yasnippet
         :ensure t
         :config
-        (use-package yasnippet-snippets
-          :ensure t)
-          (global-set-key (kbd "C-TAB") 'yas-expand)
+        (global-set-key (kbd "C-TAB") 'yas-expand)
         (yas-global-mode t)
         (add-to-list #'yas-snippet-dirs "my-personal-snippets")
         :diminish yas-minor-mode)
+      (setq yas-snippet-dirs
+            '("~/.emacs.d/snippets"                 ;; personal snippets
+              ))
+      (use-package yasnippet-snippets
+        :ensure t
+        )
+      (global-set-key (kbd "M-/") 'company-yasnippet)
 
       (use-package which-key
         :init (which-key-mode)
@@ -832,6 +840,8 @@
   (doom-modeline-mode)
 
   (setq doom-modeline-modal-icon nil)
+
+  (display-time)
 
   (use-package goggles
     :ensure t

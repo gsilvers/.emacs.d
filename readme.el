@@ -536,6 +536,7 @@
          ("C-r" . 'counsel-minibuffer-history)))
 
 (use-package company
+  :ensure t
   :after lsp-mode
   :hook (lsp-mode . company-mode)
   :bind (:map company-active-map
@@ -546,6 +547,8 @@
   (company-minimum-prefix-length 1)
   (company-idle-delay 0.0))
 
+(add-hook 'after-init-hook 'global-company-mode)
+
 (use-package company-box
   :hook (company-mode . company-box-mode))
 
@@ -554,12 +557,17 @@
 (use-package yasnippet
   :ensure t
   :config
-  (use-package yasnippet-snippets
-    :ensure t)
-    (global-set-key (kbd "C-TAB") 'yas-expand)
+  (global-set-key (kbd "C-TAB") 'yas-expand)
   (yas-global-mode t)
   (add-to-list #'yas-snippet-dirs "my-personal-snippets")
   :diminish yas-minor-mode)
+(setq yas-snippet-dirs
+      '("~/.emacs.d/snippets"                 ;; personal snippets
+        ))
+(use-package yasnippet-snippets
+  :ensure t
+  )
+(global-set-key (kbd "M-/") 'company-yasnippet)
 
 (use-package which-key
   :init (which-key-mode)
@@ -589,23 +597,26 @@
 
 (global-set-key (kbd "C-x <C-return>") 'window-swap-states)
 
-  (defun window-split-toggle ()
-    "Toggle between horizontal and vertical split with two windows."
-    (interactive)
-    (if (> (length (window-list)) 2)
-        (error "Can't toggle with more than 2 windows!")
-      (let ((func (if (window-full-height-p)
-                      #'split-window-vertically
-                    #'split-window-horizontally)))
-        (delete-other-windows)
-        (funcall func)
-        (save-selected-window
-          (other-window 1)
-          (switch-to-buffer (other-buffer))))))
+(defun window-split-toggle ()
+  "Toggle between horizontal and vertical split with two windows."
+  (interactive)
+  (if (> (length (window-list)) 2)
+      (error "Can't toggle with more than 2 windows!")
+    (let ((func (if (window-full-height-p)
+                    #'split-window-vertically
+                  #'split-window-horizontally)))
+      (delete-other-windows)
+      (funcall func)
+      (save-selected-window
+        (other-window 1)
+        (switch-to-buffer (other-buffer))))))
 
-  (use-package doom-modeline)
-  (doom-modeline-mode)
+(use-package doom-modeline)
+(doom-modeline-mode)
 
+(setq doom-modeline-modal-icon nil)
+
+(display-time)
 
 (use-package goggles
   :ensure t
@@ -637,9 +648,9 @@
   :init
   ;; Add `completion-at-point-functions', used by `completion-at-point'.
   (add-to-list 'completion-at-point-functions #'cape-file)
-  ;(add-to-list 'completion-at-point-functions #'cape-tex)
+                                        ;(add-to-list 'completion-at-point-functions #'cape-tex)
   (add-to-list 'completion-at-point-functions #'cape-abbrev)
-  ;(add-to-list 'completion-at-point-functions #'cape-keyword)
+                                        ;(add-to-list 'completion-at-point-functions #'cape-keyword)
   ;;(add-to-list 'completion-at-point-functions #'cape-sgml)
   ;;(add-to-list 'completion-at-point-functions #'cape-rfc1345)
   ;;(add-to-list 'completion-at-point-functions #'cape-abbrev)
@@ -647,7 +658,7 @@
   ;;(add-to-list 'completion-at-point-functions #'cape-dict)
   ;;(add-to-list 'completion-at-point-functions #'cape-symbol)
   ;;(add-to-list 'completion-at-point-functions #'cape-line)
-)
+  )
 
 (setq-local completion-at-point-functions
             (list (cape-super-capf #'cape-dabbrev #'cape-file #'cape-keyword #'cape-symbol)))
@@ -678,9 +689,9 @@
   ;; either locally or globally. `expand-abbrev' is bound to C-x '.
   ;; (add-hook 'prog-mode-hook #'tempel-abbrev-mode)
   ;; (tempel-global-abbrev-mode)
-)
+  )
 
 (defun git-bash () (interactive)
-(prefer-coding-system 'utf-8)
-  (let ((explicit-shell-file-name "C:\\Users\\csusggsn\\AppData\\Local\\Programs\\Git\\bin\\bash")) (setq explicit-bash.exe-args '("--login" "-i"))
-    (call-interactively 'shell)))
+       (prefer-coding-system 'utf-8)
+       (let ((explicit-shell-file-name "C:\\Users\\csusggsn\\AppData\\Local\\Programs\\Git\\bin\\bash")) (setq explicit-bash.exe-args '("--login" "-i"))
+            (call-interactively 'shell)))
