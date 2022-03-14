@@ -1,0 +1,15 @@
+# -*- mode: snippet -*-
+# name: Company Relationship Select
+# key: #CSCRS
+# --
+
+SELECT
+    *
+FROM
+    csus_core.company_relationship cr1
+WHERE
+    cr1.deleted_by_import IS NULL
+    AND cr1.deleted_by_editing_tool IS NULL
+    AND ( cr1.cs_company_id IN ( '$1' )
+          OR cr1.companyid IN ( '$2' )
+          OR cr1.parentid IN ( '$3' ) );
