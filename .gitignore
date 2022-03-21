@@ -21,3 +21,5 @@ image-dired
 image-dired/*
 .cache
 .cache/*
+var/*
+smex_items
