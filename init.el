@@ -28,7 +28,7 @@
  ;; If there is more than one, they won't work right.
  '(coffee-tab-width 2)
  '(package-selected-packages
-   '(osm dirvish powershell company-go marginalia yasnippet-snippets which-key vterm visual-fill-column vertico use-package typescript-mode tagedit smex rainbow-delimiters paredit orderless nyan-mode multiple-cursors modus-themes magit lsp-ui lsp-treemacs lsp-ivy keycast ivy-rich ido-completing-read+ helpful general exec-path-from-shell evil-collection eterm-256color doom-themes doom-modeline counsel-projectile company-box command-log-mode clojure-mode-extra-font-locking cider better-defaults)))
+   '(markdown-preview-eww osm dirvish powershell company-go marginalia yasnippet-snippets which-key vterm visual-fill-column vertico use-package typescript-mode tagedit smex rainbow-delimiters paredit orderless nyan-mode multiple-cursors modus-themes magit lsp-ui lsp-treemacs lsp-ivy keycast ivy-rich ido-completing-read+ helpful general exec-path-from-shell evil-collection eterm-256color doom-themes doom-modeline counsel-projectile company-box command-log-mode clojure-mode-extra-font-locking cider better-defaults)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
