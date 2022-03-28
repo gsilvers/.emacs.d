@@ -118,7 +118,10 @@
   :hook (org-mode . old_greg/org-mode-setup)
   :config
   (setq org-ellipsis " ▾")
-
+  (setq org-default-notes-file "~/Organization/02_Documents/inbox.org")
+  (global-set-key (kbd "C-c l") #'org-store-link)
+  (global-set-key (kbd "C-c a") #'org-agenda)
+  (global-set-key (kbd "C-c c") #'org-capture)
   (setq org-agenda-start-with-log-mode t)
   (setq org-log-done 'time)
   (setq org-log-into-drawer t)
@@ -156,14 +159,32 @@
 
 (if
     (eq system-type 'windows-nt) 
-    (setq org-agenda-files '("C:\\Users\\csusggsn\\Organization\\todo.org"))
+    (progn (setq org-agenda-files
+                 (list
+                  "C:\\Users\\csusggsn\\Organization\\02_Documents\\todo.org"
+                  "C:\\Users\\csusggsn\\Organization\\02_Documents\\inbox.org"
+                  )
+                 )
+           (setq org-refile-targets
+                 '(
+                   ("C:\\Users\\csusggsn\\Organization\\02_Documents\\todo.org" :maxlevel . 2)
+                   ("C:\\Users\\csusggsn\\Organization\\02_Documents\\inbox.org" :maxlevel . 1)
+                   ))
+           )
   )
-
 (if
     (eq system-type 'darwin) 
-    (setq org-agenda-files '("~/Organization/todo.org"))
-  )
+    (progn (setq org-agenda-files
+                 (list
+                  "~/Organization/02_Documents/todo.org"
+                  "~/Organization/02_Documents/inbox.org")
+                 )
+           (setq org-refile-targets
+                 '(("~/Organization/02_Documents/todo.org" :maxlevel . 2)
+                   ("~/Organization/02_Documents/inbox.org" :maxlevel . 1)))
 
+           )
+  )
 (global-set-key (kbd "C-c a") 'org-agenda)
 
 (custom-set-faces
@@ -316,24 +337,6 @@
 
 (global-set-key (kbd "C-M-j") 'buffer-menu)
 
-(use-package evil
-  :init
-  (setq evil-want-integration t)
-  (setq evil-want-keybinding nil)
-  (setq evil-want-C-u-scroll t)
-  (setq evil-want-C-i-jump nil)
-  :config
-  (evil-mode 1))
-
-
-(setq evil-default-state 'emacs) 
-(evil-set-initial-state 'Custom-mode 'emacs)
-
-(use-package evil-collection
-  :after evil
-  :config
-  (evil-collection-init))
-
 (require 'multiple-cursors)
 (global-set-key (kbd "C-S-c C-S-c") 'mc/edit-lines)
 (global-set-key (kbd "C->") 'mc/mark-next-like-this)
@@ -458,9 +461,6 @@
         ("C-x t C-t" . treemacs-find-file)
         ("C-x t M-t" . treemacs-find-tag)))
 
-(use-package treemacs-evil
-  :after (treemacs evil)
-  :ensure t)
 
 (use-package treemacs-projectile
   :after (treemacs projectile)
@@ -703,3 +703,6 @@
   ;; Load Org link support
   (with-eval-after-load 'org
     (require 'osm-ol)))
+
+    (custom-set-variables
+    '(markdown-command "C:\\Pandoc\\pandoc.exe"))
