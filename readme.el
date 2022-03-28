@@ -703,3 +703,6 @@
   ;; Load Org link support
   (with-eval-after-load 'org
     (require 'osm-ol)))
+
+    (custom-set-variables
+    '(markdown-command "C:\\Pandoc\\pandoc.exe"))
