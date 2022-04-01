@@ -225,6 +225,7 @@
 (load "sqlplus.el")
 (load "plsql.el")
 
+
 (require 'sqlplus)
 (add-to-list 'auto-mode-alist '("\\.sqp\\'" . sqlplus-mode))
 
@@ -370,7 +371,20 @@
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
 ;; python3 
-(setq python-shell-interpreter "python3")
+
+
+(if
+  (eq system-type 'windows-nt) 
+  (progn 
+    (setq python-shell-interpreter "python")                                    
+  )
+)
+(if
+  (eq system-type 'darwin) 
+  (progn 
+   (setq python-shell-interpreter "python3")
+  )
+)
 
 (use-package exec-path-from-shell)
 (when (memq window-system '(mac ns x))
@@ -547,7 +561,7 @@
 (use-package yasnippet
   :ensure t
   :config
-  (global-set-key (kbd "C-TAB") 'yas-expand)
+  (global-set-key (kbd "C-M-0") 'yas-expand)
   (yas-global-mode t)
   (add-to-list #'yas-snippet-dirs "my-personal-snippets")
   :diminish yas-minor-mode)
@@ -571,16 +585,42 @@
 
   (use-package lsp-mode
     :commands (lsp lsp-deferred)
-    :hook (lsp-mode . efs/lsp-mode-setup)
+    :hook 
+      (
+        (lsp-mode . efs/lsp-mode-setup)
+        (python-mode . lsp)
+        (lsp-mode . lsp-enable-which-key-integration)
+        )
     :init
-    (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
-    :config
-    (lsp-enable-which-key-integration t))
+    (setq lsp-keymap-prefix "C-c 1")  ;; Or 'C-l', 's-l'
+      :bind 
+        (
+          ("C-c 1 d" . lsp-describe-thing-at-point)
+          ("C-c 1 f" . lsp-format-buffer)
+          ("C-c 1 r" . lsp-rename)
+        )
+      )
 
 (use-package lsp-ui
-    :hook (lsp-mode . lsp-ui-mode)
-    :custom
-    (lsp-ui-doc-position 'bottom))
+  :hook (lsp-mode . lsp-ui-mode)
+  :commands lsp-ui-mode
+  :custom
+  (lsp-ui-doc-position 'bottom)
+  :config (setq lsp-ui-sideline-show-hover t
+          lsp-ui-sideline-delay 0.5
+          lsp-ui-doc-delay 5
+          lsp-ui-sideline-ignore-duplicates t
+          lsp-ui-doc-position 'bottom
+          lsp-ui-doc-alignment 'frame
+          lsp-ui-doc-header nil
+          lsp-ui-doc-include-signature t
+          lsp-ui-doc-use-childframe t)
+  :bind (
+        ("C-c 1 d" . lsp-ui-peek-find-definitions)
+        ("C-c 1 g" . lsp-ui-peek-find-references)
+        ("C-c 1 i" . lsp-ui-imenu))
+
+  )
 
   (use-package lsp-treemacs
     :after lsp)
@@ -705,4 +745,7 @@
     (require 'osm-ol)))
 
     (custom-set-variables
-    '(markdown-command "C:\\Pandoc\\pandoc.exe"))
+    '(markdown-command "C:\\Pandoc\\pandoc.exe"))  
+
+    (global-set-key (kbd "C-c <left>") 'tab-bar-switch-to-prev-tab)
+    (global-set-key (kbd "C-c <right>") 'tab-bar-switch-to-next-tab)
