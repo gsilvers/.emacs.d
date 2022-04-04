@@ -305,9 +305,9 @@
 (add-to-list 'load-path "~/.emacs.d/customizations")
 
 
-;;;;
+      ;;;;
 ;; Customization
-;;;;
+      ;;;;
 
 ;; Add a directory to our load path so that when you `load` things
 ;; below, Emacs knows where to look for the corresponding file.
@@ -316,7 +316,7 @@
 ;; Sets up exec-path-from-shell so that Emacs will use the correct
 ;; environment variables
 (load "shell-integration.el")
-
+(load "erc_config.el")
 ;; These customizations make it easier for you to navigate files,
 ;; switch buffers, and choose options from the minibuffer.
 ;; These customizations change the way emacs looks and disable/enable
