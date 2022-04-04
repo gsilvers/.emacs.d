@@ -12,3 +12,11 @@
   (enlarge-window-horizontally 5)
   (set-transient-map grow-five-keymap)
 ) 
+
+
+;; This was from a chat a user was trying to use repeat command 
+;; but it was not keeping the 5
+;; transient map seems cool you could make a mini menu
+;; of predicates fro one command. Like split
+;; and then veritcal or horizontal 
+;; or maybe even better something for tab bar mode?
