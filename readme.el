@@ -626,12 +626,6 @@
   (use-package lsp-treemacs
     :after lsp)
 
-(setq 
- erc-server "irc.libera.chat"
- erc-nick "gsilvers"
- erc-user-full-name "greg"
- )
-
 (global-set-key (kbd "C-x <C-return>") 'window-swap-states)
 
   (defun window-split-toggle ()

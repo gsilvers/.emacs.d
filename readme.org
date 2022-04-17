@@ -846,17 +846,6 @@
           :after lsp)
 
     #+end_src
-*** ERC
-
-    I have been using ERC to chat alot more and get quick help this config just gets me into libera fast.
-
-#+begin_src emacs-lisp
-   (setq 
-    erc-server "irc.libera.chat"
-    erc-nick "gsilvers"
-    erc-user-full-name "greg"
-    )
-#+end_src
 
 *** Everything Else
 
