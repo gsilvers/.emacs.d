@@ -721,76 +721,76 @@
     I was trying corfu but have just gone back to company for its better support in other packages.
 
     #+begin_src emacs-lisp 
-      (use-package ivy
-        :diminish
-        :bind (("C-s" . swiper)
-               :map ivy-minibuffer-map
-               ("TAB" . ivy-alt-done)
-               ("C-l" . ivy-alt-done)
-               ("C-j" . ivy-next-line)
-               ("C-k" . ivy-previous-line)
-               :map ivy-switch-buffer-map
-               ("C-k" . ivy-previous-line)
-               ("C-l" . ivy-done)
-               ("C-d" . ivy-switch-buffer-kill)
-               :map ivy-reverse-i-search-map
-               ("C-k" . ivy-previous-line)
-               ("C-d" . ivy-reverse-i-search-kill))
-        :config
-        (ivy-mode 1))
+            (use-package ivy
+              :diminish
+              :bind (("C-s" . swiper)
+                     :map ivy-minibuffer-map
+                     ("TAB" . ivy-alt-done)
+                     ("C-l" . ivy-alt-done)
+                     ("C-j" . ivy-next-line)
+                     ("C-k" . ivy-previous-line)
+                     :map ivy-switch-buffer-map
+                     ("C-k" . ivy-previous-line)
+                     ("C-l" . ivy-done)
+                     ("C-d" . ivy-switch-buffer-kill)
+                     :map ivy-reverse-i-search-map
+                     ("C-k" . ivy-previous-line)
+                     ("C-d" . ivy-reverse-i-search-kill))
+              :config
+              (ivy-mode 1))
 
 
-      (use-package ivy-rich
-        :init
-        (ivy-rich-mode 1))
+            (use-package ivy-rich
+              :init
+              (ivy-rich-mode 1))
 
-      (use-package counsel
-        :bind (("M-x" . counsel-M-x)
-               ("C-x b" . counsel-ibuffer)
-               ("C-x C-f" . counsel-find-file)
-               :map minibuffer-local-map
-               ("C-r" . 'counsel-minibuffer-history)))
+            (use-package counsel
+              :bind (("M-x" . counsel-M-x)
+                     ("C-x b" . counsel-ibuffer)
+                     ("C-x C-f" . counsel-find-file)
+                     :map minibuffer-local-map
+                     ("C-r" . 'counsel-minibuffer-history)))
 
-      (use-package company
-        :ensure t
-        :after lsp-mode
-        :hook (lsp-mode . company-mode)
-        :bind (:map company-active-map
-                    ("<tab>" . company-complete-selection))
-        (:map lsp-mode-map
-              ("<tab>" . company-indent-or-complete-common))
-        :custom
-        (company-minimum-prefix-length 1)
-        (company-idle-delay 0.0))
+            (use-package company
+              :ensure t
+              :after lsp-mode
+              :hook (lsp-mode . company-mode)
+              :bind (:map company-active-map
+                          ("<tab>" . company-complete-selection))
+              (:map lsp-mode-map
+                    ("<tab>" . company-indent-or-complete-common))
+              :custom
+              (company-minimum-prefix-length 1)
+              (company-idle-delay 0.0))
 
-      (add-hook 'after-init-hook 'global-company-mode)
+            (add-hook 'after-init-hook 'global-company-mode)
 
-      (use-package company-box
-        :hook (company-mode . company-box-mode))
+            (use-package company-box
+              :hook (company-mode . company-box-mode))
 
-      (use-package helpful)
+            (use-package helpful)
 
-      (use-package yasnippet
-        :ensure t
-        :config
-        (global-set-key (kbd "C-M-0") 'yas-expand)
-        (yas-global-mode t)
-        (add-to-list #'yas-snippet-dirs "my-personal-snippets")
-        :diminish yas-minor-mode)
-      (setq yas-snippet-dirs
-            '("~/.emacs.d/snippets"                 ;; personal snippets
-              ))
-      (use-package yasnippet-snippets
-        :ensure t
-        )
-      (global-set-key (kbd "M-/") 'company-yasnippet)
+            (use-package yasnippet
+              :ensure t
+              :config
+              (global-set-key (kbd "C-M-0") 'yas-expand)
+              (yas-global-mode t)
+              (add-to-list #'yas-snippet-dirs "my-personal-snippets")
+              :diminish yas-minor-mode)
+            (setq yas-snippet-dirs
+                  '("~/.emacs.d/snippets"                 ;; personal snippets
+                    ))
+            (use-package yasnippet-snippets
+              :ensure t
+              )
+            (global-set-key (kbd "M-/") 'company-yasnippet)
 
-      (use-package which-key
-        :init (which-key-mode)
-        :diminish which-key-mode
-        :config
-        (setq which-key-idle-delay 1))
-
+            (use-package which-key
+              :init (which-key-mode)
+              :diminish which-key-mode
+              :config
+              (setq which-key-idle-delay 1))
+      (setq ivy-initial-inputs-alist nil)
     #+end_src
 
 *** LSP Mode
