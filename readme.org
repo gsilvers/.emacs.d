@@ -1,4 +1,3 @@
-
 * Emacs Configuration
   
   This document is an overview of my emacs configuration with notes explaining the why and how of each bit of code works. This document can be cloned in along with this repo if you would like to emulate my emacs config.
@@ -721,6 +720,7 @@
     I was trying corfu but have just gone back to company for its better support in other packages.
 
     #+begin_src emacs-lisp 
+
             (use-package ivy
               :diminish
               :bind (("C-s" . swiper)
@@ -740,18 +740,34 @@
               (ivy-mode 1))
 
 
-            (use-package ivy-rich
+              (use-package ivy-rich
               :init
               (ivy-rich-mode 1))
-
-            (use-package counsel
+              
+              (use-package counsel
               :bind (("M-x" . counsel-M-x)
                      ("C-x b" . counsel-ibuffer)
                      ("C-x C-f" . counsel-find-file)
                      :map minibuffer-local-map
                      ("C-r" . 'counsel-minibuffer-history)))
 
-            (use-package company
+              (use-package yasnippet
+              :ensure t
+              :config
+              (global-set-key (kbd "C-M-0") 'yas-expand)
+              (yas-global-mode t)
+              (add-to-list #'yas-snippet-dirs "my-personal-snippets")
+              :diminish yas-minor-mode)
+              (setq yas-snippet-dirs
+              '("~/.emacs.d/snippets"                 ;; personal snippets
+              ))
+              (use-package yasnippet-snippets
+              :ensure t
+              )
+              (global-set-key (kbd "M-/") 'company-yasnippet)
+
+
+              (use-package company
               :ensure t
               :after lsp-mode
               :hook (lsp-mode . company-mode)
@@ -761,55 +777,30 @@
                     ("<tab>" . company-indent-or-complete-common))
               :custom
               (company-minimum-prefix-length 1)
-              (company-idle-delay 0.0))
+              (company-idle-delay 0.25)
+              (company-begin-commands '(self-insert-command))
+              (company-show-numbers t)
+              (company-tooltip-align-annotations 't)
+              (company-wrap-around 't)
+              (global-company-mode t)
+              )
 
-            (add-hook 'after-init-hook 'global-company-mode)
-
-            (use-package company-box
+              (add-hook 'after-init-hook 'global-company-mode)
+                            
+              (use-package company-box
+              :after company
+              :diminish
               :hook (company-mode . company-box-mode))
 
-            (use-package helpful)
-
-            (use-package yasnippet
-              :ensure t
-              :config
-              (global-set-key (kbd "C-M-0") 'yas-expand)
-              (yas-global-mode t)
-              (add-to-list #'yas-snippet-dirs "my-personal-snippets")
-              :diminish yas-minor-mode)
-            (setq yas-snippet-dirs
-                  '("~/.emacs.d/snippets"                 ;; personal snippets
-                    ))
-            (use-package yasnippet-snippets
-              :ensure t
-              )
-            (global-set-key (kbd "M-/") 'company-yasnippet)
-
-
-            ;; company delay until suggestions are shown
-            (setq company-idle-delay 0.5)
-
-            ;; weight by frequency
-            (setq company-transformers '(company-sort-by-occurrence))
-
-            ;; Add yasnippet support for all company backends
-            ;; https://github.com/syl20bnr/spacemacs/pull/179
-            (defvar company-mode/enable-yas t "Enable yasnippet for all backends.")
-
-            (defun company-mode/backend-with-yas (backend)
-            (if (or (not company-mode/enable-yas) (and (listp backend)    (member 'company-yasnippet backend)))
-            backend
-            (append (if (consp backend) backend (list backend))
-            '(:with company-yasnippet))))
-
-            (setq company-backends (mapcar #'company-mode/backend-with-yas company-backends))
-
-            (use-package which-key
+              (use-package helpful)
+              
+              (use-package which-key
               :init (which-key-mode)
               :diminish which-key-mode
               :config
               (setq which-key-idle-delay 1))
-      (setq ivy-initial-inputs-alist nil)
+              (setq ivy-initial-inputs-alist nil)
+
     #+end_src
 
 *** LSP Mode

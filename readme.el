@@ -510,75 +510,84 @@
 )
 
 (use-package ivy
-        :diminish
-        :bind (("C-s" . swiper)
-               :map ivy-minibuffer-map
-               ("TAB" . ivy-alt-done)
-               ("C-l" . ivy-alt-done)
-               ("C-j" . ivy-next-line)
-               ("C-k" . ivy-previous-line)
-               :map ivy-switch-buffer-map
-               ("C-k" . ivy-previous-line)
-               ("C-l" . ivy-done)
-               ("C-d" . ivy-switch-buffer-kill)
-               :map ivy-reverse-i-search-map
-               ("C-k" . ivy-previous-line)
-               ("C-d" . ivy-reverse-i-search-kill))
-        :config
-        (ivy-mode 1))
+  :diminish
+  :bind (("C-s" . swiper)
+         :map ivy-minibuffer-map
+         ("TAB" . ivy-alt-done)
+         ("C-l" . ivy-alt-done)
+         ("C-j" . ivy-next-line)
+         ("C-k" . ivy-previous-line)
+         :map ivy-switch-buffer-map
+         ("C-k" . ivy-previous-line)
+         ("C-l" . ivy-done)
+         ("C-d" . ivy-switch-buffer-kill)
+         :map ivy-reverse-i-search-map
+         ("C-k" . ivy-previous-line)
+         ("C-d" . ivy-reverse-i-search-kill))
+  :config
+  (ivy-mode 1))
 
 
-      (use-package ivy-rich
-        :init
-        (ivy-rich-mode 1))
+  (use-package ivy-rich
+  :init
+  (ivy-rich-mode 1))
 
-      (use-package counsel
-        :bind (("M-x" . counsel-M-x)
-               ("C-x b" . counsel-ibuffer)
-               ("C-x C-f" . counsel-find-file)
-               :map minibuffer-local-map
-               ("C-r" . 'counsel-minibuffer-history)))
+  (use-package counsel
+  :bind (("M-x" . counsel-M-x)
+         ("C-x b" . counsel-ibuffer)
+         ("C-x C-f" . counsel-find-file)
+         :map minibuffer-local-map
+         ("C-r" . 'counsel-minibuffer-history)))
 
-      (use-package company
-        :ensure t
-        :after lsp-mode
-        :hook (lsp-mode . company-mode)
-        :bind (:map company-active-map
-                    ("<tab>" . company-complete-selection))
-        (:map lsp-mode-map
-              ("<tab>" . company-indent-or-complete-common))
-        :custom
-        (company-minimum-prefix-length 1)
-        (company-idle-delay 0.0))
+  (use-package yasnippet
+  :ensure t
+  :config
+  (global-set-key (kbd "C-M-0") 'yas-expand)
+  (yas-global-mode t)
+  (add-to-list #'yas-snippet-dirs "my-personal-snippets")
+  :diminish yas-minor-mode)
+  (setq yas-snippet-dirs
+  '("~/.emacs.d/snippets"                 ;; personal snippets
+  ))
+  (use-package yasnippet-snippets
+  :ensure t
+  )
+  (global-set-key (kbd "M-/") 'company-yasnippet)
 
-      (add-hook 'after-init-hook 'global-company-mode)
 
-      (use-package company-box
-        :hook (company-mode . company-box-mode))
+  (use-package company
+  :ensure t
+  :after lsp-mode
+  :hook (lsp-mode . company-mode)
+  :bind (:map company-active-map
+              ("<tab>" . company-complete-selection))
+  (:map lsp-mode-map
+        ("<tab>" . company-indent-or-complete-common))
+  :custom
+  (company-minimum-prefix-length 1)
+  (company-idle-delay 0.25)
+  (company-begin-commands '(self-insert-command))
+  (company-show-numbers t)
+  (company-tooltip-align-annotations 't)
+  (company-wrap-around 't)
+  (global-company-mode t)
+  )
 
-      (use-package helpful)
+  (add-hook 'after-init-hook 'global-company-mode)
 
-      (use-package yasnippet
-        :ensure t
-        :config
-        (global-set-key (kbd "C-M-0") 'yas-expand)
-        (yas-global-mode t)
-        (add-to-list #'yas-snippet-dirs "my-personal-snippets")
-        :diminish yas-minor-mode)
-      (setq yas-snippet-dirs
-            '("~/.emacs.d/snippets"                 ;; personal snippets
-              ))
-      (use-package yasnippet-snippets
-        :ensure t
-        )
-      (global-set-key (kbd "M-/") 'company-yasnippet)
+  (use-package company-box
+  :after company
+  :diminish
+  :hook (company-mode . company-box-mode))
 
-      (use-package which-key
-        :init (which-key-mode)
-        :diminish which-key-mode
-        :config
-        (setq which-key-idle-delay 1))
-(setq ivy-initial-inputs-alist nil)
+  (use-package helpful)
+
+  (use-package which-key
+  :init (which-key-mode)
+  :diminish which-key-mode
+  :config
+  (setq which-key-idle-delay 1))
+  (setq ivy-initial-inputs-alist nil)
 
 (defun efs/lsp-mode-setup ()
     (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
