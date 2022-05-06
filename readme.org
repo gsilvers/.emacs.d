@@ -193,118 +193,118 @@
     Various configs for org mode
 
     #+begin_src emacs-lisp
-                              (defun old_greg/org-mode-setup ()
-                                ;; (org-indent-mode) ;;Currently debating this bit
-                                (variable-pitch-mode 0)
-                                (visual-line-mode 1))
+      (defun old_greg/org-mode-setup ()
+        ;; (org-indent-mode) ;;Currently debating this bit
+        (variable-pitch-mode 0)
+        (visual-line-mode 1))
 
-                              ;; Org Mode Configuration ------------------------------------------------------
+      ;; Org Mode Configuration ------------------------------------------------------
 
-                              (defun old_greg/org-font-setup ()
-                                ;; Replace list hyphen with dot
-                                (font-lock-add-keywords 'org-mode
-                                                        '(("^ *\\([-]\\) "
-                                                           (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•")))))))
+      (defun old_greg/org-font-setup ()
+        ;; Replace list hyphen with dot
+        (font-lock-add-keywords 'org-mode
+                                '(("^ *\\([-]\\) "
+                                   (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•")))))))
 
-                              ;; Set faces for heading levels
-                              (dolist (face '((org-level-1 . 1.2)
-                                              (org-level-2 . 1.1)
-                                              (org-level-3 . 1.05)
-                                              (org-level-4 . 1.0)
-                                              (org-level-5 . 1.1)
-                                              (org-level-6 . 1.1)
-                                              (org-level-7 . 1.1)
-                                              (org-level-8 . 1.1)))
-                                )
+      ;; Set faces for heading levels
+      (dolist (face '((org-level-1 . 1.2)
+                      (org-level-2 . 1.1)
+                      (org-level-3 . 1.05)
+                      (org-level-4 . 1.0)
+                      (org-level-5 . 1.1)
+                      (org-level-6 . 1.1)
+                      (org-level-7 . 1.1)
+                      (org-level-8 . 1.1)))
+        )
 
-                              (use-package org
-                                :hook (org-mode . old_greg/org-mode-setup)
-                                :config
-                                (setq org-ellipsis " ▾")
-                                (setq org-default-notes-file "~/Organization/02_Documents/inbox.org")
-                                (global-set-key (kbd "C-c l") #'org-store-link)
-                                (global-set-key (kbd "C-c a") #'org-agenda)
-                                (global-set-key (kbd "C-c c") #'org-capture)
-                                (setq org-agenda-start-with-log-mode t)
-                                (setq org-log-done 'time)
-                                (setq org-log-into-drawer t)
+      (use-package org
+        :hook (org-mode . old_greg/org-mode-setup)
+        :config
+        (setq org-ellipsis " ▾")
+        (setq org-default-notes-file "~/Organization/02_Documents/inbox.org")
+        (global-set-key (kbd "C-c l") #'org-store-link)
+        (global-set-key (kbd "C-c a") #'org-agenda)
+        (global-set-key (kbd "C-c c") #'org-capture)
+        (setq org-agenda-start-with-log-mode t)
+        (setq org-log-done 'time)
+        (setq org-log-into-drawer t)
 
-                                (setq org-todo-keywords
-                                      '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
-                                        (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "|" "COMPLETED(c)" "CANC(k@)")))
+        (setq org-todo-keywords
+              '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
+                (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "|" "COMPLETED(c)" "CANC(k@)")))
 
-                                (setq org-tag-alist
-                                      '((:startgroup)
-                                        (:endgroup)
-                                        ("@errand" . ?E)
-                                        ("@home" . ?H)
-                                        ("planning" . ?p)
-                                        ("note" . ?n)
-                                        ("idea" . ?i)
-                                        ("Personal" . ?x)
-                                        ("Misc" . ?X)
-                                        ("@Database Core" . ?C)
-                                        ("@Database Web" . ?W)
-                                        ("@Datavault" . ?D)
-                                        ("@Misc Creditsafe" . ?M)
-                                        ))
+        (setq org-tag-alist
+              '((:startgroup)
+                (:endgroup)
+                ("@errand" . ?E)
+                ("@home" . ?H)
+                ("planning" . ?p)
+                ("note" . ?n)
+                ("idea" . ?i)
+                ("Personal" . ?x)
+                ("Misc" . ?X)
+                ("@Database Core" . ?C)
+                ("@Database Web" . ?W)
+                ("@Datavault" . ?D)
+                ("@Misc Creditsafe" . ?M)
+                ))
 
 
-                                (old_greg/org-font-setup))
+        (old_greg/org-font-setup))
 
-                              (defun old_greg/org-mode-visual-fill ()
-                                (setq visual-fill-column-width 200 
-                                      visual-fill-column-center-text t)
-                                (visual-fill-column-mode 1))
+      (defun old_greg/org-mode-visual-fill ()
+        (setq visual-fill-column-width 200 
+              visual-fill-column-center-text t)
+        (visual-fill-column-mode 1))
 
-                              (use-package visual-fill-column
-                                :hook (org-mode . old_greg/org-mode-visual-fill))
+      (use-package visual-fill-column
+        :hook (org-mode . old_greg/org-mode-visual-fill))
 
-                              (if
-                                  (eq system-type 'windows-nt) 
-                                  (progn (setq org-agenda-files
-                                               (list
-                                                "C:\\Users\\csusggsn\\Organization\\02_Documents\\todo.org"
-                                                "C:\\Users\\csusggsn\\Organization\\02_Documents\\inbox.org"
-                                                )
-                                               )
-                                         (setq org-refile-targets
-                                               '(
-                                                 ("C:\\Users\\csusggsn\\Organization\\02_Documents\\todo.org" :maxlevel . 2)
-                                                 ("C:\\Users\\csusggsn\\Organization\\02_Documents\\inbox.org" :maxlevel . 1)
-                                                 ))
-                                         )
-                                )
-                              (if
-                                  (eq system-type 'darwin) 
-                                  (progn (setq org-agenda-files
-                                               (list
-                                                "~/Organization/02_Documents/todo.org"
-                                                "~/Organization/02_Documents/inbox.org")
-                                               )
-                                         (setq org-refile-targets
-                                               '(("~/Organization/02_Documents/todo.org" :maxlevel . 2)
-                                                 ("~/Organization/02_Documents/inbox.org" :maxlevel . 1)))
+      (if
+          (eq system-type 'windows-nt) 
+          (progn (setq org-agenda-files
+                       (list
+                        "C:\\Users\\csusggsn\\Organization\\02_Documents\\todo.org"
+                        "C:\\Users\\csusggsn\\Organization\\02_Documents\\inbox.org"
+                        )
+                       )
+                 (setq org-refile-targets
+                       '(
+                         ("C:\\Users\\csusggsn\\Organization\\02_Documents\\todo.org" :maxlevel . 2)
+                         ("C:\\Users\\csusggsn\\Organization\\02_Documents\\inbox.org" :maxlevel . 2)
+                         ))
+                 )
+        )
+      (if
+          (not(eq system-type 'windows-nt))
+          (progn (setq org-agenda-files
+                       (list
+                        "~/Organization/02_Documents/todo.org"
+                        "~/Organization/02_Documents/inbox.org")
+                       )
+                 (setq org-refile-targets
+                       '(("~/Organization/02_Documents/todo.org" :maxlevel . 2)
+                         ("~/Organization/02_Documents/inbox.org" :maxlevel . 1)))
 
-                                         )
-                                )
-                              (global-set-key (kbd "C-c a") 'org-agenda)
+                 )
+        )
+      (global-set-key (kbd "C-c a") 'org-agenda)
 
-                              (custom-set-faces
-                               '(org-block-begin-line
-                                 ((t (:background "#212121" :extend t))))
-                               '(org-block
-                                 ((t (:background "#252525" :extend t))))
-                               '(org-block-end-line
-                                 ((t (:background "#212121" :extend t))))
-                               )
+      (custom-set-faces
+       '(org-block-begin-line
+         ((t (:background "#212121" :extend t))))
+       '(org-block
+         ((t (:background "#252525" :extend t))))
+       '(org-block-end-line
+         ((t (:background "#212121" :extend t))))
+       )
 
-                              (org-babel-do-load-languages
-                               'org-babel-load-languages
-                               '((emacs-lisp . t)
-                                 (python . t)))
+      (org-babel-do-load-languages
+       'org-babel-load-languages
+       '((emacs-lisp . t)
+         (python . t)))
 
-                              (push '("conf-unix" . conf-unix) org-src-lang-modes)
+      (push '("conf-unix" . conf-unix) org-src-lang-modes)
 
 
         #+end_src

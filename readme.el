@@ -168,12 +168,12 @@
            (setq org-refile-targets
                  '(
                    ("C:\\Users\\csusggsn\\Organization\\02_Documents\\todo.org" :maxlevel . 2)
-                   ("C:\\Users\\csusggsn\\Organization\\02_Documents\\inbox.org" :maxlevel . 1)
+                   ("C:\\Users\\csusggsn\\Organization\\02_Documents\\inbox.org" :maxlevel . 2)
                    ))
            )
   )
 (if
-    (eq system-type 'darwin) 
+    (not(eq system-type 'windows-nt))
     (progn (setq org-agenda-files
                  (list
                   "~/Organization/02_Documents/todo.org"
