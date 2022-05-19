@@ -963,7 +963,7 @@
          (prefer-coding-system 'utf-8)
          (let ((explicit-shell-file-name "C:\\Users\\csusggsn\\AppData\\Local\\Programs\\Git\\bin\\bash")) (setq explicit-bash.exe-args '("--login" "-i"))
               (call-interactively 'shell)))
-
+(use-package sly)
 (use-package osm
   :bind (("C-c m h" . osm-home)
 	 ("C-c m s" . osm-search)
