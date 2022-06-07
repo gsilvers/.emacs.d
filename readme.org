@@ -1005,4 +1005,15 @@
     :after evil
     :config
     (evil-collection-init))
+
+
+(defun old_greg/show-buffer-file-name ()
+  "Show the full path to the current file in the minibuffer."
+  (interactive)
+  (let ((file-name (buffer-file-name)))
+    (if file-name
+        (progn
+          (message file-name)
+          (kill-new file-name))
+      (error "Buffer not visiting a file"))))
 #+end_src
