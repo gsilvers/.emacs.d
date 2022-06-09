@@ -725,7 +725,6 @@
               :diminish
               :bind (("C-s" . swiper)
                      :map ivy-minibuffer-map
-                     ("TAB" . ivy-alt-done)
                      ("C-l" . ivy-alt-done)
                      ("C-j" . ivy-next-line)
                      ("C-k" . ivy-previous-line)
@@ -773,8 +772,6 @@
               :hook (lsp-mode . company-mode)
               :bind (:map company-active-map
                           ("<tab>" . company-complete-selection))
-              (:map lsp-mode-map
-                    ("<tab>" . company-indent-or-complete-common))
               :custom
               (company-minimum-prefix-length 1)
               (company-idle-delay 0.25)
