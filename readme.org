@@ -199,7 +199,7 @@
         (visual-line-mode 1))
 
       ;; Org Mode Configuration ------------------------------------------------------
-
+      (add-hook 'org-mode-hook 'org-indent-mode)
       (defun old_greg/org-font-setup ()
         ;; Replace list hyphen with dot
         (font-lock-add-keywords 'org-mode
