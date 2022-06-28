@@ -1,18 +1,18 @@
 
 ;; ----- smex-history -----
 (
- company-yasnippet
- describe-variable
- company-mode
+ run-python
+ load-theme
  eval-region
- company-complete
- counsel-describe-variable
- tab-bar-rename-tab
+ eval-last-sexp
+ url-gateway-nslookup-host
+ package-install
+ package-refresh-contents
 )
 
 ;; ----- smex-data -----
 (
- (package-refresh-contents . 3)
+ (package-refresh-contents . 5)
  (goto-line . 1)
  (tab-bar-new-tab . 11)
  (tab-bar-rename-tab . 25)
@@ -25,9 +25,9 @@
  (treemacs-add-project . 1)
  (treemacs-remove-project-from-workspace . 2)
  (treemacs-refresh . 1)
- (package-install . 1)
+ (package-install . 5)
  (markdown-preview . 12)
- (eval-region . 27)
+ (eval-region . 31)
  (artist-mode . 10)
  (cua-mode . 3)
  (treemacs-mode . 1)
@@ -36,8 +36,8 @@
  (git-bash . 1)
  (lsp . 1)
  (python-skeleton-if . 1)
- (lsp-mode . 2)
- (run-python . 7)
+ (lsp-mode . 5)
+ (run-python . 9)
  (eval-buffer . 2)
  (kill-buffer . 9)
  (describe-function . 1)
@@ -65,10 +65,19 @@
  (yas-insert-snippet . 1)
  (magit-stage-modified . 1)
  (ido-switch-buffer . 1)
- (text-scale-increase . 1)
- (company-mode . 6)
+ (text-scale-increase . 2)
+ (company-mode . 8)
  (counsel-describe-variable . 3)
  (company-complete . 1)
  (describe-variable . 3)
  (company-yasnippet . 1)
+ (term . 3)
+ (emojify-insert-emoji . 2)
+ (emojify-mode . 1)
+ (company-box-mode . 2)
+ (flymake-mode . 1)
+ (revert-buffer . 2)
+ (load-theme . 7)
+ (url-gateway-nslookup-host . 1)
+ (eval-last-sexp . 2)
 )

@@ -27,9 +27,11 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(coffee-tab-width 2)
+ '(custom-safe-themes
+   '("02fff7eedb18d38b8fd09a419c579570673840672da45b77fde401d8708dc6b5" "8a379e7ac3a57e64de672dd744d4730b3bdb88ae328e8106f95cd81cbd44e0b6" "2035a16494e06636134de6d572ec47c30e26c3447eafeb6d3a9e8aee73732396" default))
  '(markdown-command "C:\\Pandoc\\pandoc.exe")
  '(package-selected-packages
-   '(sly with-emacs all-the-icons-completion markdown-preview-eww osm dirvish powershell company-go marginalia yasnippet-snippets which-key vterm visual-fill-column vertico use-package typescript-mode tagedit smex rainbow-delimiters paredit orderless nyan-mode multiple-cursors modus-themes magit lsp-ui lsp-treemacs lsp-ivy keycast ivy-rich ido-completing-read+ helpful general exec-path-from-shell evil-collection eterm-256color doom-themes doom-modeline counsel-projectile company-box command-log-mode clojure-mode-extra-font-locking cider better-defaults)))
+   '(ewal-evil-cursors ewal-doom-themes ewal emojify sly with-emacs all-the-icons-completion markdown-preview-eww osm dirvish powershell company-go marginalia yasnippet-snippets which-key vterm visual-fill-column vertico use-package typescript-mode tagedit smex rainbow-delimiters paredit orderless nyan-mode multiple-cursors modus-themes magit lsp-ui lsp-treemacs lsp-ivy keycast ivy-rich ido-completing-read+ helpful general exec-path-from-shell evil-collection eterm-256color doom-themes doom-modeline counsel-projectile company-box command-log-mode clojure-mode-extra-font-locking cider better-defaults)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
