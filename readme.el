@@ -349,10 +349,11 @@
 ;; hidpi
 ;;(set-face-attribute 'default nil :font "IBM Plex Mono" :height 170)
 ;; normal screens
-(set-face-attribute 'default nil :font "IBM Plex Mono" :height 135)
+(set-face-attribute 'default nil :font "BlexMono Nerd Font" :height 145)
 
 (use-package all-the-icons)
 
+;; Modus Themes
 (modus-themes-load-vivendi)
 
 (use-package rainbow-delimiters
@@ -371,20 +372,23 @@
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
 ;; python3 
-
+(use-package pyvenv
+  :ensure t
+  :init
+  (setenv "WORKON_HOME" "~/.pyenv/versions"))
 
 (if
-  (eq system-type 'windows-nt) 
-  (progn 
-    (setq python-shell-interpreter "python")                                    
+    (eq system-type 'windows-nt) 
+    (progn 
+      (setq python-shell-interpreter "python")                                    
+      )
   )
-)
 (if
-  (eq system-type 'darwin) 
-  (progn 
-   (setq python-shell-interpreter "python3")
+    (eq system-type 'darwin) 
+    (progn 
+      (setq python-shell-interpreter "python3")
+      )
   )
-)
 
 (use-package exec-path-from-shell)
 (when (memq window-system '(mac ns x))

@@ -1,8 +1,8 @@
 * Emacs Configuration
   
-  This document is an overview of my emacs configuration with notes explaining the why and how of each bit of code works. This document can be cloned in along with this repo if you would like to emulate my emacs config.
-
-  I would however recomend you arive 
+This document is an overview of my emacs configuration with notes explaining the why and how of each bit of code works. This document can be cloned in along with this repo if you would like to emulate my emacs config.
+  
+I would however recomend you arive 
 
 ** Overview and References
 
@@ -519,10 +519,11 @@
       ;; hidpi
       ;;(set-face-attribute 'default nil :font "IBM Plex Mono" :height 170)
       ;; normal screens
-      (set-face-attribute 'default nil :font "IBM Plex Mono" :height 135)
+      (set-face-attribute 'default nil :font "BlexMono Nerd Font" :height 145)
 
       (use-package all-the-icons)
 
+      ;; Modus Themes
       (modus-themes-load-vivendi)
 
       (use-package rainbow-delimiters
@@ -551,25 +552,28 @@
 
 *** Python
 
-    Here we set the python to python 3. My Mac has both python 2 and python 3 installed so this keeps it on the right one.
+    Here we set the python to python 3. My Mac has both python 2 and python 3 installed so this keeps it on the right one. I also use pyenv after a coworker at Creditsafe turned me onto it over manual bash configs. There is a mode for it.
 
     
     #+begin_src emacs-lisp
       ;; python3 
-      
+      (use-package pyvenv
+        :ensure t
+        :init
+        (setenv "WORKON_HOME" "~/.pyenv/versions"))
 
       (if
-        (eq system-type 'windows-nt) 
-        (progn 
-          (setq python-shell-interpreter "python")                                    
+          (eq system-type 'windows-nt) 
+          (progn 
+            (setq python-shell-interpreter "python")                                    
+            )
         )
-      )
       (if
-        (eq system-type 'darwin) 
-        (progn 
-         (setq python-shell-interpreter "python3")
+          (eq system-type 'darwin) 
+          (progn 
+            (setq python-shell-interpreter "python3")
+            )
         )
-      )
 
     #+end_src
 
