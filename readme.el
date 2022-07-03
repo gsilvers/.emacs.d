@@ -91,12 +91,12 @@
 )
 
 (defun old_greg/org-mode-setup ()
-  ;; (org-indent-mode) ;;Currently debating this bit
+   (org-indent-mode) ;;Currently debating this bit
   (variable-pitch-mode 0)
   (visual-line-mode 1))
 
 ;; Org Mode Configuration ------------------------------------------------------
-
+(add-hook 'org-mode-hook 'org-indent-mode)
 (defun old_greg/org-font-setup ()
   ;; Replace list hyphen with dot
   (font-lock-add-keywords 'org-mode
