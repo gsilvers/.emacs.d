@@ -1,0 +1,63 @@
+# -*- mode: snippet -*-
+# name: Company Relationship Insert Query 
+# key: #CSCRI
+# --
+
+
+
+
+INSERT INTO CSUS_CORE.company_relationship cr 
+( 
+  PARENTID ,
+  COMPANYID ,
+  CS_COMPANY_ID ,
+  COMPANY_NAME ,
+  IMPORT_EXPORT ,
+  COMPANY_TYPE ,
+  COMPANY_ADDRESS ,
+  COMPANY_CITY ,
+  COMPANY_STATE ,
+  COMPANY_ZIPCODE ,
+  COMPANY_PHONE ,
+  COMPANY_COUNTRY ,
+  ROW_UNIQUE_ID ,
+  CREATE_DATE ,
+  CREATE_BATCH_ID ,
+  LAST_UPDATE_DATE ,
+  LAST_BATCH_ID ,
+  DELETED_BY_IMPORT ,
+  DELETED_BY_EDITING_TOOL ,
+  COMPANY_NUMBER ,
+  DEDUPE_OVERRIDE 
+) 
+SELECT 
+       '$1' PARENTID ,
+       LOAD_WML.F_GET_NEW_INSERT_ID() COMPANYID ,
+       co.safe_number CS_COMPANY_ID ,
+       co.COMPANY_NAME COMPANY_NAME ,
+       null IMPORT_EXPORT ,
+       '$2' COMPANY_TYPE ,
+       co.ADDRESS COMPANY_ADDRESS ,
+       co.CITY COMPANY_CITY ,
+       co.STATE COMPANY_STATE ,
+       co.zip COMPANY_ZIPCODE ,
+       co.PHONE_NUMBER COMPANY_PHONE ,
+       'UNITED STATES OF AMERICA' COMPANY_COUNTRY ,
+       load.SEQ_SUPPLIERS_ROW_ID.nextval ROW_UNIQUE_ID ,
+       sysdate CREATE_DATE ,
+       to_char(sysdate, 'ddmmyyyy') CREATE_BATCH_ID ,
+       sysdate LAST_UPDATE_DATE ,
+       to_char(sysdate, 'ddmmyyyy') LAST_BATCH_ID ,
+       null DELETED_BY_IMPORT ,
+       null DELETED_BY_EDITING_TOOL ,
+       co.safe_number COMPANY_NUMBER ,
+       'N' DEDUPE_OVERRIDE 
+FROM 
+     CSUS_CORE.company co 
+WHERE 
+      CO.deleted_by_import is null 
+      AND CO.deleted_by_editing_tool is null 
+      AND CO.safe_number in ( 
+          SELECT SAFE_NUMBER FROM $3
+      ) 
+;
