@@ -857,7 +857,20 @@ I would however recomend you arive
           :after lsp)
 
     #+end_src
+*** Trying out macros
+In this section I am trying out keyboard macros per 
+https://masteringemacs.org/article/keyboard-macros-are-misunderstood
+I am using them to build components for other code. All macros will be set up as og-MACRONAME
 
+#+begin_src emacs-lisp
+
+;; This macro opens up two windows opens my daily journal to left
+;; my main todo org file to the right
+;; and names the tab notes
+(fset 'og-SetUpNotesTab
+   (kmacro-lambda-form [?\C-x ?3 ?\C-x ?\C-f backspace backspace backspace backspace ?~ ?O ?r ?g tab ?0 ?3 tab ?2 ?0 ?2 ?2 tab ?0 ?7 tab ?2 backspace ?0 ?7 ?2 ?2 tab ?2 ?0 tab return ?\C-x ?o ?\C-x ?\C-f backspace backspace backspace backspace backspace backspace ?~ ?/ backspace ?o ?r ?g tab ?0 ?2 tab ?t ?o ?d ?o return ?\M-x ?r ?e ?n ?a ?m ?e return ?N ?O ?T ?E ?S return] 0 "%d"))
+
+#+end_src
 *** Everything Else
 
     Anything else random will be here. Right now this is just the git client which I have not configured fully for myself. This is sort of a "work in progress area" of my config.

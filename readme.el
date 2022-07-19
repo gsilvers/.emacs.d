@@ -636,6 +636,12 @@
   (use-package lsp-treemacs
     :after lsp)
 
+;; This macro opens up two windows opens my daily journal to left
+;; my main todo org file to the right
+;; and names the tab notes
+(fset 'og-SetUpNotesTab
+   (kmacro-lambda-form [?\C-x ?3 ?\C-x ?\C-f backspace backspace backspace backspace ?~ ?O ?r ?g tab ?0 ?3 tab ?2 ?0 ?2 ?2 tab ?0 ?7 tab ?2 backspace ?0 ?7 ?2 ?2 tab ?2 ?0 tab return ?\C-x ?o ?\C-x ?\C-f backspace backspace backspace backspace backspace backspace ?~ ?/ backspace ?o ?r ?g tab ?0 ?2 tab ?t ?o ?d ?o return ?\M-x ?r ?e ?n ?a ?m ?e return ?N ?O ?T ?E ?S return] 0 "%d"))
+
 (global-set-key (kbd "C-x <C-return>") 'window-swap-states)
 
   (defun window-split-toggle ()
