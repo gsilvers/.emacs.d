@@ -1,0 +1,36 @@
+# -*- mode: snippet -*-
+# name: Oracle PLSQL Loop with Counts and Exception Trap 
+# key: #ORAPLFOR
+# --
+
+SET SERVEROUTPUT ON;
+
+DECLARE
+    l_processed_count NUMBER(38) := 0;
+BEGIN
+    FOR p_match_record IN (
+        SELECT
+            *
+        FROM
+            csusggsn.temp_rv_rename_1021
+    ) LOOP
+        BEGIN
+        -- add any update or otehr repeated operations here 
+            l_processed_count := l_processed_count + 1;
+        EXCEPTION
+            WHEN OTHERS THEN
+                dbms_output.put_line('SKIPPED: ' || p_match_record.cs_company_id);
+                dbms_output.put_line('error with'
+                                     || sqlcode
+                                     || sqlerrm);
+        END;
+    END LOOP;
+
+    dbms_output.put_line('Loop Completed with: '
+                         || l_processed_count
+                         || ' Updates');
+END;
+
+ROLLBACK;
+
+COMMIT;
