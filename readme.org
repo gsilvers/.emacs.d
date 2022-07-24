@@ -1021,13 +1021,18 @@ I am using them to build components for other code. All macros will be set up as
     (evil-collection-init))
 
 
-(defun old_greg/show-buffer-file-name ()
-  "Show the full path to the current file in the minibuffer."
-  (interactive)
-  (let ((file-name (buffer-file-name)))
-    (if file-name
-        (progn
-          (message file-name)
-          (kill-new file-name))
-      (error "Buffer not visiting a file"))))
-#+end_src
+  (defun old_greg/show-buffer-file-name ()
+    "Show the full path to the current file in the minibuffer."
+    (interactive)
+    (let ((file-name (buffer-file-name)))
+      (if file-name
+          (progn
+            (message file-name)
+            (kill-new file-name))
+        (error "Buffer not visiting a file"))))
+
+
+  (use-package org-alert
+    :ensure t)
+  (setq alert-default-style 'libnotify)
+  #+end_src
