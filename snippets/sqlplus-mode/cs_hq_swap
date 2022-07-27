@@ -1,0 +1,11 @@
+# -*- mode: snippet -*-
+# name: Swap HQs Using Edit Tool Procedure 
+# key: #CSSWHQ
+# --
+BEGIN
+        load_editing_tool.PKG_EDIT_COMPANY_RELATIONS.p_swap_hq
+        (
+                i_safe_number_oldhq => 'US87318594',
+                i_safe_number_newhq => 'US106493872'
+        ) ;
+END;

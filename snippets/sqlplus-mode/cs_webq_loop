@@ -1,0 +1,13 @@
+# -*- mode: snippet -*-
+# name: Web Queue Loop
+# key: #CSWEBQL
+# --
+BEGIN
+    FOR p_match_record in
+        (
+            select $1 as safe_number from $2
+        )
+    LOOP
+        LOAD_EDITING_TOOL.PKG_EDITING_TOOL.enqueue_safe_number(p_match_record.safe_number);
+    END LOOP;
+END;

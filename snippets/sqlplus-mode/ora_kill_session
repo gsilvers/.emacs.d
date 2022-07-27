@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: kill a session by sid in oracle 
+# key: #ORAKSESS
+# --
+BEGIN
+    CS_ORACLE.P_KILL_SESSION(529);
+END;

@@ -2,10 +2,6 @@
 # name: Company Relationship Insert Query 
 # key: #CSCRI
 # --
-
-
-
-
 INSERT INTO CSUS_CORE.company_relationship cr 
 ( 
   PARENTID ,

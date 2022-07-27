@@ -1,0 +1,16 @@
+# -*- mode: snippet -*-
+# name: Rebuild Group Structure
+# key: #CSRGS
+# --
+SET SERVEROUTPUT ON;
+-- rebuild groups that they used to be in
+SELECT * FROM LOAD_WML.GTT_GROUPSTRUCTURE_INPUT;
+DELETE FROM CSUS_CORE.group_structure where orgnr_daughter in (
+SELECT companyid FROM LOAD_WML.GTT_GROUPSTRUCTURE_INPUT);
+-- rebuild group
+BEGIN
+    LOAD_EDITING_TOOL.load_pkg_group_structure.p_create_group_structure(
+        i_companyid => '$1', 
+        i_companyid_2 => '$2'
+    );
+END;		
