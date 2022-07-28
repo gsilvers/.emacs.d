@@ -1,0 +1,20 @@
+# -*- mode: snippet -*-
+# name: Remove Web Restrictions for a set of companies
+# key: #CSREMWEBR
+# --
+-- Script to unhide companies for mark replace inner query in create
+CREATE TABLE CSUSGGSN.TEMP_UNHIDE_MARK AS (
+    SELECT u.safe_number fROM LOAD_COMPANY.mv_unhide_company U
+    INNER JOIN CSUS_CORE.COMPANY_RESTRICTIONS R ON U.SAFE_NUMBER = R.SAFE_NUMBER
+    WHERE unhide = 1
+);
+
+UPDATE CSUS_CORE.company CO
+set last_update_date = sysdate 
+where safe_number in ( select safe_number from CSUSGGSN.TEMP_UNHIDE_MARK);
+
+DELETE FROM CSUS_CORE.COMPANY_RESTRICTIONS
+WHERE SAFE_NUMBER in  ( select safe_number from CSUSGGSN.TEMP_UNHIDE_MARK);
+
+COMMIT;
+DROP TABLE CSUSGGSN.TEMP_UNHIDE_MARK;
