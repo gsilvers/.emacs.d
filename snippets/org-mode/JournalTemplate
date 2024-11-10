@@ -1,0 +1,45 @@
+# -*- mode: snippet -*-
+# name:Journal Template
+# key: <jt
+# --
+#+TITLE: Journal for `(shell-command-to-string "echo -n $(date +\"%A %B %d %Y\")")`
+#+AUTHOR: Greg Silverstein
+#+EMAIL: greg.silverstein@proton.me
+
+* Journaling
+
+** What are you grateful for today?
+** What do you hope to do the most today?
+** What is at the top of your mind today?
+** What is your mood like?
+** What happened in the last 24 hours that is significant to you?
+
+* Dog Health
+
+** General
+** Bathroom
+** Sleep
+
+* Personal Health
+
+** Systolic-
+** Diastolic-
+** BS-
+** Weight-
+** Sleep
+** General
+** Exercise
+** Medication
+
+* Work Notes
+
+** Key Tasks
+** General
+
+* Food Journal
+** Morning
+** Lunch
+** Evening
+** Other
+
+* Misc
