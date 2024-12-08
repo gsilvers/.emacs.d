@@ -89,18 +89,14 @@ well as use melpa org and elpa repos.
 
 *** Fonts
 
-I'm a bit nearsighted so I'm going to use some big fonts. Note this requires you to use your package manager to install fira code etc fonts.
+I'm a bit nearsighted so I'm going to use some big fonts. Note this requires you to use your package manager to install the fonts.
 
 #+begin_src emacs-lisp :tangle ./init.el
 
-  ;; bigger fonts plz
-  ;;(defvar efs/default-font-size 180)
-  ;;(defvar efs/default-variable-font-size 180)
+  (set-face-attribute 'default nil :font "Comic Mono" :height 180)
 
-  ;; lets use fira code for now
-  ;;(set-face-attribute 'default nil :font "Fira Code Retina" :height efs/default-font-size)
   ;; Set the fixed pitch face
-  ;;(set-face-attribute 'fixed-pitch nil :font "Fira Code Retina" :height efs/default-font-size)
+  (set-face-attribute 'fixed-pitch nil :font "Comic Mono" :height 180)
   ;; Except for variable pitch lets use cantarell
   ;;(set-face-attribute 'variable-pitch nil :font "Cantarell" :height efs/default-font-size :weight 'regular)
 
@@ -144,8 +140,8 @@ another terminal multiplexer. Note that the environment package required a manua
     (setq term-prompt-regexp ".*>\s\]")
     (setq vterm-max-scrollback 10000))
 
-  (when (memq window-system '(mac ns x))
-  (exec-path-from-shell-initialize))
+  ;;(when (memq window-system '(mac ns x))
+  ;;(exec-path-from-shell-initialize))
 
     (dolist (mode '(org-mode-hook
                     term-mode-hook
@@ -345,25 +341,45 @@ This is completion at point
 
 #+begin_src emacs-lisp :tangle ./init.el
 
-  ;; corfu completion at point
+
   (use-package corfu
-    ;; TAB-and-Go customizations
-    :custom
-    (corfu-cycle t)           ;; Enable cycling for `corfu-next/previous'
-    (corfu-preselect 'prompt) ;; Always preselect the prompt
+  :custom
+  (corfu-cycle t)
+  (corfu-auto t)
+  (corfu-auto-prefix 1)
+  (corfu-auto-delay 0.1)
+  (corfu-preselect 'prompt)
+  (corfu-on-exact-match nil)
+  (corfu-echo-documentation t)      
+  :bind (:map corfu-map
+              ([tab] . corfu-next)
+              ([backtab] . corfu-previous)
+              ("S-<return>" . corfu-insert)
+              ("RET" . nil)
+              ([remap move-end-of-line] . nil))
+  :hook (eshell-mode . (lambda () (setq-local corfu-auto nil)))
+  :init
+  (global-corfu-mode)
+  (corfu-popupinfo-mode))
 
-    ;; Use TAB for cycling, default is `corfu-complete'.
-    :bind
-    (:map corfu-map
-          ("TAB" . corfu-next)
-          ([tab] . corfu-next)
-          ("S-TAB" . corfu-previous)
-          ([backtab] . corfu-previous))
 
+
+  (use-package cape
+    :after corfu
+    :bind (("C-c 1 p" . completion-at-point)
+  	 ("C-c 1 t" . complete-tag)
+  	 ("C-c 1 d" . cape-dabbrev)
+  	 ("C-c 1 f" . cape-file)
+  	 ("C-c 1 s" . cape-elisp-symbol)
+  	 ("C-c 1 e" . cape-elisp-block)
+  	 ("C-c 1 a" . cape-abbrev)
+  	 ("C-c 1 l" . cape-line)
+  	 ("C-c 1 w" . cape-dict))
     :init
-    (global-corfu-mode)
-    (corfu-popupinfo-mode) ;; this gives in popup docs like vs code
-    (setq corfu-popupinfo-delay 1))
+    (add-to-list 'completion-at-point-functions #'cape-file)
+    (add-to-list 'completion-at-point-functions #'cape-elisp-block)
+    (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster))
+
 #+end_src
 
 **** Vertico
@@ -668,6 +684,28 @@ Evil mode and its associated packages allow for the use of vim like keyboard nav
   (evil-mode)
 #+end_src
 
+*** Python and other programming languages
+
+I code in python at work and will use it sometimes locally these are config tweaks I've made to use the python LSP et all.
+
+
+#+begin_src emacs-lisp :tangle ./init.el
+
+  (use-package eglot
+  :defer t
+  :bind (:map eglot-mode-map
+              ("C-c l a" . eglot-code-actions)
+              ("C-c l r" . eglot-rename)
+              ("C-c l f" . eglot-format)
+              ("C-c l d" . eldoc))
+  :custom (eglot-report-progress nil)
+  :config
+  (setq read-process-output-max (* 1024 1024))
+  (setq eglot-events-buffer-size 0))
+
+(use-package breadcrumb
+  :config (breadcrumb-mode))
+#+end_src
 
 *** Janet, LUA, Love2D and Fennel Support
 
