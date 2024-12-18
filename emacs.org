@@ -690,21 +690,23 @@ I code in python at work and will use it sometimes locally these are config twea
 
 
 #+begin_src emacs-lisp :tangle ./init.el
+        (use-package eglot
+        :defer t
+        :bind (:map eglot-mode-map
+                    ("C-c l a" . eglot-code-actions)
+                    ("C-c l r" . eglot-rename)
+                    ("C-c l f" . eglot-format)
+                    ("C-c l d" . eldoc))
+        :custom (eglot-report-progress nil)
+        :config
+        (setq read-process-output-max (* 1024 1024))
+        (setq eglot-events-buffer-size 0)
+        :hook
+        ((python-mode . eglot-ensure)
+         (lua-mode . eglot-ensure)))
 
-  (use-package eglot
-  :defer t
-  :bind (:map eglot-mode-map
-              ("C-c l a" . eglot-code-actions)
-              ("C-c l r" . eglot-rename)
-              ("C-c l f" . eglot-format)
-              ("C-c l d" . eldoc))
-  :custom (eglot-report-progress nil)
-  :config
-  (setq read-process-output-max (* 1024 1024))
-  (setq eglot-events-buffer-size 0))
-
-(use-package breadcrumb
-  :config (breadcrumb-mode))
+      (use-package breadcrumb
+        :config (breadcrumb-mode))
 #+end_src
 
 *** Janet, LUA, Love2D and Fennel Support
@@ -767,3 +769,13 @@ Some Modes and Tools I will use are:
     :config
     (append '((janet . t)) org-babel-load-languages))
 #+end_src
+
+I'm going to add to this today. I'm adding a first stab at LUA support past the basic lua mode in emacs.
+
+The first step is installing this [[https://luals.github.io/#other-install][LSP for LUA]]
+
+#+begin_src bash
+  brew install lua-language-server 
+#+end_src
+
+After this my LSP config above needs updating.
