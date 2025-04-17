@@ -123,6 +123,30 @@ I am going to be using Prot's Modus themes here they seem flexible.
 
 #+end_src
 
+*** General
+
+There are going to be some general settings I want to make emacs more sane. I'll eventually clean these up.
+
+#+begin_src emacs-lisp :tangle ./init.el
+
+  ;; Don't backup files and make temp, backup or lock files
+  (setq auto-save-default nil)
+  (setq make-backup-files nil)
+  (setq create-lockfiles nil)
+
+  ;; Handle Bell
+  (setq visible-bell t)
+  (setq ring-bell-function nil)
+
+  (use-package markdown-mode
+  :ensure t
+  :mode ("README\\.md\\'" . gfm-mode)
+  :init (setq markdown-command "multimarkdown")
+  :bind (:map markdown-mode-map
+         ("C-c C-e" . markdown-do)))
+
+#+end_src
+
 
 ** Packages
 
@@ -340,46 +364,53 @@ Perspectives are critical to my workflow. They can be though of sort of as an em
 This is completion at point
 
 #+begin_src emacs-lisp :tangle ./init.el
-
-
-  (use-package corfu
-  :custom
-  (corfu-cycle t)
-  (corfu-auto t)
-  (corfu-auto-prefix 1)
-  (corfu-auto-delay 0.1)
-  (corfu-preselect 'prompt)
-  (corfu-on-exact-match nil)
-  (corfu-echo-documentation t)      
-  :bind (:map corfu-map
-              ([tab] . corfu-next)
-              ([backtab] . corfu-previous)
-              ("S-<return>" . corfu-insert)
-              ("RET" . nil)
-              ([remap move-end-of-line] . nil))
-  :hook (eshell-mode . (lambda () (setq-local corfu-auto nil)))
-  :init
-  (global-corfu-mode)
-  (corfu-popupinfo-mode))
-
-
-
-  (use-package cape
-    :after corfu
-    :bind (("C-c 1 p" . completion-at-point)
-  	 ("C-c 1 t" . complete-tag)
-  	 ("C-c 1 d" . cape-dabbrev)
-  	 ("C-c 1 f" . cape-file)
-  	 ("C-c 1 s" . cape-elisp-symbol)
-  	 ("C-c 1 e" . cape-elisp-block)
-  	 ("C-c 1 a" . cape-abbrev)
-  	 ("C-c 1 l" . cape-line)
-  	 ("C-c 1 w" . cape-dict))
+    (use-package corfu
+    :custom
+    (corfu-cycle t)
+    (corfu-auto t)
+    (corfu-auto-prefix 0.1)
+    (corfu-auto-delay 0)
+    (corfu-preselect 'prompt)
+    (corfu-on-exact-match nil)
+    (corfu-echo-documentation t)
+    (corfu-popupinfo-delay 0.1)
+    :bind (:map corfu-map
+                ([tab] . corfu-next)
+                ([backtab] . corfu-previous)
+                ("S-<return>" . corfu-insert)
+                ("RET" . nil)
+                ([remap move-end-of-line] . nil))
+    :hook (eshell-mode . (lambda () (setq-local corfu-auto nil)))
     :init
-    (add-to-list 'completion-at-point-functions #'cape-file)
-    (add-to-list 'completion-at-point-functions #'cape-elisp-block)
-    (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster))
+    (global-corfu-mode)
+    (corfu-popupinfo-mode))
+  
+    (use-package cape
+      :after corfu
+      :bind (("C-c 1 p" . completion-at-point)
+    	 ("C-c 1 t" . complete-tag)
+    	 ("C-c 1 d" . cape-dabbrev)
+    	 ("C-c 1 f" . cape-file)
+    	 ("C-c 1 s" . cape-elisp-symbol)
+    	 ("C-c 1 e" . cape-elisp-block)
+    	 ("C-c 1 a" . cape-abbrev)
+    	 ("C-c 1 l" . cape-line)
+    	 ("C-c 1 w" . cape-dict))
+      :init
+      (add-to-list 'completion-at-point-functions #'cape-file)
+      (add-to-list 'completion-at-point-functions #'cape-elisp-block)
+      (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster))
 
+    (use-package yasnippet-capf
+    :after cape
+    :config
+    (add-to-list 'completion-at-point-functions #'yasnippet-capf))
+
+
+    (defun my/add-global-capfs ()
+    (add-hook 'completion-at-point-functions #'yasnippet-capf nil t)) ;; t = buffer-local
+
+    (add-hook 'after-change-major-mode-hook #'my/add-global-capfs)
 #+end_src
 
 **** Vertico
@@ -639,50 +670,6 @@ This section is for using geiser and guile scheme for a class I am taking as wel
 
 #+end_src
 
-*** Evil Mode
-
-Evil mode and its associated packages allow for the use of vim like keyboard navigatio I generally use this at work since it comes by default in doom and I will use it here since I play to use emacs from a tablet very often with a small keyboard.
-
-#+begin_src emacs-lisp :tangle ./init.el
-        (defun greg/evil-hook ()
-        (dolist (mode '(custom-mode
-                        eshell-mode
-                        git-rebase-mode
-                        erc-mode
-                        circe-server-mode
-                        circe-chat-mode
-                        circe-query-mode
-                        sauron-mode
-                        term-mode))
-         (add-to-list 'evil-emacs-state-modes mode)))
-
-      (use-package evil
-        :ensure t
-        :init
-        (setq evil-want-integration t)
-        (setq evil-want-keybinding nil)
-        (setq evil-want-C-u-scroll t)
-        (setq evil-want-C-i-jump nil)
-        :hook (evil-mode . greg/evil-hook)
-        :config
-        (evil-mode 1)
-        (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
-        (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
-
-        ;; Use visual line motions even outside of visual-line-mode buffers
-        (evil-global-set-key 'motion "j" 'evil-next-visual-line)
-        (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
-
-        (evil-set-initial-state 'messages-buffer-mode 'normal)
-        (evil-set-initial-state 'dashboard-mode 'normal))
-
-  (use-package evil-collection
-        :after evil
-        :config
-        (evil-collection-init))
-
-  (evil-mode)
-#+end_src
 
 *** Python and other programming languages
 
