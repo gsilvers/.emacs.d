@@ -1,6 +1,6 @@
 # -*- mode: snippet -*-
 # name:Journal Template
-# key: <jt
+# key: journaltemplate
 # --
 #+TITLE: Journal for `(shell-command-to-string "echo -n $(date +\"%A %B %d %Y\")")`
 #+AUTHOR: Greg Silverstein
