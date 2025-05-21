@@ -177,6 +177,15 @@ another terminal multiplexer. Note that the environment package required a manua
 
 
 #+end_src
+
+*** EShell
+
+I want to use eshell a bit more. I'm not sure if I can really work it in at work, but certainly at home it seems optimal. The ability to run not just shell commands but also emacs commands against my files in my normal shell feel sounds excellent.
+
+#+begin_src emacs-lisp :tangle ./init.el
+(defalias 'ffow 'find-file-other-window)
+#+end_src
+
 *** Projectile
 
 Projectile lets me manage projects
@@ -390,7 +399,7 @@ This is completion at point
     (add-to-list 'completion-at-point-functions #'cape-elisp-block)
     (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
     )
-
+`
   (use-package yasnippet-capf
     :after cape
     :config
@@ -662,23 +671,28 @@ I code in python at work and will use it sometimes locally these are config twea
 
 
 #+begin_src emacs-lisp :tangle ./init.el
-        (use-package eglot
-        :defer t
-        :bind (:map eglot-mode-map
-                    ("C-c l a" . eglot-code-actions)
-                    ("C-c l r" . eglot-rename)
-                    ("C-c l f" . eglot-format)
-                    ("C-c l d" . eldoc))
-        :custom (eglot-report-progress nil)
-        :config
-        (setq read-process-output-max (* 1024 1024))
-        (setq eglot-events-buffer-size 0)
-        :hook
-        ((python-mode . eglot-ensure)
-         (lua-mode . eglot-ensure)))
+  (use-package eglot
+    :defer t
+    :bind (:map eglot-mode-map
+                ("C-c l a" . eglot-code-actions)
+                ("C-c l r" . eglot-rename)
+                ("C-c l f" . eglot-format)
+                ("C-c l d" . eldoc))
+    :custom (eglot-report-progress nil)
+    :config
+    (setq read-process-output-max (* 1024 1024))
+    (setq eglot-events-buffer-size 0)
+    (add-to-list 'eglot-server-programs
+               '(janet-mode . ("janet-lsp")))
+    :hook
+    ((python-mode . eglot-ensure)
+     (lua-mode . eglot-ensure)
+     (janet-mode . eglot-ensure)
+     )
+    )
 
-      (use-package breadcrumb
-        :config (breadcrumb-mode))
+  (use-package breadcrumb
+    :config (breadcrumb-mode))
 #+end_src
 
 *** Janet, LUA, Love2D and Fennel Support
@@ -721,12 +735,17 @@ Some Modes and Tools I will use are:
 [[https://github.com/ALSchwalm/janet-mode][janet mode]] - Installed
 [[https://github.com/CFiggers/janet-lsp][janet lsp]]
 
+To use the janet LSP I used this [[https://github.com/CFiggers/janet-lsp][repo]]
+
 #+begin_src emacs-lisp :tangle ./init.el
   (use-package lua-mode
     :defer 1)
 
   (use-package janet-mode
-    :defer 1)
+    :defer 1
+    :ensure t
+    :mode (("\\.janet\\'" . janet-mode))
+    )
 
   (use-package fennel-mode
     :defer 1)
