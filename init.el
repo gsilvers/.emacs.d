@@ -126,7 +126,7 @@
   "Sets fonts etc for mobile mode / size"
   (interactive
    (progn
-     (set-face-attribute 'default nil :height 160))))
+     (set-face-attribute 'default nil :height 130))))
 
 (defun log-bike-ride (duration distance elevation)
   "Prompt for a bike ride log and append it to ~/bike_log.csv.
