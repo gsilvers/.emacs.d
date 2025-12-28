@@ -149,12 +149,18 @@ a line to the file with today's date."
 ;;; ====================================================================================
 (greg/universal-setup-items)
 (if (eq system-type `darwin)
-    (progn greg/macos-setup-items)
-  (if (eq system-type `android)
-      (progn greg/android-setup-items)
     (progn
-      (message (format "Unexpected Operating System Type Encountered: %s" system-type)))
-      (warn (format "Unexpected Operating System Type Encountered: %s" system-type))
+      (message (format "Loading Mac Config: %s" system-type))
+      (greg/macos-setup-items)
+      )
+  (if (eq system-type `android)
+      (progn
+	(message (format "Loading Android Config: %s" system-type))
+	(greg/android-setup-items)
+	)
+    (progn
+      (message (format "Unexpected Operating System Type Encountered: %s" system-type))
+      (display-warning :warning (format "Unexpected Operating System Type Encountered: %s" system-type))
       )))
 
 
