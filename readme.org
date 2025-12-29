@@ -1,5 +1,11 @@
+* My Universal Config
+
 I've declared emacs bankruptcy of sorts.
 
 I'm working from scratch on a config that works for me on my mobile phone as well as a desktop.
 
 We'll see how this goes :/ 
+
+* Changelog
+
+See [[./log.org][this document]] for a history of changes to this configuration repo.

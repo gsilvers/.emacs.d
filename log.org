@@ -1,0 +1,16 @@
+* 2025-12-28
+
+I've had this configuration sitting on my phone for a few months. Honestly mostly getting acclimated to having emacs on a phone. After getting comfortable that emacs is worth not having my apple niceties I've gone all in on that phone and on [[https://grapheneos.org][GrapheneOS]]. Today however I went all in on this config. I've hand rolled my emacs config before but often times the lazy way, copying a few things and calling it good. Hopefully having two very different machines will encourage me to keep this configuration well intentioned and well set up.
+
+** Today's Changes
+
+- Partitioned my configuration based upon the OS I'm on.
+- Updated corfu to show the information / docstrings
+- Just some general commentary.
+
+** Todo Next Time
+
+- I'd like to clean up my very sloppy OS based triggering to use a macro like this person [[https://github.com/search?q=repo%3AGiedriusj1%2Femacs-config%20on-linux&type=code][link]]. Much more ledgeable.
+- Update the config to support eglot and python so I can use it at work.
+- Look into eshell customizations. I am using it extensively on android as well as IELM as quick repls to calculate things and such.
+- Add magit to the config explicitly. It's not working on my desktop for some reason.
