@@ -68,7 +68,6 @@
     (column-number-mode)
     (global-display-line-numbers-mode 1)
 
-
     (with-eval-after-load 'embark
       (require 'embark-consult))
 
@@ -76,6 +75,10 @@
 	  corfu-cycle t
 	  corfu-preview-current nil)
     (global-corfu-mode 1)
+    (setq corfu-popupinfo-delay 0.2)
+    (corfu-popupinfo-mode 1)
+
+    
     (setq tab-always-indent 'complete)
 
     (defun set-desktop-size ()
