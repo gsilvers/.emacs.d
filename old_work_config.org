@@ -1,0 +1,781 @@
+
+** Outstanding
+
+** EMACS Build
+
+I've built emacs from source this time. I'm running emacs mostly on a mac. I built emacs using information from
+
+[[https://dawranliou.com/blog/compiling-emacs-from-source/][link 1]]
+[[https://stuff-things.net/2020/12/28/building-emacs-27-dot-1-on-macos-big-sur/][link 2]]
+
+I ran into some warning sfrom native comp which I will continue to look into. It seems like emacs does not read load paths from .zshrc initially
+and so sloppily I have followed:
+
+[[https://github.com/d12frosted/homebrew-emacs-plus/issues/323][this link]]
+
+Which basically has you ammend the load path in your early-init.el file. I had to change the paths as I guess when that was written the lib was v11 and now
+it has reached v13 and thus the path changed.
+
+I am going to copy a few things here from [[https://github.com/daviwil/emacs-from-scratch/tree/9388cf6ecd9b44c430867a5c3dad5f050fdc0ee1][link]] just as I've not played with babel much. This link does not seem to work out of the box. Tangle
+does not work so I've added :tangle to each block. Anyhow here we go with my config.
+
+** Package Managers
+
+Before going anywhere you need to be able to declare imports as code. I am going to use use-package and maybe straight lets get them. As
+well as use melpa org and elpa repos.
+
+#+begin_src emacs-lisp :tangle ./init.el
+;; -*- lexical-binding: t -*-
+
+;; NOTE: init.el is now generated from Emacs.org. Please edit that file
+;; in Emacs and init.el will be generated automatically!
+
+;; You will most likely need to adjust this font size for your system!
+
+;; Initialize package sources
+(package-refresh-contents)
+(server-start)
+
+;; Get basic package imports working
+(require 'package)
+
+(setq package-archives '(("melpa" . "https://melpa.org/packages/")
+("org" . "https://orgmode.org/elpa/")
+("elpa" . "https://elpa.gnu.org/packages/")))
+
+(package-initialize)
+(unless package-archive-contents
+(package-refresh-contents))
+
+;; Initialize use-package on non-Linux platforms
+(unless (package-installed-p 'use-package)
+(package-install 'use-package))
+
+(require 'use-package)
+(setq use-package-always-ensure t)
+
+;; use straight
+(defvar bootstrap-version)
+(let ((bootstrap-file
+(expand-file-name
+"straight/repos/straight.el/bootstrap.el"
+(or (bound-and-true-p straight-base-dir)
+user-emacs-directory)))
+(bootstrap-version 7))
+(unless (file-exists-p bootstrap-file)
+(with-current-buffer
+(url-retrieve-synchronously
+"https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+'silent 'inhibit-cookies)
+(goto-char (point-max))
+(eval-print-last-sexp)))
+(load bootstrap-file nil 'nomessage))
+
+#+end_src
+
+** Emacs Visual Configuration
+
+*** Fonts
+
+I'm a bit nearsighted so I'm going to use some big fonts. Note this requires you to use your package manager to install the fonts.
+
+#+begin_src emacs-lisp :tangle ./init.el
+
+(set-face-attribute 'default nil :font "Comic Mono" :height 180)
+
+;; Set the fixed pitch face
+(set-face-attribute 'fixed-pitch nil :font "Comic Mono" :height 180)
+;; Except for variable pitch lets use cantarell
+;;(set-face-attribute 'variable-pitch nil :font "Cantarell" :height efs/default-font-size :weight 'regular)
+
+;; bigger fringe
+(set-fringe-mode 10) ; Give some breathing room
+
+;; numbers
+(column-number-mode)
+(global-display-line-numbers-mode t)
+(setq make-backup-files nil)
+
+
+#+end_src
+
+
+*** Themes
+
+I am going to be using Prot's Modus themes here they seem flexible.
+
+#+begin_src emacs-lisp :tangle ./init.el
+
+;; awesome prot's package is part of emacs now in v29
+(load-theme 'modus-vivendi-deuteranopia)
+
+#+end_src
+
+
+*** General
+
+There are going to be some general settings I want to make emacs more sane. I'll eventually clean these up.
+
+#+begin_src emacs-lisp :tangle ./init.el
+
+;; Don't backup files and make temp, backup or lock files
+(setq auto-save-default nil)
+(setq make-backup-files nil)
+(setq create-lockfiles nil)
+
+;; Handle Bell
+(setq visible-bell t)
+(setq ring-bell-function nil)
+
+#+end_src
+
+
+** Packages
+
+*** Terminal
+
+I use vterm alot at work in doom emacs. It mostly allows me to live in emacs rather than using
+another terminal multiplexer. Note that the environment package required a manuall insall via M-x package-install RET exec-path-from-shell RET.
+
+#+begin_src emacs-lisp :tangle ./init.el
+
+;; Let's use vterm
+(use-package vterm
+:commands vterm
+:config
+(setq term-prompt-regexp ".*>\s\]")
+(setq vterm-max-scrollback 10000))
+
+;;(when (memq window-system '(mac ns x))
+;;(exec-path-from-shell-initialize))
+
+(dolist (mode '(org-mode-hook
+term-mode-hook
+vterm-mode-hook
+shell-mode-hook
+treemacs-mode-hook
+eshell-mode-hook))
+(add-hook mode (lambda() (display-line-numbers-mode 0))))
+
+
+#+end_src
+*** Projectile
+
+Projectile lets me manage projects
+
+#+begin_src emacs-lisp :tangle ./init.el
+
+;; projectile basics
+(use-package projectile
+:diminish projectile-mode
+:config (projectile-mode)
+:bind-keymap
+("C-c p" . projectile-command-map)
+:init
+;; NOTE: Set this to the folder where you keep your Git repos!
+(when (file-directory-p "~/")
+(setq projectile-project-search-path '("~/")))
+(setq projectile-switch-project-action #'projectile-dired))
+
+
+#+end_src
+
+*** Magit
+
+Magit is the best
+
+#+begin_src emacs-lisp :tangle ./init.el
+
+;; magit basics
+(use-package magit
+:bind (("C-x g" . magit-status)
+("C-x C-g" . magit-status))
+:custom
+(magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
+
+#+end_src
+
+*** Markdown
+
+I am going to enable markdown mode here
+
+#+begin_src emacs-lisp :tangle ./init.el
+
+(use-package markdown-mode
+:ensure t
+:mode ("README\\.md\\'" . gfm-mode)
+:init (setq markdown-command "multimarkdown")
+:bind (:map markdown-mode-map
+("C-c C-e" . markdown-do)))
+
+#+end_src
+
+
+
+*** Org Mode
+
+For now I am going to copy some basics from my old config. This is very old code even including handling windows.
+
+#+begin_src emacs-lisp :tangle ./init.el
+
+;; org mode setup
+(defun old_greg/org-mode-setup ()
+(org-indent-mode) ;;Currently debating this bit
+(variable-pitch-mode 0)
+(visual-line-mode 1))
+
+;; Org Mode Configuration ------------------------------------------------------
+(add-hook 'org-mode-hook 'org-indent-mode)
+(defun old_greg/org-font-setup ()
+;; Replace list hyphen with dot
+(font-lock-add-keywords 'org-mode
+'(("^ *\\([-]\\) "
+(0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•")))))))
+
+;; Set faces for heading levels
+(dolist (face '((org-level-1 . 1.2)
+(org-level-2 . 1.1)
+(org-level-3 . 1.05)
+(org-level-4 . 1.0)
+(org-level-5 . 1.1)
+(org-level-6 . 1.1)
+(org-level-7 . 1.1)
+(org-level-8 . 1.1)))
+)
+
+(use-package org
+:hook (org-mode . old_greg/org-mode-setup)
+:config
+(setq org-ellipsis " ▾")
+(setq org-default-notes-file "~/Organization/02_Documents/todo.org")
+(global-set-key (kbd "C-c l") #'org-store-link)
+(global-set-key (kbd "C-c a") #'org-agenda)
+(global-set-key (kbd "C-c c") #'org-capture)
+(setq org-agenda-start-with-log-mode t)
+(setq org-log-done 'time)
+(setq org-log-into-drawer t)
+
+(setq org-todo-keywords
+'((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
+(sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "|" "COMPLETED(c)" "CANC(k@)")))
+
+(setq org-tag-alist
+'((:startgroup)
+(:endgroup)
+("@errand" . ?E)
+("@chore" . ?C)
+))
+
+
+(old_greg/org-font-setup))
+
+
+(use-package selected-window-accent-mode
+:config (selected-window-accent-mode 1)
+:custom
+(selected-window-accent-fringe-thickness 10)
+(selected-window-accent-custom-color "#CC5500")
+(selected-window-accent-mode-style 'subtle))
+
+
+(defun old_greg/org-mode-visual-fill ()
+(setq visual-fill-column-width 200
+visual-fill-column-center-text t)
+(visual-fill-column-mode 1))
+
+(use-package visual-fill-column
+:hook (org-mode . old_greg/org-mode-visual-fill))
+
+(if
+(eq system-type 'windows-nt)
+(progn (setq org-agenda-files
+(list
+"C:\\Users\\csusggsn\\source\\repos\\Organization\\02_Documents\\todo.org"
+"C:\\Users\\csusggsn\\source\\repos\\Organization\\02_Documents\\inbox.org"
+)
+)
+(setq org-refile-targets
+'(
+("C:\\Users\\csusggsn\\Organization\\source\\repos\\02_Documents\\todo.org" :maxlevel . 2)
+("C:\\Users\\csusggsn\\Organization\\source\\repos\\02_Documents\\inbox.org" :maxlevel . 2)
+)))
+
+)
+(if
+(not(eq system-type 'windows-nt))
+(progn (setq org-agenda-files
+(list
+"~/Organization/02_Documents/todo.org"
+"~/Organization/02_Documents/inbox.org")
+)
+(setq org-refile-targets
+'(("~/Organization/02_Documents/todo.org" :maxlevel . 2)
+("~/Organization/02_Documents/inbox.org" :maxlevel . 1))))
+)
+(global-set-key (kbd "C-c a") 'org-agenda)
+
+(custom-set-faces
+'(org-block-begin-line
+((t (:background "#212121" :extend t))))
+'(org-block
+((t (:background "#252525" :extend t))))
+'(org-block-end-line
+((t (:background "#212121" :extend t))))
+)
+
+(org-babel-do-load-languages
+'org-babel-load-languages
+'((emacs-lisp . t)
+(python . t)))
+
+(push '("conf-unix" . conf-unix) org-src-lang-modes)
+#+end_src
+*** Perspective Mode
+
+Perspectives are critical to my workflow. They can be though of sort of as an emacs multiplexer I suppose. Each perspective has its own buffer list and window layouts. Perspectives can be used to have "workspaces" if you will for different topics for example a repo or your documents.
+
+#+begin_src emacs-lisp :tangle ./init.el
+
+;; perspective mode
+(use-package perspective
+:ensure t ; use `:straight t` if using straight.el!
+:bind
+("C-x C-b" . persp-list-buffers)
+:custom
+(persp-mode-prefix-key (kbd "C-x C-p"))
+:init
+(persp-mode))
+
+#+end_src
+
+*** Which Key
+
+#+begin_src emacs-lisp :tangle ./init.el
+
+;; helpful and which key
+(use-package helpful)
+
+(use-package which-key
+:init (which-key-mode)
+:diminish which-key-mode
+:config
+(setq which-key-idle-delay 1))
+(setq ivy-initial-inputs-alist nil)
+#+end_src
+
+*** Completions
+
+**** Corfu
+
+This is completion at point
+
+#+begin_src emacs-lisp :tangle ./init.el
+
+(use-package corfu
+:init
+(global-corfu-mode)
+(corfu-popupinfo-mode)
+:custom
+(corfu-cycle t)
+(corfu-auto t)
+(corfu-auto-prefix 0.1)
+(corfu-auto-delay 0)
+(corfu-preselect 'prompt)
+(corfu-on-exact-match nil)
+(corfu-echo-documentation t)
+(corfu-popupinfo-delay 0.1)
+:hook
+(eshell-mode . (lambda () (setq-local corfu-auto nil)))
+(minibuffer-mode . (lambda () (setq-local corfu-auto nil)))
+)
+
+(use-package cape
+:after corfu
+:init
+(add-to-list 'completion-at-point-functions #'cape-file)
+(add-to-list 'completion-at-point-functions #'cape-elisp-block)
+(advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
+)
+
+(use-package yasnippet-capf
+:after cape
+:config
+(add-to-list 'completion-at-point-functions #'yasnippet-capf))
+
+
+#+end_src
+
+**** Vertico
+
+This is menu completion by the minibuffer
+
+#+begin_src emacs-lisp :tangle ./init.el
+
+;; Enable vertico vertical completion buffer
+(use-package vertico
+:init
+(vertico-mode)
+
+;; Different scroll margin
+;; (setq vertico-scroll-margin 0)
+
+;; Show more candidates
+;; (setq vertico-count 20)
+
+;; Grow and shrink the Vertico minibuffer
+(setq vertico-resize t)
+
+;; Optionally enable cycling for `vertico-next' and `vertico-previous'.
+;; (setq vertico-cycle t)
+)
+
+;; Persist history over Emacs restarts. Vertico sorts by history position.
+(use-package savehist
+:init
+(savehist-mode))
+
+;; A few more useful configurations...
+(use-package emacs
+:init
+;; Add prompt indicator to `completing-read-multiple'.
+;; We display [CRM<separator>], e.g., [CRM,] if the separator is a comma.
+(defun crm-indicator (args)
+(cons (format "[CRM%s] %s"
+(replace-regexp-in-string
+"\\`\\[.*?]\\*\\|\\[.*?]\\*\\'" ""
+crm-separator)
+(car args))
+(cdr args)))
+(advice-add #'completing-read-multiple :filter-args #'crm-indicator)
+
+;; Do not allow the cursor in the minibuffer prompt
+(setq minibuffer-prompt-properties
+'(read-only t cursor-intangible t face minibuffer-prompt))
+(add-hook 'minibuffer-setup-hook #'cursor-intangible-mode)
+
+;; Emacs 28: Hide commands in M-x which do not work in the current mode.
+;; Vertico commands are hidden in normal buffers.
+;; (setq read-extended-command-predicate
+;; #'command-completion-default-include-p)
+
+;; Enable recursive minibuffers
+(setq enable-recursive-minibuffers t))
+
+
+#+end_src
+
+**** Orderless
+
+This is for orderless this is sort of an enhancement to completion search where you can type parts of the word with spaces and get it such as 'us pac' would get you use package
+
+#+begin_src emacs-lisp :tangle ./init.el
+
+;; orderless searching of completions
+(use-package orderless
+:ensure t
+:custom
+(completion-styles '(orderless basic))
+(completion-category-overrides '((file (styles basic partial-completion)))))
+
+#+end_src
+
+**** Marginalia
+
+This is to add context to the menus. It provides short help blurbs in the popups
+
+#+begin_src emacs-lisp :tangle ./init.el
+
+;; Enable rich annotations using the Marginalia package
+(use-package marginalia
+;; Bind `marginalia-cycle' locally in the minibuffer. To make the binding
+;; available in the *Completions* buffer, add it to the
+;; `completion-list-mode-map'.
+:bind (:map minibuffer-local-map
+("M-A" . marginalia-cycle))
+
+;; The :init section is always executed.
+:init
+
+;; Marginalia must be activated in the :init section of use-package such that
+;; the mode gets enabled right away. Note that this forces loading the
+;; package.
+(marginalia-mode))
+
+#+end_src
+
+*** Consult
+
+Along side marginalia and the associated packages consult is suggested for a host of search functions. It seems to be a little more atomic than what comes with doom emacs by default. There are basically commands for so many types of search. There is search in active buffers (line-mutli) vs in project files (grep or rgrep). It may take a bit to learn the different functions. At this point I should be able to set keys up for myself better than these default ones.
+
+#+begin_src emacs-lisp :tangle ./init.el
+;; Example configuration for Consult
+(use-package consult
+;; Replace bindings. Lazily loaded due by `use-package'.
+:bind (;; C-c bindings in `mode-specific-map'
+("C-c M-x" . consult-mode-command)
+("C-c h" . consult-history)
+("C-c k" . consult-kmacro)
+("C-c m" . consult-man)
+("C-c i" . consult-info)
+([remap Info-search] . consult-info)
+;; C-x bindings in `ctl-x-map'
+("C-x M-:" . consult-complex-command) ;; orig. repeat-complex-command
+("C-x b" . consult-buffer) ;; orig. switch-to-buffer
+("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
+("C-x 5 b" . consult-buffer-other-frame) ;; orig. switch-to-buffer-other-frame
+("C-x t b" . consult-buffer-other-tab) ;; orig. switch-to-buffer-other-tab
+("C-x r b" . consult-bookmark) ;; orig. bookmark-jump
+("C-x p b" . consult-project-buffer) ;; orig. project-switch-to-buffer
+;; Custom M-# bindings for fast register access
+("M-#" . consult-register-load)
+("M-'" . consult-register-store) ;; orig. abbrev-prefix-mark (unrelated)
+("C-M-#" . consult-register)
+;; Other custom bindings
+("M-y" . consult-yank-pop) ;; orig. yank-pop
+;; M-g bindings in `goto-map'
+("M-g e" . consult-compile-error)
+("M-g f" . consult-flymake) ;; Alternative: consult-flycheck
+("M-g g" . consult-goto-line) ;; orig. goto-line
+("M-g M-g" . consult-goto-line) ;; orig. goto-line
+("M-g o" . consult-outline) ;; Alternative: consult-org-heading
+("M-g m" . consult-mark)
+("M-g k" . consult-global-mark)
+("M-g i" . consult-imenu)
+("M-g I" . consult-imenu-multi)
+;; M-s bindings in `search-map'
+("M-s d" . consult-find) ;; Alternative: consult-fd
+("M-s c" . consult-locate)
+("M-s g" . consult-grep)
+("M-s G" . consult-git-grep)
+("M-s r" . consult-ripgrep)
+("M-s l" . consult-line)
+("M-s L" . consult-line-multi)
+("M-s k" . consult-keep-lines)
+("M-s u" . consult-focus-lines)
+;; Isearch integration
+("M-s e" . consult-isearch-history)
+:map isearch-mode-map
+("M-e" . consult-isearch-history) ;; orig. isearch-edit-string
+("M-s e" . consult-isearch-history) ;; orig. isearch-edit-string
+("M-s l" . consult-line) ;; needed by consult-line to detect isearch
+("M-s L" . consult-line-multi) ;; needed by consult-line to detect isearch
+;; Minibuffer history
+:map minibuffer-local-map
+("M-s" . consult-history) ;; orig. next-matching-history-element
+("M-r" . consult-history)) ;; orig. previous-matching-history-element
+
+;; Enable automatic preview at point in the *Completions* buffer. This is
+;; relevant when you use the default completion UI.
+:hook (completion-list-mode . consult-preview-at-point-mode)
+
+;; The :init configuration is always executed (Not lazy)
+:init
+
+;; Optionally configure the register formatting. This improves the register
+;; preview for `consult-register', `consult-register-load',
+;; `consult-register-store' and the Emacs built-ins.
+(setq register-preview-delay 0.5
+register-preview-function #'consult-register-format)
+
+;; Optionally tweak the register preview window.
+;; This adds thin lines, sorting and hides the mode line of the window.
+(advice-add #'register-preview :override #'consult-register-window)
+
+;; Use Consult to select xref locations with preview
+(setq xref-show-xrefs-function #'consult-xref
+xref-show-definitions-function #'consult-xref)
+
+;; Configure other variables and modes in the :config section,
+;; after lazily loading the package.
+:config
+
+;; Optionally configure preview. The default value
+;; is 'any, such that any key triggers the preview.
+;; (setq consult-preview-key 'any)
+;; (setq consult-preview-key "M-.")
+;; (setq consult-preview-key '("S-<down>" "S-<up>"))
+;; For some commands and buffer sources it is useful to configure the
+;; :preview-key on a per-command basis using the `consult-customize' macro.
+(consult-customize
+consult-theme :preview-key '(:debounce 0.2 any)
+consult-ripgrep consult-git-grep consult-grep
+consult-bookmark consult-recent-file consult-xref
+consult--source-bookmark consult--source-file-register
+consult--source-recent-file consult--source-project-recent-file
+;; :preview-key "M-."
+:preview-key '(:debounce 0.4 any))
+
+;; Optionally configure the narrowing key.
+;; Both < and C-+ work reasonably well.
+(setq consult-narrow-key "<") ;; "C-+"
+
+;; Optionally make narrowing help available in the minibuffer.
+;; You may want to use `embark-prefix-help-command' or which-key instead.
+;; (define-key consult-narrow-map (vconcat consult-narrow-key "?") #'consult-narrow-help)
+
+;; By default `consult-project-function' uses `project-root' from project.el.
+;; Optionally configure a different project root function.
+;;;; 1. project.el (the default)
+;; (setq consult-project-function #'consult--default-project--function)
+;;;; 2. vc.el (vc-root-dir)
+;; (setq consult-project-function (lambda (_) (vc-root-dir)))
+;;;; 3. locate-dominating-file
+;; (setq consult-project-function (lambda (_) (locate-dominating-file "." ".git")))
+;;;; 4. projectile.el (projectile-project-root)
+;; (autoload 'projectile-project-root "projectile")
+;; (setq consult-project-function (lambda (_) (projectile-project-root)))
+;;;; 5. No project support
+;; (setq consult-project-function nil)
+)
+#+end_src
+
+*** YAS
+
+#+begin_src emacs-lisp :tangle ./init.el
+
+;; yas snippets
+(use-package yasnippet
+:ensure t
+:config
+(global-set-key (kbd "C-M-0") 'yas-expand)
+(yas-global-mode t)
+(add-to-list #'yas-snippet-dirs "my-personal-snippets")
+:diminish yas-minor-mode)
+(setq yas-snippet-dirs
+'("~/.emacs.d/snippets" ;; personal snippets
+))
+
+#+end_src
+
+*** Lisps
+
+This section is for using geiser and guile scheme for a class I am taking as well as common lisp as I use am comparing the two.
+
+#+begin_src emacs-lisp :tangle ./init.el
+
+(use-package geiser-guile
+:ensure t)
+
+;;(load (expand-file-name "~/.quicklisp/slime-helper.el"))
+;;(setq inferior-lisp-program "sbcl")
+
+
+#+end_src
+
+*** Python and other programming languages
+
+I code in python at work and will use it sometimes locally these are config tweaks I've made to use the python LSP et all.
+
+
+#+begin_src emacs-lisp :tangle ./init.el
+(use-package typescript-mode
+:mode "\\.ts\\'"
+:hook (typescript-mode . eglot-ensure))
+
+(use-package js
+:mode "\\.js\\'"
+:hook (js-mode . eglot-ensure))
+
+
+(use-package eglot
+:defer t
+:bind (:map eglot-mode-map
+("C-c l a" . eglot-code-actions)
+("C-c l r" . eglot-rename)
+("C-c l f" . eglot-format)
+("C-c l d" . eldoc))
+:custom (eglot-report-progress nil)
+:config
+(setq read-process-output-max (* 1024 1024))
+(setq eglot-events-buffer-size 0)
+
+;; Force Eglot to use Pyright for python-mode
+(add-to-list 'eglot-server-programs
+`(python-mode . ("pyright-langserver" "--stdio")))
+
+(add-to-list 'eglot-server-programs
+`(typescript-mode . ("typescript-language-server" "--stdio")))
+(add-to-list 'eglot-server-programs
+`(js-mode . ("typescript-language-server" "--stdio"))))
+
+(setq-default eglot-workspace-configuration
+'(:pyright (:venvPath "."
+:venv ".venv"
+:pythonVersion "3.13")))
+
+
+(use-package breadcrumb
+:config (breadcrumb-mode))
+
+#+end_src
+
+*** Janet, LUA, Love2D and Fennel Support
+
+I am going to experiment with [[https://lua.org][Lua]], [[https://www.love2d.org][Love2D]], C and [[https://fennel-lang.org][Fennel]] as tools for daily language chores. I've used python for this for decades but the overly corporate feel of python and just the desire to get good with a lisp has me wanting to try other things.
+
+I've played with [[https://janet-lang.org][Janet]] a bit and have made my backup script for my journal with it. It seems fun, small and for sure scrappy enough. I examined scheme and while I like the GNU ecosystem in general I have some concerns with the political nature of the group. I'll keep my eye on it though.
+
+For now these smaller, more packable languages like Janet and Lua seem to fit the bill. My needs are pretty simple, I'd like to be able to undertake small scripting needs with these langauges. Janet proved capable albeit harder than python for this. LUA seems great as well and Fennel will allow me to use LUA in a lisp-ey way. Likewise Love2d will provide a basis for doing graphical applications. A secondary desire would be to be able to host and run these things on the web easily. I like local apps, and will hope to get bash and CLI tools on an Ipad one day but getting graphics onto any device seems to require the web. We can sort of envision a web browser as a required shitty compile target in a way.
+
+Much of this is motivated by the writings of [[http://akkartik.name][Kartik]] whom has a different motivation perhaps but a similar need to me to have a better simpler computing stack.
+
+Goals are different however. I see alot of value in insulating myself from the overly complex systems we are all sold, but I see them as required right now. Meaning I need to play within these sandboxes unfortionatly. There is no current equitable system that produces free to the mind such as open source systems, that solve other issues for humanity like being outside and not sequestered in front of isolating screens.
+
+I do not love mobile phones, but I do believe computing on the go is an essential part of going furthere here. Noone invents the important thing in a suburban house playing fortnight. They do it perhaps in a warehouse, a laboratory or out in nature. Enabling people to have computing where they are not in a cage is best.
+
+Yesterday I was able to use this [[https://github.com/Davidobot/love.js][Lovejs]] project to quickly and easily deploy a graphical app to the web. You basically just run two shells commands as your build:
+
+#+begin_src bash
+
+# zip the lua project (assume you have a main.lua)
+zip -9 -r hello.love .
+
+# "compile" the code using lovejs
+npx love.js hello.love game -c
+
+# move into the directory and serve the web application
+# pythons http server used here
+cd game
+python3 -m http.server 8000
+
+#+end_src
+
+Some Modes and Tools I will use are:
+[[https://git.sr.ht/~technomancy/fennel-mode][fennel-mode]] - Install
+[[https://git.sr.ht/~xerool/fennel-ls][fennel-ls]]
+[[https://www.love2d.org/forums/viewtopic.php?t=83465][love2d minor mode maybe]]
+[[http://immerrr.github.io/lua-mode/][lua mode]] - Installed
+[[https://github.com/LuaLS/lua-language-server][lua lsp]]
+[[https://github.com/ALSchwalm/janet-mode][janet mode]] - Installed
+[[https://github.com/CFiggers/janet-lsp][janet lsp]]
+
+#+begin_src emacs-lisp :tangle ./init.el
+(use-package lua-mode
+:defer 1)
+
+(use-package janet-mode
+:defer 1)
+
+(use-package fennel-mode
+:defer 1)
+
+(use-package ob-janet
+:straight '(ob-janet
+:type git
+:host github
+:repo "DEADB17/ob-janet")
+:after org
+:pin manual
+:config
+(append '((janet . t)) org-babel-load-languages))
+#+end_src
+
+I'm going to add to this today. I'm adding a first stab at LUA support past the basic lua mode in emacs.
+
+The first step is installing this [[https://luals.github.io/#other-install][LSP for LUA]]
+
+#+begin_src bash
+brew install lua-language-server
+#+end_src
+
+After this my LSP config above needs updating.
