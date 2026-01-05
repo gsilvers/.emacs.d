@@ -113,6 +113,7 @@ a line to the file with today's date."
 	(message "Logged ride on %s." date)))
 
     (use-package magit
+      :ensure t
       :bind (("C-x g" . magit-status)
 	     ("C-x C-g" . magit-status))
       :custom
@@ -137,6 +138,7 @@ a line to the file with today's date."
 
     ;; projectile basics
     (use-package projectile
+      :ensure t
       :diminish projectile-mode
       :config (projectile-mode)
       :bind-keymap
@@ -150,7 +152,7 @@ a line to the file with today's date."
 
     ;; perspective mode
     (use-package perspective
-      :ensure t ; use `:straight t` if using straight.el!
+      :ensure t 
       :bind
       ("C-x C-b" . persp-list-buffers)
       :custom
@@ -159,6 +161,7 @@ a line to the file with today's date."
       (persp-mode))
 
     (use-package which-key
+      :ensure t
       :init (which-key-mode)
       :diminish which-key-mode
       :config
@@ -178,12 +181,14 @@ a line to the file with today's date."
     (set-desktop-size)
 
     (use-package vterm
+      :ensure t
       :commands vterm
       :config
       (setq term-prompt-regexp ".*>\s\]")
       (setq vterm-max-scrollback 10000))
 
     (use-package consult
+      :ensure t
       ;; Replace bindings. Lazily loaded due by `use-package'.
       :bind (;; C-c bindings in `mode-specific-map'
 	     ("C-c M-x" . consult-mode-command)
@@ -303,15 +308,18 @@ a line to the file with today's date."
       )
 
     (use-package typescript-mode
+      :emsure t
       :mode "\\.ts\\'"
       :hook (typescript-mode . eglot-ensure))
 
     (use-package js
+      :ensure t
       :mode "\\.js\\'"
       :hook (js-mode . eglot-ensure))
 
 
-    (use-package eglot
+    (use-package eglot\
+      :ensure t
       :defer t
       :bind (:map eglot-mode-map
 		  ("C-c l a" . eglot-code-actions)
@@ -392,7 +400,8 @@ a line to the file with today's date."
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    '(corfu ef-themes embark-consult magit marginalia markdown-mode
-	   orderless perspective selected-window-accent-mode vertico)))
+	   orderless perspective selected-window-accent-mode vertico
+	   vterm)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
