@@ -308,7 +308,7 @@ a line to the file with today's date."
       )
 
     (use-package typescript-mode
-      :emsure t
+      :ensure t
       :mode "\\.ts\\'"
       :hook (typescript-mode . eglot-ensure))
 
@@ -318,8 +318,7 @@ a line to the file with today's date."
       :hook (js-mode . eglot-ensure))
 
 
-    (use-package eglot\
-      :ensure t
+    (use-package eglot
       :defer t
       :bind (:map eglot-mode-map
 		  ("C-c l a" . eglot-code-actions)
@@ -398,10 +397,7 @@ a line to the file with today's date."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   '(corfu ef-themes embark-consult magit marginalia markdown-mode
-	   orderless perspective selected-window-accent-mode vertico
-	   vterm)))
+ '(package-selected-packages nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
