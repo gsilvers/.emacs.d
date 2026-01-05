@@ -158,6 +158,13 @@ a line to the file with today's date."
       :init
       (persp-mode))
 
+    (use-package which-key
+      :init (which-key-mode)
+      :diminish which-key-mode
+      :config
+      (setq which-key-idle-delay 1))
+    (setq ivy-initial-inputs-alist nil)
+
 
     ))
 ;;; End Universal Setup
@@ -295,6 +302,40 @@ a line to the file with today's date."
       ;; (setq consult-project-function nil)
       )
 
+    (use-package typescript-mode
+      :mode "\\.ts\\'"
+      :hook (typescript-mode . eglot-ensure))
+
+    (use-package js
+      :mode "\\.js\\'"
+      :hook (js-mode . eglot-ensure))
+
+
+    (use-package eglot
+      :defer t
+      :bind (:map eglot-mode-map
+		  ("C-c l a" . eglot-code-actions)
+		  ("C-c l r" . eglot-rename)
+		  ("C-c l f" . eglot-format)
+		  ("C-c l d" . eldoc))
+      :custom (eglot-report-progress nil)
+      :config
+      (setq read-process-output-max (* 1024 1024))
+      (setq eglot-events-buffer-size 0)
+
+      ;; Force Eglot to use Pyright for python-mode
+      (add-to-list 'eglot-server-programs
+		   `(python-mode . ("pyright-langserver" "--stdio")))
+
+      (add-to-list 'eglot-server-programs
+		   `(typescript-mode . ("typescript-language-server" "--stdio")))
+      (add-to-list 'eglot-server-programs
+		   `(js-mode . ("typescript-language-server" "--stdio"))))
+
+    (setq-default eglot-workspace-configuration
+		  '(:pyright (:venvPath "."
+					:venv ".venv"
+					:pythonVersion "3.13")))
     ))
 ;;; End Macos Setup
 ;;; ====================================================================================
@@ -350,8 +391,8 @@ a line to the file with today's date."
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(corfu ef-themes embark-consult marginalia markdown-mode orderless
-	   perspective selected-window-accent-mode vertico)))
+   '(corfu ef-themes embark-consult magit marginalia markdown-mode
+	   orderless perspective selected-window-accent-mode vertico)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
