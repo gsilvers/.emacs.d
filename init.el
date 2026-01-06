@@ -317,6 +317,16 @@ a line to the file with today's date."
       :mode "\\.js\\'"
       :hook (js-mode . eglot-ensure))
 
+    (use-package python
+      :ensure nil
+      :init
+      (setq major-mode-remap-alist
+	    '((python-mode . python-ts-mode)))
+      (setq treesit-language-source-alist
+	    '((python "https://github.com/tree-sitter/tree-sitter-python")))
+      :hook
+      (python-ts-mode . eglot-ensure))
+
 
     (use-package eglot
       :defer t
@@ -332,7 +342,9 @@ a line to the file with today's date."
 
       ;; Force Eglot to use Pyright for python-mode
       (add-to-list 'eglot-server-programs
-		   `(python-mode . ("pyright-langserver" "--stdio")))
+		   `(python-mode . ("basedpyright-langserver" "--stdio")))
+      (add-to-list 'eglot-server-programs
+		   `(python-ts-mode . ("basedpyright-langserver" "--stdio")))
 
       (add-to-list 'eglot-server-programs
 		   `(typescript-mode . ("typescript-language-server" "--stdio")))
