@@ -14,6 +14,7 @@
 (defun greg/universal-setup-items ()
   "Items which are executed no matter what"
   (progn
+    (package-refresh-contents)
     (require 'package)
     
     (setq package-archives
