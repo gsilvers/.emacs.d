@@ -1,4 +1,4 @@
-;;; ====================================================================================
+;;; ====================================================================================  -*- lexical-binding: t; -*-
 ;;; init.el Base Emacs Configuration
 ;;; Greg Silverstein
 ;;; ====================================================================================
@@ -49,7 +49,7 @@
     (load-theme 'ef-bio :no-confirm)
     (setq modus-themes-italic-constructs t
 	  modus-themes-bold-constructs t)
-    (set-face-attribute 'default nil :height 160)
+    (set-face-attribute 'default nil :family "Comic Mono" :height 160)
 
     (vertico-mode 1)
     (savehist-mode 1)
