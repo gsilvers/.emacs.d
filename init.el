@@ -25,6 +25,7 @@
     (setq make-backup-files nil)
     (setq auto-save-default nil)
     (setq create-lockfiles nil)
+    (add-hook 'org-mode-hook 'org-indent-mode)
 
     (unless package-archive-contents
       (package-refresh-contents))
