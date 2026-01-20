@@ -26,6 +26,7 @@
     (setq auto-save-default nil)
     (setq create-lockfiles nil)
     (add-hook 'org-mode-hook 'org-indent-mode)
+    (add-hook 'org-mode-hook #'visual-line-mode)
 
     (unless package-archive-contents
       (package-refresh-contents))
