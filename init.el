@@ -14,6 +14,10 @@
 (defun greg/universal-setup-items ()
   "Items which are executed no matter what"
   (progn
+
+    (require 'server)
+    (unless (server-running-p) (server-start))
+    
     (package-refresh-contents)
     (require 'package)
     
