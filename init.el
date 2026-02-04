@@ -72,6 +72,13 @@
     (column-number-mode)
     (global-display-line-numbers-mode 1)
 
+    ;; Disable line numbers in terminal-like buffers (they're slow + visually noisy there)
+    (defun greg/disable_line_numbers ()
+      "Disable `display-line-numbers-mode' in the current buffer."
+      (display-line-numbers-mode -1))
+    (add-hook 'vterm-mode-hook #'greg/disable_line_numbers)
+    (add-hook 'eshell-mode-hook #'greg/disable_line_numbers)
+
     (with-eval-after-load 'embark
       (require 'embark-consult))
 
