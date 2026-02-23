@@ -15,6 +15,16 @@
   "Items which are executed no matter what"
   (progn
 
+    ;; Load SSH agent env so Magit can authenticate over SSH
+    ;; Reads ~/.ssh/agent.env (written by the bash_profile singleton)
+    (let ((agent-env (expand-file-name "~/.ssh/agent.env")))
+      (when (file-exists-p agent-env)
+        (with-temp-buffer
+          (insert-file-contents agent-env)
+          (goto-char (point-min))
+          (while (re-search-forward "^\\(SSH_[A-Z_]+\\)=\\([^;]+\\)" nil t)
+            (setenv (match-string 1) (match-string 2))))))
+
     (require 'server)
     (unless (server-running-p) (server-start))
     
