@@ -18,13 +18,15 @@
     (require 'server)
     (unless (server-running-p) (server-start))
     
-    (package-refresh-contents)
+ 
     (require 'package)
     
     (setq package-archives
 	  '(("melpa" . "https://melpa.org/packages/")
+	    ("nongnu" . "https://elpa.nongnu.org/nongnu/")
             ("gnu"   . "https://elpa.gnu.org/packages/")))
-    
+
+    (package-refresh-contents)
     (package-initialize)
     (setq make-backup-files nil)
     (setq auto-save-default nil)
@@ -82,7 +84,7 @@
       (display-line-numbers-mode -1))
     (add-hook 'vterm-mode-hook #'greg/disable_line_numbers)
     (add-hook 'eshell-mode-hook #'greg/disable_line_numbers)
-
+   
     (with-eval-after-load 'embark
       (require 'embark-consult))
 
@@ -181,7 +183,7 @@ a line to the file with today's date."
       :config
       (setq which-key-idle-delay 1))
     (setq ivy-initial-inputs-alist nil)
-
+     
 
     ))
 ;;; End Universal Setup
@@ -199,7 +201,8 @@ a line to the file with today's date."
       :commands vterm
       :config
       (setq term-prompt-regexp ".*>\s\]")
-      (setq vterm-max-scrollback 10000))
+      (setq vterm-max-scrollback 10000)
+      (setq vterm-shell "/bin/bash --login"))
 
     (use-package consult
       :ensure t
@@ -423,7 +426,10 @@ a line to the file with today's date."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(package-selected-packages nil))
+ '(package-selected-packages
+   '(corfu eat ef-themes embark-consult magit marginalia markdown-mode
+	   orderless perspective projectile
+	   selected-window-accent-mode typescript-mode vertico vterm)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
