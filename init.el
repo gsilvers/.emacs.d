@@ -67,8 +67,7 @@
     (load-theme 'ef-bio :no-confirm)
     (setq modus-themes-italic-constructs t
 	  modus-themes-bold-constructs t)
-    (set-face-attribute 'default nil :family "SeriousShanns Nerd Font Mono" :height 160)
-
+  
     (vertico-mode 1)
     (savehist-mode 1)
 
@@ -227,7 +226,9 @@ a line to the file with today's date."
 (defun greg/macos-setup-items ()
   "Items to be executed when logged in on macos only"
   (progn
+    (set-face-attribute 'default nil :family "SeriousShanns Nerd Font Mono" :height 160)
     (set-desktop-size)
+
 
     (use-package vterm
       :ensure t
@@ -433,7 +434,10 @@ a line to the file with today's date."
     (scroll-bar-mode 1)
     (modifier-bar-mode 1)
     (menu-bar-set-tool-bar-position `bottom)
+    (set-face-attribute 'default nil :family "Comic Mono" :height 160)
     (set-mobile-size)
+   
+
     
     (global-set-key (kbd "<volume-up>") 'scroll-down-command)
     (global-set-key (kbd "<volume-down>") 'scroll-up-command)
