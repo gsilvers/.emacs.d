@@ -57,6 +57,7 @@
 	embark
 	embark-consult
 	use-package
+	diminish
 	corfu))
 
     (dolist (pkg my/packages)
@@ -66,7 +67,7 @@
     (load-theme 'ef-bio :no-confirm)
     (setq modus-themes-italic-constructs t
 	  modus-themes-bold-constructs t)
-    (set-face-attribute 'default nil :family "Comic Mono" :height 160)
+    (set-face-attribute 'default nil :family "SeriousShanns Nerd Font Mono" :height 160)
 
     (vertico-mode 1)
     (savehist-mode 1)
@@ -94,6 +95,7 @@
       (display-line-numbers-mode -1))
     (add-hook 'vterm-mode-hook #'greg/disable_line_numbers)
     (add-hook 'eshell-mode-hook #'greg/disable_line_numbers)
+    (add-hook 'eat-mode-hook #'greg/disable_line_numbers)
    
     (with-eval-after-load 'embark
       (require 'embark-consult))
@@ -104,6 +106,9 @@
     (global-corfu-mode 1)
     (setq corfu-popupinfo-delay 0.2)
     (corfu-popupinfo-mode 1)
+    (with-eval-after-load 'diminish
+      (diminish 'corfu-mode)
+      (diminish 'eldoc-mode))
 
     
     (setq tab-always-indent 'complete)
@@ -178,13 +183,31 @@ a line to the file with today's date."
 
     ;; perspective mode
     (use-package perspective
-      :ensure t 
+      :ensure t
       :bind
       ("C-x C-b" . persp-list-buffers)
       :custom
       (persp-mode-prefix-key (kbd "C-x C-p"))
+      (persp-show-modestring nil)           ; disable built-in indicator; we provide our own
       :init
-      (persp-mode))
+      (persp-mode)
+      :config
+      ;; Keymap for clicking the perspective indicator in the modeline
+      (defvar greg/persp-modeline-map
+        (let ((map (make-sparse-keymap)))
+          (define-key map [mode-line mouse-1] #'persp-switch)
+          map))
+
+      ;; Returns a propertized string showing only the current perspective name
+      (defun greg/persp-modeline-segment ()
+        (when (and (bound-and-true-p persp-mode) (persp-curr))
+          (propertize (format " [%s]" (persp-name (persp-curr)))
+                      'face 'bold
+                      'help-echo "mouse-1: switch perspective"
+                      'mouse-face 'mode-line-highlight
+                      'local-map greg/persp-modeline-map)))
+
+      (add-to-list 'mode-line-misc-info '(:eval (greg/persp-modeline-segment)) t))
 
     (use-package which-key
       :ensure t
@@ -212,7 +235,17 @@ a line to the file with today's date."
       :config
       (setq term-prompt-regexp ".*>\s\]")
       (setq vterm-max-scrollback 10000)
-      (setq vterm-shell "/bin/bash --login"))
+      (setq vterm-shell "/bin/bash --login")
+      :hook
+      (vterm-mode . (lambda ()
+                      ;; Re-sync terminal size whenever the window layout changes.
+                      ;; Fixes line-length issues with CLI tools like claude-code.
+                      (add-hook 'window-configuration-change-hook
+                                (lambda ()
+                                  (when (get-buffer-window (current-buffer))
+                                    (vterm-set-size (window-body-height)
+                                                    (window-body-width))))
+                                nil t))))
 
     (use-package consult
       :ensure t
