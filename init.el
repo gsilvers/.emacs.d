@@ -41,6 +41,7 @@
     (setq make-backup-files nil)
     (setq auto-save-default nil)
     (setq create-lockfiles nil)
+    (setq ring-bell-function 'ignore)
     (add-hook 'org-mode-hook 'org-indent-mode)
     (add-hook 'org-mode-hook #'visual-line-mode)
 
@@ -243,8 +244,13 @@ a line to the file with today's date."
                       (add-hook 'window-configuration-change-hook
                                 (lambda ()
                                   (when (get-buffer-window (current-buffer))
-                                    (vterm-set-size (window-body-height)
-                                                    (window-body-width))))
+                                    (let ((proc (get-buffer-process (current-buffer)))
+                                          (width (window-body-width))
+                                          (height (window-body-height)))
+                                      (if (fboundp 'vterm-set-size)
+                                          (vterm-set-size height width)
+                                        (when (and proc (process-live-p proc))
+                                          (set-process-window-size proc height width))))))
                                 nil t))))
 
     (use-package consult
