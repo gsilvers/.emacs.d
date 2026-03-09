@@ -42,6 +42,8 @@
     (setq auto-save-default nil)
     (setq create-lockfiles nil)
     (setq ring-bell-function 'ignore)
+    (global-auto-revert-mode 1)
+    (setq auto-revert-verbose nil)
     (add-hook 'org-mode-hook 'org-indent-mode)
     (add-hook 'org-mode-hook #'visual-line-mode)
 
@@ -237,6 +239,7 @@ a line to the file with today's date."
       (setq term-prompt-regexp ".*>\s\]")
       (setq vterm-max-scrollback 10000)
       (setq vterm-shell "/bin/bash --login")
+      (setq vterm-bell-function #'ignore)
       :hook
       (vterm-mode . (lambda ()
                       ;; Re-sync terminal size whenever the window layout changes.
