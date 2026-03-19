@@ -61,6 +61,7 @@
 	embark-consult
 	use-package
 	diminish
+	htmlize
 	corfu))
 
     (dolist (pkg my/packages)
@@ -158,7 +159,10 @@ a line to the file with today's date."
       :init (setq markdown-command "multimarkdown")
       :bind (:map markdown-mode-map
 		  ("C-c C-e" . markdown-do)))
-
+    
+    (use-package sketch-mode
+      :ensure t
+      :defer t)
     
     (use-package selected-window-accent-mode
       :ensure t 
@@ -483,9 +487,10 @@ a line to the file with today's date."
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(corfu eat ef-themes embark-consult magit marginalia markdown-mode
-	   orderless perspective projectile
-	   selected-window-accent-mode typescript-mode vertico vterm)))
+   '(corfu diminish ef-themes embark-consult htmlize magit marginalia
+	   markdown-mode orderless perspective projectile
+	   selected-window-accent-mode sketch-mode svg-lib
+	   typescript-mode vertico vterm)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
