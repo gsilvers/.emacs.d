@@ -47,6 +47,16 @@
     (add-hook 'org-mode-hook 'org-indent-mode)
     (add-hook 'org-mode-hook #'visual-line-mode)
 
+    ;; Helper for Claude Code to open files in the current perspective
+    (defun greg/open-in-persp (file)
+      "Open FILE in another window within the current perspective.
+Reuses an existing non-vterm window, or splits above if only vterm is visible."
+      (let ((buf (find-file-noselect file)))
+        (persp-add-buffer buf)
+        (display-buffer buf
+          '((display-buffer-use-some-window display-buffer-above-selected)
+            (inhibit-same-window . t)))))
+
     (unless package-archive-contents
       (package-refresh-contents))
     
