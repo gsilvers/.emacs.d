@@ -47,15 +47,46 @@
     (add-hook 'org-mode-hook 'org-indent-mode)
     (add-hook 'org-mode-hook #'visual-line-mode)
 
-    ;; Helper for Claude Code to open files in the current perspective
+    ;; Helper for Claude Code to open files in the current perspective.
+    ;; Called directly when used interactively in the GUI, or via the
+    ;; file queue when triggered externally (emacsclient -e cannot see
+    ;; ns GUI frames on macOS).
     (defun greg/open-in-persp (file)
       "Open FILE in another window within the current perspective.
 Reuses an existing non-vterm window, or splits above if only vterm is visible."
-      (let ((buf (find-file-noselect file)))
+      (interactive "fFile: ")
+      (let ((buf (find-file-noselect (expand-file-name file))))
         (persp-add-buffer buf)
         (display-buffer buf
           '((display-buffer-use-some-window display-buffer-above-selected)
             (inhibit-same-window . t)))))
+
+    ;; File queue for opening files from external processes (e.g. Claude Code).
+    ;; External callers write a path to this file; a file-notify watcher
+    ;; running in the GUI context picks it up and calls greg/open-in-persp.
+    (defvar greg/open-queue-file
+      (expand-file-name "~/.emacs.d/.open-queue"))
+
+    (defun greg/process-open-queue ()
+      "Read the open queue file and open the requested file."
+      (when (file-exists-p greg/open-queue-file)
+        (let ((file (string-trim
+                     (with-temp-buffer
+                       (insert-file-contents greg/open-queue-file)
+                       (buffer-string)))))
+          (delete-file greg/open-queue-file)
+          (when (and (not (string-empty-p file))
+                     (file-exists-p file))
+            (greg/open-in-persp file)))))
+
+    (require 'filenotify)
+    (file-notify-add-watch
+     (file-name-directory greg/open-queue-file)
+     '(change)
+     (lambda (event)
+       (when (and (member (nth 1 event) '(created changed))
+                  (string= (nth 2 event) greg/open-queue-file))
+         (greg/process-open-queue))))
 
     (unless package-archive-contents
       (package-refresh-contents))
@@ -105,6 +136,7 @@ Reuses an existing non-vterm window, or splits above if only vterm is visible."
     ;; Disable line numbers in terminal-like buffers (they're slow + visually noisy there)
     (defun greg/disable_line_numbers ()
       "Disable `display-line-numbers-mode' in the current buffer."
+      (interactive)
       (display-line-numbers-mode -1))
     (add-hook 'vterm-mode-hook #'greg/disable_line_numbers)
     (add-hook 'eshell-mode-hook #'greg/disable_line_numbers)
