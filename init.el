@@ -222,7 +222,26 @@ a line to the file with today's date."
       :config
       (setq which-key-idle-delay 1))
     (setq ivy-initial-inputs-alist nil)
-     
+
+    ;; SVG editing and preview
+    (add-to-list 'auto-mode-alist '("\\.svg\\'" . nxml-mode))
+
+    (defun preview-svg-buffer ()
+      "Preview the current SVG file in a buffer below."
+      (interactive)
+      (let ((xml (buffer-string))
+            (buf (get-buffer-create "*SVG Preview*")))
+        (with-current-buffer buf
+          (erase-buffer)
+          (insert-image (create-image xml 'svg t))
+          (goto-char (point-min)))
+        (display-buffer buf '(display-buffer-below-selected))))
+
+    (add-hook 'nxml-mode-hook
+              (lambda ()
+                (when (and (buffer-file-name)
+                           (string-suffix-p ".svg" (buffer-file-name)))
+                  (local-set-key (kbd "C-c p") #'preview-svg-buffer))))
 
     ))
 ;;; End Universal Setup
