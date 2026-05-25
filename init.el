@@ -490,6 +490,22 @@ a line to the file with today's date."
 		  '(:pyright (:venvPath "."
 					:venv ".venv"
 					:pythonVersion "3.13")))
+
+    (use-package dart-mode
+      :ensure t
+      :mode "\\.dart\\'"
+      :hook (dart-mode . eglot-ensure))
+
+    (with-eval-after-load 'eglot
+      (add-to-list 'eglot-server-programs
+		   '(dart-mode . ("dart" "language-server"
+				  "--client-id" "emacs.eglot"))))
+
+    (use-package flutter
+      :ensure t
+      :after dart-mode
+      :bind (:map dart-mode-map
+		  ("C-c C-r" . flutter-run-or-hot-reload)))
     ))
 ;;; End Macos Setup
 ;;; ====================================================================================
