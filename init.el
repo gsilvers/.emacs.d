@@ -26,7 +26,7 @@
             (setenv (match-string 1) (match-string 2))))))
 
     (require 'server)
-    (unless (server-running-p) (server-start))
+    (unless (server-running-p) (progn (setq server-name "gregs-emacs") (server-start)))
     
  
     (require 'package)
