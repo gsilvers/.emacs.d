@@ -240,20 +240,49 @@ a line to the file with today's date."
       :init
       (persp-mode)
       :config
-      ;; Keymap for clicking the perspective indicator in the modeline
-      (defvar greg/persp-modeline-map
+      ;; Two-segment modeline indicator: name + buffer count. Each chunk is its
+      ;; own single-tap target so the same UI works on touch (Android native
+      ;; Emacs has no reliable mouse-3) and on desktop.
+      ;;   [name]  -> mouse-1: switch perspective
+      ;;   ≡N      -> mouse-1: popup of this perspective's buffers
+      (defvar greg/persp-name-map
         (let ((map (make-sparse-keymap)))
           (define-key map [mode-line mouse-1] #'persp-switch)
           map))
 
-      ;; Returns a propertized string showing only the current perspective name
+      (defvar greg/persp-buf-map
+        (let ((map (make-sparse-keymap)))
+          (define-key map [mode-line mouse-1] #'greg/persp-buffer-menu)
+          map))
+
+      (defun greg/persp-buffer-menu (event)
+        "Pop a menu of the current perspective's buffers and switch the
+window whose modeline was clicked to the chosen buffer."
+        (interactive "e")
+        (let* ((window (posn-window (event-start event)))
+               (names  (sort (persp-current-buffer-names) #'string<))
+               (menu   (list "Perspective buffers"
+                             (cons (persp-current-name)
+                                   (mapcar (lambda (n) (cons n n)) names))))
+               (choice (x-popup-menu event menu)))
+          (when choice
+            (select-window window)
+            (persp-switch-to-buffer choice))))
+
       (defun greg/persp-modeline-segment ()
+        "Two-chunk modeline indicator for the current perspective."
         (when (and (bound-and-true-p persp-mode) (persp-curr))
-          (propertize (format " [%s]" (persp-name (persp-curr)))
-                      'face 'bold
-                      'help-echo "mouse-1: switch perspective"
-                      'mouse-face 'mode-line-highlight
-                      'local-map greg/persp-modeline-map)))
+          (concat
+           (propertize (format " [%s] " (persp-current-name))
+                       'face 'bold
+                       'help-echo "Tap: switch perspective"
+                       'mouse-face 'mode-line-highlight
+                       'local-map greg/persp-name-map)
+           (propertize (format " ≡%d " (length (persp-current-buffer-names)))
+                       'face 'bold
+                       'help-echo "Tap: list/switch buffers in this perspective"
+                       'mouse-face 'mode-line-highlight
+                       'local-map greg/persp-buf-map))))
 
       (add-to-list 'mode-line-misc-info '(:eval (greg/persp-modeline-segment)) t))
 
