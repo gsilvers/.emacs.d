@@ -8,7 +8,6 @@
 ;;; which execute only based on the appropriate enviornment.
 ;;; ====================================================================================
 
-
 ;;; ====================================================================================
 ;;; Universal Setup
 (defun greg/universal-setup-items ()
@@ -560,6 +559,26 @@ window whose modeline was clicked to the chosen buffer."
     
     (global-set-key (kbd "<volume-up>") 'scroll-down-command)
     (global-set-key (kbd "<volume-down>") 'scroll-up-command)
+
+    ;; In order to have Tab available regardless of keyboard app
+    ;; lets add them as buttons on the tool bar
+    (defun greg-emulate-tab ()
+      "This function most truly emulates a keyboard tab press.
+      
+      There are a few ways to do this but execute-kbd-macro is the most
+      accurate and works while in the minibuffer etc. Others like:
+
+      (indent-for-tab-command)
+      or (insert \t)
+
+      Only work inside of a buffer.
+      "
+      (interactive)
+      (execute-kbd-macro (kbd "TAB")))
+
+    (tool-bar-add-item "right-arrow" 'greg-emulate-tab
+		       'greg-emulate-tab
+		       :help   "Hit Tab")
     
     ))
 ;;; End Android Setup
