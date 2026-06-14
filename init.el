@@ -350,6 +350,39 @@ window whose modeline was clicked to the chosen buffer."
                                           (set-process-window-size proc height width))))))
                                 nil t))))
 
+    ;; --------------------------------------------------------------------
+    ;; Eat terminal -- primarily for running Claude Code.
+    ;; Unlike the vterm setup above, Eat resizes itself (no manual
+    ;; window-size hook needed) and keeps a large scrollback buffer, so long
+    ;; Claude Code answers can be scrolled back through and searched.
+    (use-package eat
+      :ensure t
+      :commands (eat greg/claude-code)
+      :bind ("C-c c" . greg/claude-code)
+      :custom
+      ;; Generous scrollback (in characters) so long Claude answers stay
+      ;; reviewable. Default is 131072; nil would mean unlimited.
+      (eat-term-scrollback-size 1000000)
+      :config
+      ;; Mouse-wheel scrolling through the terminal and its scrollback.
+      (setq eat-enable-mouse t)
+
+      (defun greg/claude-code ()
+        "Open or switch to an Eat terminal running Claude Code.
+Launches in the current Projectile project root when available so Claude
+starts in the right repository, and runs through a login shell so the
+full PATH/env is picked up (same approach as the vterm config above)."
+        (interactive)
+        (let* ((default-directory
+                (or (and (fboundp 'projectile-project-root)
+                         (ignore-errors (projectile-project-root)))
+                    default-directory))
+               (existing (get-buffer "*claude*")))
+          (if (and existing (process-live-p (get-buffer-process existing)))
+              (pop-to-buffer existing)
+            (pop-to-buffer
+             (eat-make "claude" "/bin/zsh" nil "-l" "-c" "exec claude"))))))
+
     (use-package consult
       :ensure t
       ;; Replace bindings. Lazily loaded due by `use-package'.
@@ -612,7 +645,7 @@ window whose modeline was clicked to the chosen buffer."
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(corfu diminish ef-themes embark-consult htmlize magit marginalia
+   '(corfu diminish eat ef-themes embark-consult htmlize magit marginalia
 	   markdown-mode orderless perspective projectile
 	   selected-window-accent-mode sketch-mode svg-lib
 	   typescript-mode vertico vterm)))
