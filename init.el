@@ -369,6 +369,8 @@ window whose modeline was clicked to the chosen buffer."
 
       (defun greg/claude-code ()
         "Open or switch to an Eat terminal running Claude Code.
+Each perspective gets its own Claude buffer, named \"*claude:PERSP*\",
+so switching perspectives gives you a separate Claude session.
 Launches in the current Projectile project root when available so Claude
 starts in the right repository, and runs through a login shell so the
 full PATH/env is picked up (same approach as the vterm config above)."
@@ -377,11 +379,17 @@ full PATH/env is picked up (same approach as the vterm config above)."
                 (or (and (fboundp 'projectile-project-root)
                          (ignore-errors (projectile-project-root)))
                     default-directory))
-               (existing (get-buffer "*claude*")))
+               (persp (and (bound-and-true-p persp-mode)
+                           (persp-current-name)))
+               (name (if persp (format "claude:%s" persp) "claude"))
+               (bufname (format "*%s*" name))
+               (existing (get-buffer bufname)))
           (if (and existing (process-live-p (get-buffer-process existing)))
               (pop-to-buffer existing)
-            (pop-to-buffer
-             (eat-make "claude" "/bin/zsh" nil "-l" "-c" "exec claude"))))))
+            ;; `eat-make' names the buffer "*NAME*" from its first argument.
+            (let ((buf (eat-make name "/bin/zsh" nil "-l" "-c" "exec claude")))
+              (when persp (persp-add-buffer buf))
+              (pop-to-buffer buf))))))
 
     (use-package consult
       :ensure t
