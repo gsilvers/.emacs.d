@@ -367,6 +367,16 @@ window whose modeline was clicked to the chosen buffer."
       ;; Mouse-wheel scrolling through the terminal and its scrollback.
       (setq eat-enable-mouse t)
 
+      ;; macOS Cmd-V (and C-S-v) should paste *into the terminal* via
+      ;; `eat-yank', which sends the clipboard to the running process.
+      ;; The default global `yank' tries to insert into Eat's output,
+      ;; which is read-only and errors with "text is read-only".
+      ;; (C-y already does the right thing in semi-char mode.)
+      (define-key eat-semi-char-mode-map (kbd "s-v") #'eat-yank)
+      (define-key eat-semi-char-mode-map (kbd "C-S-v") #'eat-yank)
+      (define-key eat-char-mode-map (kbd "s-v") #'eat-yank)
+      (define-key eat-char-mode-map (kbd "C-S-v") #'eat-yank)
+
       (defun greg/claude-code ()
         "Open or switch to an Eat terminal running Claude Code.
 Each perspective gets its own Claude buffer, named \"*claude:PERSP*\",
