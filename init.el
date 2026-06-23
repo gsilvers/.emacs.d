@@ -132,6 +132,31 @@ Reuses an existing non-vterm window, or splits above if only vterm is visible."
     (column-number-mode)
     (global-display-line-numbers-mode 1)
 
+    ;; Custom modeline. This mirrors the stock Emacs format but with two
+    ;; changes:
+    ;;   1. The `(vc-mode vc-mode)' Git/branch indicator is removed.
+    ;;   2. `mode-line-modes' (which renders every minor-mode lighter) is
+    ;;      replaced by just `mode-name', so only the MAJOR mode shows.
+    ;; `mode-line-misc-info' is kept, so the perspective segment that the
+    ;; `perspective' config adds still appears. `mode-line-process' is
+    ;; retained because it reports major-mode process state (e.g. a shell
+    ;; or compilation status), not a minor mode.
+    (setq-default mode-line-format
+		  '("%e" mode-line-front-space
+		    (:propertize
+		     ("" mode-line-mule-info mode-line-client
+		      mode-line-modified mode-line-remote
+		      mode-line-window-dedicated)
+		     display (min-width (6.0)))
+		    mode-line-frame-identification
+		    mode-line-buffer-identification "   "
+		    mode-line-position
+		    (project-mode-line project-mode-line-format)
+		    "  "
+		    ;; Major mode only -- no minor-mode lighters.
+		    " " mode-name mode-line-process " "
+		    mode-line-misc-info mode-line-end-spaces))
+
     ;; Disable line numbers in terminal-like buffers (they're slow + visually noisy there)
     (defun greg/disable_line_numbers ()
       "Disable `display-line-numbers-mode' in the current buffer."
@@ -576,10 +601,30 @@ window whose modeline was clicked to the chosen buffer."
       (interactive)
       (execute-kbd-macro (kbd "TAB")))
 
+    ;; Divider so our custom Tab/Esc keys are visually separated from
+    ;; the default tool-bar items. `menu-bar-separator' is the standard
+    ;; "--" separator item; `define-key-after' appends it to the end of
+    ;; the tool bar, and since Tab/Esc are added afterwards they line up
+    ;; to its right.
+    (define-key-after tool-bar-map [greg-keys-separator] menu-bar-separator)
+
     (tool-bar-add-item "right-arrow" 'greg-emulate-tab
 		       'greg-emulate-tab
 		       :help   "Hit Tab")
-    
+
+    (defun greg-emulate-esc ()
+      "Emulate a keyboard Escape press.
+
+      Like `greg-emulate-tab', uses `execute-kbd-macro' so it works
+      in the minibuffer, isearch, transient menus, etc. -- not just
+      inside a buffer."
+      (interactive)
+      (execute-kbd-macro (kbd "ESC")))
+
+    (tool-bar-add-item "cancel" 'greg-emulate-esc
+		       'greg-emulate-esc
+		       :help   "Hit Esc")
+
     ))
 ;;; End Android Setup
 ;;; ====================================================================================
