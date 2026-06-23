@@ -1,0 +1,33 @@
+# Machine-local Emacs runtime / generated state -- not config.
+# Keeps `git status` clean and avoids syncing per-machine caches.
+
+# Byte / native compilation
+*.elc
+eln-cache/
+
+# Package manager
+elpa/
+
+# Caches, persistence and history files
+.cache/
+auto-save-list/
+data/
+eshell/
+games/
+url/
+tramp
+history
+ielm-history.eld
+recentf
+
+# Projectile / project state
+projectile-bookmarks.eld
+projects
+
+# Claude Code open-file queue (see greg/open-queue-file in init.el)
+.open-queue
+
+# Backups, auto-saves and lockfiles
+*~
+\#*\#
+.\#*
