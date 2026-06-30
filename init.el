@@ -666,11 +666,18 @@ full PATH/env is picked up (same approach as the vterm config above)."
     (defun greg-emulate-esc ()
       "Emulate a keyboard Escape press.
 
-      Like `greg-emulate-tab', uses `execute-kbd-macro' so it works
-      in the minibuffer, isearch, transient menus, etc. -- not just
-      inside a buffer."
+      Unlike Tab, ESC is the meta *prefix* key in Emacs, not a
+      complete key sequence. Feeding it through `execute-kbd-macro'
+      (as `greg-emulate-tab' does) does nothing: ESC is read as a
+      prefix and the macro ends before any key sequence completes.
+
+      Instead we push the escape character onto the front of
+      `unread-command-events', so the command loop reads it exactly
+      as if the physical Escape key were pressed -- routing through
+      the minibuffer, isearch, the terminal, etc. just like a real
+      keypress."
       (interactive)
-      (execute-kbd-macro (kbd "ESC")))
+      (push ?\e unread-command-events))
 
     (tool-bar-add-item "cancel" 'greg-emulate-esc
 		       'greg-emulate-esc
