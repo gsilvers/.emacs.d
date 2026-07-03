@@ -343,6 +343,34 @@ window whose modeline was clicked to the chosen buffer."
 ;;; ====================================================================================
 
 ;;; ====================================================================================
+;;; Shared Language Setup (called by both macOS and Android)
+;;; Dart / Flutter support lives here rather than inside a single OS's setup
+;;; so the exact same config runs on both. eglot resolves the language-server
+;;; executable from `exec-path' at connect time, so this works anywhere `dart'
+;;; is findable there: the login-shell PATH on macOS, or the Termux bin dir on
+;;; Android (which `greg/android-setup-items' adds to `exec-path'/PATH first).
+(defun greg/dart-setup-items ()
+  "Install and configure Dart + Flutter with eglot.
+Portable across environments -- see the section comment above."
+  (use-package dart-mode
+    :ensure t
+    :mode "\\.dart\\'"
+    :hook (dart-mode . eglot-ensure))
+
+  (with-eval-after-load 'eglot
+    (add-to-list 'eglot-server-programs
+                 '(dart-mode . ("dart" "language-server"
+                                "--client-id" "emacs.eglot"))))
+
+  (use-package flutter
+    :ensure t
+    :after dart-mode
+    :bind (:map dart-mode-map
+                ("C-c C-r" . flutter-run-or-hot-reload))))
+;;; End Shared Language Setup
+;;; ====================================================================================
+
+;;; ====================================================================================
 ;;; Macos Setup
 (defun greg/macos-setup-items ()
   "Items to be executed when logged in on macos only"
@@ -595,21 +623,8 @@ full PATH/env is picked up (same approach as the vterm config above)."
 					:venv ".venv"
 					:pythonVersion "3.13")))
 
-    (use-package dart-mode
-      :ensure t
-      :mode "\\.dart\\'"
-      :hook (dart-mode . eglot-ensure))
-
-    (with-eval-after-load 'eglot
-      (add-to-list 'eglot-server-programs
-		   '(dart-mode . ("dart" "language-server"
-				  "--client-id" "emacs.eglot"))))
-
-    (use-package flutter
-      :ensure t
-      :after dart-mode
-      :bind (:map dart-mode-map
-		  ("C-c C-r" . flutter-run-or-hot-reload)))
+    ;; Dart / Flutter -- shared with Android (see greg/dart-setup-items).
+    (greg/dart-setup-items)
     ))
 ;;; End Macos Setup
 ;;; ====================================================================================
@@ -622,6 +637,11 @@ full PATH/env is picked up (same approach as the vterm config above)."
     (push "/data/data/com.termux/files/usr/bin" exec-path)
     (setenv "PATH" (format "%s:%s" "/data/data/com.termux/files/usr/bin"
 			   (getenv "PATH")))
+
+    ;; Dart / Flutter support (shared with macOS). Placed after the Termux
+    ;; bin dir has been added to `exec-path'/PATH above, so eglot can find
+    ;; the `dart' binary that Termux provides.
+    (greg/dart-setup-items)
 
     (menu-bar-mode 1)
     (tool-bar-mode 1)
