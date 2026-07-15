@@ -108,7 +108,7 @@ Reuses an existing non-vterm window, or splits above if only vterm is visible."
       (unless (package-installed-p pkg)
 	(package-install pkg)))
 
-    (load-theme 'ef-bio :no-confirm)
+    (load-theme 'ef-cherie :no-confirm)
     (setq modus-themes-italic-constructs t
 	  modus-themes-bold-constructs t)
   
