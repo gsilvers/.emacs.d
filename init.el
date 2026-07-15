@@ -703,6 +703,38 @@ full PATH/env is picked up (same approach as the vterm config above)."
 		       'greg-emulate-esc
 		       :help   "Hit Esc")
 
+    ;; Bigger touch targets for every tool-bar button (incl. the modifier bar).
+    (setq tool-bar-button-margin 15)
+
+    ;; Major modes install their own buffer-local `tool-bar-map', which hides
+    ;; the global buttons added above (Tab/Esc/arrows). Drop the local override
+    ;; so they stay available everywhere. Trade-off: mode-specific toolbar
+    ;; buttons (e.g. Info's nav row) are replaced by the global bar.
+    (defun greg/kill-local-tool-bar-map ()
+      (kill-local-variable 'tool-bar-map))
+    (dolist (h '(prog-mode-hook text-mode-hook special-mode-hook
+                                compilation-mode-hook))
+      (add-hook h #'greg/kill-local-tool-bar-map))
+
+    ;; Arrow-key buttons so cursor movement doesn't need the soft keyboard.
+    ;; Reuses the Esc button's `unread-command-events' approach (via
+    ;; `listify-key-sequence') so each tap reads exactly like a real keypress --
+    ;; working in the minibuffer, isearch, transient menus, etc.
+    (defun greg-emulate-key (key)
+      "Inject KEY (a `kbd' description) as if it were physically pressed."
+      (setq unread-command-events
+            (append (listify-key-sequence (kbd key)) unread-command-events)))
+
+    (defun greg-emulate-left  () (interactive) (greg-emulate-key "<left>"))
+    (defun greg-emulate-up    () (interactive) (greg-emulate-key "<up>"))
+    (defun greg-emulate-down  () (interactive) (greg-emulate-key "<down>"))
+    (defun greg-emulate-right () (interactive) (greg-emulate-key "<right>"))
+
+    (tool-bar-add-item "left"  'greg-emulate-left  'greg-emulate-left  :help "Arrow Left")
+    (tool-bar-add-item "up"    'greg-emulate-up    'greg-emulate-up    :help "Arrow Up")
+    (tool-bar-add-item "down"  'greg-emulate-down  'greg-emulate-down  :help "Arrow Down")
+    (tool-bar-add-item "right" 'greg-emulate-right 'greg-emulate-right :help "Arrow Right")
+
     ))
 ;;; End Android Setup
 ;;; ====================================================================================
