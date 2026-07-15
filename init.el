@@ -717,6 +717,19 @@ full PATH/env is picked up (same approach as the vterm config above)."
           (save-buffer)
         (save-some-buffers)))
 
+    (defun greg/toggle-line-wrap ()
+      "Toggle all line wrapping in the current buffer.
+Turns wrapping ON via `visual-line-mode' (word wrap, no truncation) or OFF
+(long lines truncated); uses `visual-line-mode' as the on/off state."
+      (interactive)
+      (if visual-line-mode
+          (progn (visual-line-mode -1)
+                 (setq truncate-lines t)
+                 (message "Line wrapping OFF (lines truncated)"))
+        (setq truncate-lines nil)
+        (visual-line-mode 1)
+        (message "Line wrapping ON (word wrap)")))
+
     (when (boundp 'touch-screen-display-keyboard)
       (defun greg/android-toggle-touch-screen-keyboard ()
         "Toggle the Android on-screen keyboard."
@@ -727,9 +740,12 @@ full PATH/env is picked up (same approach as the vterm config above)."
                      "enabled" "disabled"))))
 
     ;; Six reassignable quick-action buttons (the numeric-N icons). Program them
-    ;; by putting commands in `greg/android-tool-bar-custom-commands'.
-    (defcustom greg/android-tool-bar-custom-commands nil
-      "Commands run by the numbered quick-action tool-bar buttons."
+    ;; by putting commands in `greg/android-tool-bar-custom-commands'. Defaults:
+    ;; (1) this help buffer, (2) toggle line wrap, (3) eshell.
+    (defcustom greg/android-tool-bar-custom-commands
+      '(greg/android-tool-bar-help greg/toggle-line-wrap eshell)
+      "Commands run by the numbered quick-action tool-bar buttons.
+Slot N (1-based) is run by the numeric-N button."
       :type '(repeat function))
     (dotimes (i 6)
       (let ((n i))
@@ -765,6 +781,44 @@ full PATH/env is picked up (same approach as the vterm config above)."
         ("numeric-6-circle-outline"      greg/android-tool-bar-custom-command-6)
         ("magnify"                       isearch-forward))
       "Button grid for the Android touch tool bar.")
+
+    (defun greg/android-tool-bar-help ()
+      "Pop a help buffer describing the touch tool-bar buttons and bindings."
+      (interactive)
+      (with-help-window "*Android Tool Bar*"
+        (princ "Android touch tool bar\n======================\n\n")
+        (princ "Tap a button to run the command shown. The C-x, C-c, M-g and\n")
+        (princ "M-s buttons are prefixes: tap one, then another button, to run\n")
+        (princ "a chord (see Chords below).\n\n")
+        (princ "BUTTON (icon)                    TAP RUNS\n")
+        (princ "-------------------------------  -----------------------------\n")
+        (dolist (item greg/android-tool-bar-items)
+          (let* ((icon (nth 0 item))
+                 (cmd  (nth 1 item))
+                 (key  (or (nth 2 item) cmd))
+                 (tr   (ignore-errors
+                         (lookup-key key-translation-map (vector 'tool-bar key))))
+                 (sends (and (or (vectorp tr) (stringp tr)) (key-description tr))))
+            (princ (format "  %-30s %s%s\n" icon cmd
+                           (if sends (format "  [sends %s]" sends) "")))))
+        (princ "\nChords (tap the prefix button, then a second button)\n")
+        (princ "----------------------------------------------------\n")
+        (dolist (ch '(("C-x then up"     . delete-other-windows)
+                      ("C-x then down"   . split-window-below)
+                      ("C-c then uarg"   . execute-extended-command)
+                      ("C-c then undo"   . pop-to-mark-command)
+                      ("C-x then undo"   . quit-window)
+                      ("C-c then buffer" . project-find-file)
+                      ("C-x then buffer" . find-file)
+                      ("C-c then save"   . bookmark-set)
+                      ("C-x then save"   . greg/android-kill-buffer)))
+          (princ (format "  %-18s %s\n" (car ch) (cdr ch))))
+        (princ "\nNumbered quick-action slots\n")
+        (princ "---------------------------\n")
+        (dotimes (i 6)
+          (princ (format "  %d  %s\n" (1+ i)
+                         (or (nth i greg/android-tool-bar-custom-commands)
+                             "(unset)"))))))
 
     (setq tool-bar-map (make-sparse-keymap))
     (dolist (item greg/android-tool-bar-items)
