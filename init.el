@@ -740,13 +740,18 @@ Turns wrapping ON via `visual-line-mode' (word wrap, no truncation) or OFF
                      "enabled" "disabled"))))
 
     ;; Six reassignable quick-action buttons (the numeric-N icons). Program them
-    ;; by putting commands in `greg/android-tool-bar-custom-commands'. Defaults:
-    ;; (1) this help buffer, (2) toggle line wrap, (3) eshell.
-    (defcustom greg/android-tool-bar-custom-commands
-      '(greg/android-tool-bar-help greg/toggle-line-wrap eshell)
+    ;; by putting commands in `greg/android-tool-bar-custom-commands'.
+    (defcustom greg/android-tool-bar-custom-commands nil
       "Commands run by the numbered quick-action tool-bar buttons.
-Slot N (1-based) is run by the numeric-N button."
+Slot N (1-based) is run by the numeric-N button. When left unset, the
+defaults below are installed: (1) help, (2) toggle line wrap, (3) eshell."
       :type '(repeat function))
+    ;; Install defaults when unset. Uses `unless'+`setq' rather than the
+    ;; defcustom default so it ALSO takes effect when init is re-evaluated in a
+    ;; running session -- a defcustom won't overwrite an already-bound value.
+    (unless greg/android-tool-bar-custom-commands
+      (setq greg/android-tool-bar-custom-commands
+            '(greg/android-tool-bar-help greg/toggle-line-wrap eshell)))
     (dotimes (i 6)
       (let ((n i))
         (defalias (intern (format "greg/android-tool-bar-custom-command-%d" (1+ n)))
