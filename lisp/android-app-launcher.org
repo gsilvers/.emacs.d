@@ -1,0 +1,224 @@
+#+title: Launching Android Apps from Emacs
+#+subtitle: What am, pm and cmd are, and why --user 0 is not optional
+#+author: Greg Silverstein
+#+date: 2026-09-02
+#+options: toc:2 num:nil
+
+Background for =android-app-launcher.el=. Everything here was verified on-device
+(GrapheneOS, Emacs 30.1 for Android); the parts that bite are the ones that
+differ from a desktop Unix.
+
+* The model you need in your head
+
+Android is Linux, but the security model is not the desktop one. Two facts
+explain almost every error in this document.
+
+** Every app is its own Unix user
+
+When an app is installed the system allocates it a UID, conventionally rendered
+=u0_aNNN=. Emacs is one such user. Termux is a *different* one. They cannot
+read each other's files, and neither of them is privileged.
+
+The consequence that catches people out:
+
+#+begin_quote
+Every process Emacs spawns runs as *Emacs's* UID, whatever shell binary it
+passes through.
+#+end_quote
+
+So pointing =shell-file-name= at Termux's =bash= does not borrow Termux's
+identity — you get Emacs's UID running Termux's shell. And running the same
+command inside the Termux app does not help either, because Termux's UID is
+just another unprivileged app UID. Termux hits precisely the same wall; see
+[[https://github.com/termux/termux-api/issues/26][termux-api#26]], which is Termux
+itself being told =/system/bin/am: Permission denied=.
+
+The privileged identity people are unknowingly borrowing in tutorials is the
+=shell= user, UID 2000. That is what =adb shell= gives you, and no app ever has
+it. Anything you read that "works in adb" may still be refused here.
+
+** Android has multiple users
+
+Beyond the human sense of profiles (a work profile, a second user), the API
+carries pseudo-user IDs. The one that matters:
+
+| ID | Meaning                                                  |
+|----+----------------------------------------------------------|
+| =0=  | the primary user — what you are almost always on         |
+| =-2= | =USER_CURRENT_OR_SELF=, "whoever is in front right now"  |
+
+Command-line tools default to =-2=. Resolving "whoever is in front" means
+looking across users, which requires the =INTERACT_ACROSS_USERS= permission,
+which an app UID does not hold. Hence the error that blocked this module for an
+afternoon:
+
+#+begin_example
+Permission Denial: null asks to run as user -2
+#+end_example
+
+Passing =--user 0= names the user outright, so nothing has to be resolved across
+users and no permission is required. *This is the single most important line in
+this document.*
+
+* am, pm and cmd
+
+All three live in =/system/bin= and are shell scripts. Each execs =app_process=,
+the Android VM launcher, to run a Java class that talks to a system service over
+Binder. They are thin clients, not kernel interfaces — which is why they fail
+with Java-style permission errors rather than =EPERM=.
+
+** am — the activity manager
+
+Starts and inspects the things a user interacts with: activities (screens),
+services, broadcasts.
+
+#+begin_src sh
+  am start --user 0 -n app.vanadium.browser/com.google.android.apps.chrome.Main
+  am start --user 0 -a android.intent.action.VIEW -d https://example.com
+#+end_src
+
+This module uses the first form.
+
+** pm — the package manager
+
+Queries what is installed.
+
+#+begin_src sh
+  pm list packages --user 0
+  pm list users
+#+end_src
+
+Two traps worth committing to memory:
+
+- It lists *package names* (=app.vanadium.browser=), never the label you see on
+  the home screen. Grepping for an app's visible name usually finds nothing,
+  and that is not a bug.
+- Emacs does not declare the =QUERY_ALL_PACKAGES= permission, so on Android 11
+  and later the list may be only a subset of what is really installed. If it
+  looks suspiciously short, compare against Termux, which does declare it.
+
+** cmd — the generic service shim
+
+Newer and more general: =cmd SERVICE ARGS...= dispatches to any registered system
+service. =cmd package= overlaps heavily with =pm= — it is broadly the modern
+spelling of it. This module uses the subcommand that maps a package to its
+launcher activity:
+
+#+begin_src sh
+  cmd package resolve-activity --brief --user 0 app.vanadium.browser
+#+end_src
+
+=--brief= is a lie by omission: it still prints a =priority=... preferredOrder=...
+isDefault=true= line above the component. So the component is *not* reliably the
+last line of output, and code that assumes it is will silently take the wrong
+one. =android-app-launcher--component= scans every line for a =PACKAGE/ACTIVITY=
+shape instead.
+
+* Intents, briefly
+
+Android does not "run programs"; it dispatches *intents*, which come in two
+flavours.
+
+| Kind     | Says                      | Example                                    |
+|----------+---------------------------+--------------------------------------------|
+| Explicit | exactly which component   | =app.vanadium.browser/...chrome.Main=      |
+| Implicit | an action plus some data  | VIEW =https://example.com=                 |
+
+An implicit intent is resolved by the system against everything installed,
+which is how "open with…" choosers arise. A *component* is the explicit form:
+=PACKAGE/ACTIVITY=, where the activity is a Java class name. It may be written
+relative, with a leading dot (=app.vanadium.browser/.Main=), meaning "relative
+to the package".
+
+** Emacs's own bridge, and its one limitation
+
+Emacs ships =android-browse-url=, which is a genuine intent sent from Emacs's own
+Android context. No subprocess, no UID problem, none of this document applies:
+
+#+begin_src emacs-lisp
+  (android-browse-url "https://example.com")     ; open
+  (android-browse-url "https://example.com" t)   ; share sheet
+#+end_src
+
+It handles any scheme an app has registered — =https:=, =mailto:=, =tel:=, =geo:=.
+Prefer it whenever it suffices.
+
+The limitation is visible in =EmacsService.browseUrl= on the Java side, which
+builds its intent as:
+
+#+begin_src java
+  new Intent(Intent.ACTION_VIEW, Uri.parse(url))
+#+end_src
+
+That is =Uri.parse=, not =Intent.parseUri=. So the =intent://#Intent;package=...;end=
+form — the usual trick for naming a package in a URI — is not parsed as a
+launcher intent. There is *no way to name a package* through =android-browse-url=,
+which is the entire reason this module shells out to =am= instead.
+
+* What actually works from Emacs's UID
+
+Verified on-device, not inferred:
+
+| Command                                     | Works? | Notes                                        |
+|---------------------------------------------+--------+----------------------------------------------|
+| =am start --user 0 -n PKG/ACT=                | yes    | confirmed switching to Vanadium              |
+| =cmd package resolve-activity --brief --user 0= | yes | component is not always the last line        |
+| =pm list packages --user 0=                   | yes    | may be a subset; no =QUERY_ALL_PACKAGES=       |
+| =monkey -p PKG -c ...LAUNCHER 1=              | *no*   | needs the =shell= UID; =--user 0= will not help |
+
+=monkey= is the tempting one, because it launches by package alone and needs no
+activity. It is nonetheless unusable here: it injects input events, which
+requires talking to the window manager, which requires UID 2000. From an app it
+fails with:
+
+#+begin_example
+,** Error: Unable to connect to window manager: is the system running?
+#+end_example
+
+** A diagnostic worth knowing
+
+#+begin_example
+Error: No intent supplied
+#+end_example
+
+is =am='s *own usage message*. It means =am= ran fine and simply received no
+arguments. It is not a permission problem, and mistaking it for one costs time.
+A real refusal says =Permission Denial= or =Permission denied=.
+
+Always append =2>&1= to these commands. They report refusals on stderr, so
+without it a permission failure is indistinguishable from an empty answer —
+which is exactly how the =--user 0= problem stayed hidden.
+
+* What the module does
+
+=M-x android-app-launcher-launch= is two shell calls:
+
+1. =pm list packages --user 0= to populate completion (interactive use only).
+2. =cmd package resolve-activity --brief --user 0 PKG= to find the launcher
+   activity, scanning every line of output for a =PACKAGE/ACTIVITY= shape.
+3. =am start --user 0 -n PKG/ACT= to start it.
+
+If step 2 finds nothing, the raw output is reported rather than swallowed,
+because on this platform that output is normally the only clue.
+
+=android-app-launcher-user= customises the =--user= value if you ever need a work
+profile; =pm list users= will tell you its ID.
+
+* Troubleshooting
+
+| Symptom                                      | Cause                                                          |
+|----------------------------------------------+----------------------------------------------------------------|
+| =Permission Denial: null asks to run as user -2= | missing =--user 0=                                            |
+| =Unable to connect to window manager=          | =monkey=, or anything else needing the =shell= UID               |
+| =Error: No intent supplied=                    | =am= ran but got no arguments — not a permissions issue         |
+| grep for the app's name finds nothing        | =pm= lists package names, not home-screen labels               |
+| package list looks far too short             | =QUERY_ALL_PACKAGES= not held; compare against Termux          |
+| command appears to return nothing            | stderr discarded; add =2>&1=                                   |
+
+* References
+
+- [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Android.html][Android (GNU Emacs Manual)]] — the port's own documentation
+- [[https://lists.gnu.org/archive/html/help-gnu-emacs/2023-08/msg00387.html][Po Lu on opening files with external apps]] — =file://= URIs and the
+  =content://org.gnu.emacs/PATH= form, which lets another app read a file inside
+  Emacs's sandbox
+- [[https://github.com/termux/termux-api/issues/26][termux-api#26]] — Termux meeting the same =/system/bin/am= restriction

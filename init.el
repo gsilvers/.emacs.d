@@ -28,6 +28,10 @@
     (unless (server-running-p) (progn (setq server-name "gregs-emacs") (server-start)))
     
  
+    ;; Local modules live in ~/.emacs.d/lisp. Kept separate from init.el so
+    ;; they can be extracted into their own repositories later.
+    (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
+
     (require 'package)
     
     (setq package-archives
@@ -808,52 +812,23 @@ or holds something that is no longer a command just says so when tapped."
     (define-key key-translation-map (kbd "<tool-bar> <right>")  (kbd "<right>"))
     (define-key key-translation-map (kbd "<tool-bar> <search>") (kbd "C-s"))
 
-    ;; ---- Launching other Android apps --------------------------------------
-    ;; `android-browse-url' builds its intent with
-    ;; `new Intent(ACTION_VIEW, Uri.parse(url))', not `Intent.parseUri', so it
-    ;; can only reach an app that has registered a URI scheme -- there is no way
-    ;; to name a package through it. Launching an arbitrary app therefore has to
-    ;; go through the activity manager.
-    ;;
-    ;; Caveats worth remembering when this comes up empty:
-    ;;   * `pm list packages' lists package names, NOT the label shown on the
-    ;;     home screen, so grepping for an app's visible name often misses.
-    ;;   * Emacs does not declare QUERY_ALL_PACKAGES, so on Android 11+ the list
-    ;;     may only be a subset of what is really installed. Termux does declare
-    ;;     it, so compare there if the list looks short.
-    ;;   * If the app registers a URI scheme, prefer `android-browse-url' -- one
-    ;;     call, no shell, none of the above applies.
-
-    (defun greg/android-packages ()
-      "Return a list of installed Android package names."
-      (mapcar (lambda (line) (replace-regexp-in-string "\\`package:" "" line))
-              (split-string (shell-command-to-string "pm list packages") "\n" t)))
-
-    (defun greg/android-launch-app (package)
-      "Launch the Android application PACKAGE, e.g. \"com.example.err\".
-Resolves the package's launcher activity and starts it; falls back to
-`monkey' when the activity cannot be resolved."
-      (interactive (list (completing-read "App package: " (greg/android-packages))))
-      (let* ((component (string-trim
-                         (car (last (split-string
-                                     (shell-command-to-string
-                                      (format "cmd package resolve-activity --brief %s"
-                                              (shell-quote-argument package)))
-                                     "\n" t)))))
-             ;; Match a real package/activity component; a failure message
-             ;; from resolve-activity can itself contain a slash.
-             (command (if (string-match-p "\\`[[:alnum:]_.]+/[[:alnum:]_.$]+\\'" component)
-                          (format "am start -n %s" (shell-quote-argument component))
-                        (format "monkey -p %s -c android.intent.category.LAUNCHER 1"
-                                (shell-quote-argument package)))))
-        (message "%s" (string-trim (shell-command-to-string (concat command " 2>&1"))))))
-
     ;; Plain keyboard bindings; no button depends on these.
     (global-set-key (kbd "M-s M-s") #'isearch-forward)
     (global-set-key (kbd "M-g M-s") #'consult-imenu)
     (global-set-key (kbd "M-s M-g") (if (executable-find "rg") #'consult-ripgrep #'consult-grep))
     (global-set-key (kbd "C-x M-g") #'greg/android-toggle-touch-screen-keyboard)
     (global-set-key (kbd "C-x M-s") #'read-only-mode)
+
+    ;; ---- Launching other Android apps --------------------------------------
+    ;; `android-app-launcher' drives Android's activity manager to start other
+    ;; apps; see lisp/android-app-launcher.org for why that is needed and what
+    ;; `am', `pm' and `cmd' actually are. Required last on purpose: this whole
+    ;; function is one `progn', so anything that signals here cannot take the
+    ;; tool bar set up above it down with it.
+    (require 'android-app-launcher)
+    ;; Muscle memory only; drop this whenever. The real command is
+    ;; `android-app-launcher-launch'.
+    (defalias 'greg/android-launch-app #'android-app-launcher-launch)
 
     ))
 ;;; End Android Setup
