@@ -646,7 +646,7 @@ full PATH/env is picked up (same approach as the vterm config above)."
     (menu-bar-mode 1)
     (tool-bar-mode 1)
     (scroll-bar-mode 1)
-    (modifier-bar-mode 1)
+    (modifier-bar-mode -1)          ; off: Alt now lives in the tool bar below
     (menu-bar-set-tool-bar-position `bottom)
     (set-face-attribute 'default nil :family "Comic Mono" :height 160)
     (set-mobile-size)
@@ -656,20 +656,25 @@ full PATH/env is picked up (same approach as the vterm config above)."
     (global-set-key (kbd "<volume-up>") 'scroll-down-command)
     (global-set-key (kbd "<volume-down>") 'scroll-up-command)
 
-    ;; ---- Touch tool bar (ported from bohonghuang's android-support.el) ------
-    ;; A curated on-screen button grid replaces the default tool bar, so touch
-    ;; users get quit / undo / save / navigation / search / imenu etc. without a
-    ;; physical keyboard. Icons come from `material-pbm-icons' because PBM renders
-    ;; on the Android build of Emacs, whereas the stock arrow icons ship only as
-    ;; SVG (unsupported there) and silently show nothing. The modifier bar
-    ;; (Ctrl/Meta/...) lives in a separate `secondary-tool-bar-map', so replacing
-    ;; `tool-bar-map' below leaves it untouched.
+    ;; ---- Touch tool bar ----------------------------------------------------
+    ;; One row of twelve buttons is the whole touch control surface: the
+    ;; modifier bar is off, so this bar is it. Icons come from
+    ;; `material-pbm-icons' because PBM renders on the Android build of Emacs,
+    ;; whereas the stock arrow icons ship only as SVG (unsupported there) and
+    ;; silently show nothing.
     ;;
-    ;; Most buttons feed a real key through `key-translation-map' so they can be
-    ;; composed into chords: tap the C-x button, then another button. Tab and Esc
-    ;; are the exception -- they run `greg-emulate-tab'/`greg-emulate-esc' directly,
-    ;; because ESC is Emacs's meta *prefix* key and must not be routed through key
-    ;; translation (it would hang waiting for the rest of a sequence).
+    ;; Three different mechanisms sit behind the buttons:
+    ;;   Alt                 -> `input-decode-map', reusing the modifier bar's
+    ;;                          own `tool-bar-event-apply-meta-modifier'. A tap
+    ;;                          applies M- to whatever is pressed next and pops
+    ;;                          the soft keyboard so there is something to press.
+    ;;   C-g, arrows, search -> `key-translation-map', so a tap emits a real key
+    ;;                          and therefore also works in the minibuffer and
+    ;;                          in isearch.
+    ;;   Tab, Esc, the rest  -> plain commands. ESC especially must NOT be
+    ;;                          key-translated: it is Emacs's meta *prefix* key
+    ;;                          and would hang waiting for the rest of a
+    ;;                          sequence.
 
     ;; Material Design icons in PBM form. Installed from GitHub the first time
     ;; Emacs starts here (needs network + git); a no-op afterwards.
@@ -680,7 +685,7 @@ full PATH/env is picked up (same approach as the vterm config above)."
             (require 'material-pbm-icons))
         (error (message "material-pbm-icons install failed: %s" err))))
 
-    (setq tool-bar-button-margin 15)   ; bigger touch targets (bohonghuang uses 25)
+    (setq tool-bar-button-margin 15)   ; bigger touch targets
 
     ;; Keep the global tool bar visible in modes that install their own local one.
     (defun greg/kill-local-tool-bar-map ()
@@ -695,7 +700,7 @@ full PATH/env is picked up (same approach as the vterm config above)."
       (interactive)
       (execute-kbd-macro (kbd "TAB")))
 
-    ;; Esc: ESC is the meta *prefix* key, so `execute-kbd-macro'/key-translation
+    ;; Esc: ESC is the meta prefix key, so `execute-kbd-macro'/key-translation
     ;; do nothing. Push the escape char onto `unread-command-events' so the
     ;; command loop reads it exactly like a real Escape press.
     (defun greg-emulate-esc ()
@@ -703,19 +708,19 @@ full PATH/env is picked up (same approach as the vterm config above)."
       (interactive)
       (push ?\e unread-command-events))
 
-    ;; One-tap helpers.
-    (defun greg/android-kill-buffer (arg)
-      "Kill the current buffer; with a prefix ARG, also delete its window."
-      (interactive "p")
-      (if (>= arg 4) (kill-buffer-and-window) (kill-buffer)))
+    (defvar greg/android-keyboard-shown nil
+      "Non-nil when the keyboard button last asked for the keyboard to show.")
 
-    (defun greg/android-save-buffer ()
-      "Save this file buffer, else offer to save all buffers."
+    (defun greg/android-toggle-touch-screen-keyboard ()
+      "Show or hide the Android on-screen keyboard."
       (interactive)
-      (if (and (buffer-modified-p)
-               (or (derived-mode-p 'prog-mode) (derived-mode-p 'text-mode)))
-          (save-buffer)
-        (save-some-buffers)))
+      (setq greg/android-keyboard-shown (not greg/android-keyboard-shown))
+      (when (boundp 'touch-screen-display-keyboard)
+        (setq touch-screen-display-keyboard greg/android-keyboard-shown))
+      (frame-toggle-on-screen-keyboard (selected-frame)
+                                       (not greg/android-keyboard-shown))
+      (message "On-screen keyboard %s"
+               (if greg/android-keyboard-shown "shown" "hidden")))
 
     (defun greg/toggle-line-wrap ()
       "Toggle all line wrapping in the current buffer.
@@ -730,135 +735,72 @@ Turns wrapping ON via `visual-line-mode' (word wrap, no truncation) or OFF
         (visual-line-mode 1)
         (message "Line wrapping ON (word wrap)")))
 
-    (when (boundp 'touch-screen-display-keyboard)
-      (defun greg/android-toggle-touch-screen-keyboard ()
-        "Toggle the Android on-screen keyboard."
-        (interactive)
-        (message "Touch screen keyboard %s"
-                 (if (setq touch-screen-display-keyboard
-                           (not touch-screen-display-keyboard))
-                     "enabled" "disabled"))))
-
-    ;; Six reassignable quick-action buttons (the numeric-N icons). Program them
-    ;; by putting commands in `greg/android-tool-bar-custom-commands'.
+    ;; The two numbered buttons are yours to program, e.g.
+    ;;   (setq greg/android-tool-bar-custom-commands '(eshell greg/toggle-line-wrap))
     (defcustom greg/android-tool-bar-custom-commands nil
       "Commands run by the numbered quick-action tool-bar buttons.
-Slot N (1-based) is run by the numeric-N button. When left unset, the
-defaults below are installed: (1) help, (2) toggle line wrap, (3) eshell."
+Slot N (1-based) is run by the numeric-N button.  A slot that is empty
+or holds something that is no longer a command just says so when tapped."
       :type '(repeat function))
-    ;; Install defaults when unset. Uses `unless'+`setq' rather than the
-    ;; defcustom default so it ALSO takes effect when init is re-evaluated in a
-    ;; running session -- a defcustom won't overwrite an already-bound value.
-    (unless greg/android-tool-bar-custom-commands
-      (setq greg/android-tool-bar-custom-commands
-            '(greg/android-tool-bar-help greg/toggle-line-wrap eshell)))
-    (dotimes (i 6)
+    (dotimes (i 2)
       (let ((n i))
         (defalias (intern (format "greg/android-tool-bar-custom-command-%d" (1+ n)))
           (lambda ()
             (interactive)
-            (when-let* ((command (nth n greg/android-tool-bar-custom-commands)))
-              (call-interactively command))))))
+            (let ((command (nth n greg/android-tool-bar-custom-commands)))
+              (if (commandp command)
+                  (call-interactively command)
+                (message "Tool-bar slot %d is unset (see `greg/android-tool-bar-custom-commands')"
+                         (1+ n))))))))
 
-    ;; The button grid. Each entry is (ICON COMMAND [KEY]): COMMAND runs on a
-    ;; bare tap; KEY (or COMMAND) is the tool-bar event symbol the chord
-    ;; bindings below hang off of.
+    ;; The row, left to right. Each entry is (ICON COMMAND EVENT . PROPS): EVENT is the
+    ;; tool-bar event symbol the translations below hang off. Where a button is
+    ;; translated to a real key, COMMAND is what that key runs -- it documents
+    ;; the button, but the translation is what actually fires.
     (defvar greg/android-tool-bar-items
-      '(("close-outline"                 keyboard-quit)
-        ("plus-circle-multiple-outline"  universal-argument)
-        ("file-replace-outline"          consult-buffer switch-to-buffer)
-        ("arrow-u-left-top"              undo)
-        ("arrow-up"                      previous-line)
-        ("content-save-outline"          greg/android-save-buffer save-buffer)
-        ("numeric-1-circle-outline"      greg/android-tool-bar-custom-command-1)
-        ("numeric-2-circle-outline"      greg/android-tool-bar-custom-command-2)
-        ("numeric-3-circle-outline"      greg/android-tool-bar-custom-command-3)
-        ("menu"                          imenu)
-        ("arrow-collapse-right"          greg-emulate-tab)
-        ("keyboard-esc"                  greg-emulate-esc)
-        ("circle-multiple-outline"       execute-extended-command)
-        ("close-circle-multiple-outline" exchange-point-and-mark)
-        ("arrow-left"                    backward-char)
-        ("arrow-down"                    next-line)
-        ("arrow-right"                   forward-char)
-        ("numeric-4-circle-outline"      greg/android-tool-bar-custom-command-4)
-        ("numeric-5-circle-outline"      greg/android-tool-bar-custom-command-5)
-        ("numeric-6-circle-outline"      greg/android-tool-bar-custom-command-6)
-        ("magnify"                       isearch-forward))
-      "Button grid for the Android touch tool bar.")
-
-    (defun greg/android-tool-bar-help ()
-      "Pop a help buffer describing the touch tool-bar buttons and bindings."
-      (interactive)
-      (with-help-window "*Android Tool Bar*"
-        (princ "Android touch tool bar\n======================\n\n")
-        (princ "Tap a button to run the command shown. The C-x, C-c, M-g and\n")
-        (princ "M-s buttons are prefixes: tap one, then another button, to run\n")
-        (princ "a chord (see Chords below).\n\n")
-        (princ "BUTTON (icon)                    TAP RUNS\n")
-        (princ "-------------------------------  -----------------------------\n")
-        (dolist (item greg/android-tool-bar-items)
-          (let* ((icon (nth 0 item))
-                 (cmd  (nth 1 item))
-                 (key  (or (nth 2 item) cmd))
-                 (tr   (ignore-errors
-                         (lookup-key key-translation-map (vector 'tool-bar key))))
-                 (sends (and (or (vectorp tr) (stringp tr)) (key-description tr))))
-            (princ (format "  %-30s %s%s\n" icon cmd
-                           (if sends (format "  [sends %s]" sends) "")))))
-        (princ "\nChords (tap the prefix button, then a second button)\n")
-        (princ "----------------------------------------------------\n")
-        (dolist (ch '(("C-x then up"     . delete-other-windows)
-                      ("C-x then down"   . split-window-below)
-                      ("C-c then uarg"   . execute-extended-command)
-                      ("C-c then undo"   . pop-to-mark-command)
-                      ("C-x then undo"   . quit-window)
-                      ("C-c then buffer" . project-find-file)
-                      ("C-x then buffer" . find-file)
-                      ("C-c then save"   . bookmark-set)
-                      ("C-x then save"   . greg/android-kill-buffer)))
-          (princ (format "  %-18s %s\n" (car ch) (cdr ch))))
-        (princ "\nNumbered quick-action slots\n")
-        (princ "---------------------------\n")
-        (dotimes (i 6)
-          (princ (format "  %d  %s\n" (1+ i)
-                         (or (nth i greg/android-tool-bar-custom-commands)
-                             "(unset)"))))))
+      '(("keyboard-esc"             greg-emulate-esc          esc)
+        ("keyboard-tab"             greg-emulate-tab          tab)
+        ;; :enable greys the button out while it is armed, which is the only
+        ;; feedback that a modifier is pending.
+        ("alpha-a-box-outline"      event-apply-meta-modifier meta
+         :enable (modifier-bar-available-p 'meta))
+        ("close-outline"            keyboard-quit             quit)
+        ("arrow-left"               backward-char             left)
+        ("arrow-up"                 previous-line             up)
+        ("arrow-down"               next-line                 down)
+        ("arrow-right"              forward-char              right)
+        ("magnify"                  consult-line              search)
+        ("keyboard-outline"         greg/android-toggle-touch-screen-keyboard keyboard)
+        ("numeric-1-circle-outline" greg/android-tool-bar-custom-command-1 slot-1)
+        ("numeric-2-circle-outline" greg/android-tool-bar-custom-command-2 slot-2))
+      "Single-row button list for the Android touch tool bar.")
 
     (setq tool-bar-map (make-sparse-keymap))
     (dolist (item greg/android-tool-bar-items)
-      (let ((icon (nth 0 item)) (command (nth 1 item)) (key (nth 2 item)))
-        (tool-bar-add-item icon command (or key command))))
+      (apply #'tool-bar-add-item item))
 
-    ;; Buttons that emit a real key (so they also work in minibuffer/isearch and
-    ;; can be chorded). Tab/Esc are intentionally absent here (see above).
-    (define-key key-translation-map (kbd "<tool-bar> <keyboard-quit>")            (kbd "C-g"))
-    (define-key key-translation-map (kbd "<tool-bar> <execute-extended-command>") (kbd "C-c"))
-    (define-key key-translation-map (kbd "<tool-bar> <exchange-point-and-mark>")  (kbd "C-x"))
-    (define-key key-translation-map (kbd "<tool-bar> <imenu>")                    (kbd "M-g"))
-    (define-key key-translation-map (kbd "<tool-bar> <isearch-forward>")          (kbd "M-s"))
-    (define-key key-translation-map (kbd "<tool-bar> <previous-line>")            (kbd "<up>"))
-    (define-key key-translation-map (kbd "<tool-bar> <next-line>")                (kbd "<down>"))
-    (define-key key-translation-map (kbd "<tool-bar> <backward-char>")            (kbd "<left>"))
-    (define-key key-translation-map (kbd "<tool-bar> <forward-char>")             (kbd "<right>"))
+    ;; Alt. `modifier-bar-mode' normally installs these `input-decode-map'
+    ;; entries; it is off, so install just the one modifier we keep.
+    (define-key input-decode-map [tool-bar meta]
+                #'tool-bar-event-apply-meta-modifier)
 
-    ;; Chords: a prefix button (C-c or C-x) followed by another button.
-    (global-set-key (kbd "C-x <up>")   #'delete-other-windows)
-    (global-set-key (kbd "C-x <down>") #'split-window-below)
-    (global-set-key (kbd "C-c <tool-bar> <universal-argument>") #'execute-extended-command)
-    (when (fboundp 'er/expand-region)
-      (global-set-key (kbd "C-x <tool-bar> <universal-argument>") #'er/expand-region))
-    (global-set-key (kbd "C-c <tool-bar> <undo>")             #'pop-to-mark-command)
-    (global-set-key (kbd "C-x <tool-bar> <undo>")             #'quit-window)
-    (global-set-key (kbd "C-c <tool-bar> <switch-to-buffer>") #'project-find-file)
-    (global-set-key (kbd "C-x <tool-bar> <switch-to-buffer>") #'find-file)
-    (global-set-key (kbd "C-c <tool-bar> <save-buffer>")      #'bookmark-set)
-    (global-set-key (kbd "C-x <tool-bar> <save-buffer>")      #'greg/android-kill-buffer)
+    ;; Buttons that emit a real key. Rebuilding the whole `<tool-bar>' prefix,
+    ;; rather than adding keys to it, also drops translations left over from an
+    ;; earlier version of this config when init.el is re-evaluated in a running
+    ;; session.
+    (define-key key-translation-map (kbd "<tool-bar>") (make-sparse-keymap))
+    (define-key key-translation-map (kbd "<tool-bar> <quit>")   (kbd "C-g"))
+    (define-key key-translation-map (kbd "<tool-bar> <left>")   (kbd "<left>"))
+    (define-key key-translation-map (kbd "<tool-bar> <up>")     (kbd "<up>"))
+    (define-key key-translation-map (kbd "<tool-bar> <down>")   (kbd "<down>"))
+    (define-key key-translation-map (kbd "<tool-bar> <right>")  (kbd "<right>"))
+    (define-key key-translation-map (kbd "<tool-bar> <search>") (kbd "C-s"))
+
+    ;; Plain keyboard bindings; no button depends on these.
     (global-set-key (kbd "M-s M-s") #'isearch-forward)
     (global-set-key (kbd "M-g M-s") #'consult-imenu)
     (global-set-key (kbd "M-s M-g") (if (executable-find "rg") #'consult-ripgrep #'consult-grep))
-    (when (boundp 'touch-screen-display-keyboard)
-      (global-set-key (kbd "C-x M-g") #'greg/android-toggle-touch-screen-keyboard))
+    (global-set-key (kbd "C-x M-g") #'greg/android-toggle-touch-screen-keyboard)
     (global-set-key (kbd "C-x M-s") #'read-only-mode)
 
     ))
