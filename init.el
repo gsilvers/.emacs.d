@@ -827,26 +827,30 @@ or holds something that is no longer a command just says so when tapped."
     (defun greg/android-packages ()
       "Return a list of installed Android package names."
       (mapcar (lambda (line) (replace-regexp-in-string "\\`package:" "" line))
-              (split-string (shell-command-to-string "pm list packages") "\n" t)))
+              (split-string (shell-command-to-string "pm list packages --user 0")
+                            "\n" t)))
+
+    (defvar greg/android-component-regexp "\\`[[:alnum:]_.]+/[[:alnum:]_.$]+\\'"
+      "Regexp matching an Android package/activity component name.")
 
     (defun greg/android-launch-app (package)
-      "Launch the Android application PACKAGE, e.g. \"com.example.err\".
-Resolves the package's launcher activity and starts it; falls back to
-`monkey' when the activity cannot be resolved."
+      "Launch the Android application PACKAGE, e.g. \"app.vanadium.browser\".
+Resolves the package's launcher activity and starts it with `am start'."
       (interactive (list (completing-read "App package: " (greg/android-packages))))
-      (let* ((component (string-trim
-                         (car (last (split-string
-                                     (shell-command-to-string
-                                      (format "cmd package resolve-activity --brief %s"
-                                              (shell-quote-argument package)))
-                                     "\n" t)))))
-             ;; Match a real package/activity component; a failure message
-             ;; from resolve-activity can itself contain a slash.
-             (command (if (string-match-p "\\`[[:alnum:]_.]+/[[:alnum:]_.$]+\\'" component)
-                          (format "am start -n %s" (shell-quote-argument component))
-                        (format "monkey -p %s -c android.intent.category.LAUNCHER 1"
-                                (shell-quote-argument package)))))
-        (message "%s" (string-trim (shell-command-to-string (concat command " 2>&1"))))))
+      (let* ((output (shell-command-to-string
+                      (format "cmd package resolve-activity --brief --user 0 %s 2>&1"
+                              (shell-quote-argument package))))
+             ;; Scan every line rather than taking the last: --brief still
+             ;; prints a `priority=...' line, and errors add more.
+             (component (seq-find (lambda (line)
+                                    (string-match-p greg/android-component-regexp line))
+                                  (mapcar #'string-trim (split-string output "\n" t)))))
+        (if (not component)
+            (message "No launcher activity for %s: %s" package (string-trim output))
+          (message "%s" (string-trim
+                         (shell-command-to-string
+                          (format "am start --user 0 -n %s 2>&1"
+                                  (shell-quote-argument component))))))))
 
     ;; Plain keyboard bindings; no button depends on these.
     (global-set-key (kbd "M-s M-s") #'isearch-forward)
