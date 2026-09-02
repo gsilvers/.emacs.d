@@ -657,17 +657,17 @@ full PATH/env is picked up (same approach as the vterm config above)."
     (global-set-key (kbd "<volume-down>") 'scroll-up-command)
 
     ;; ---- Touch tool bar ----------------------------------------------------
-    ;; One row of twelve buttons is the whole touch control surface: the
+    ;; One row of thirteen buttons is the whole touch control surface: the
     ;; modifier bar is off, so this bar is it. Icons come from
     ;; `material-pbm-icons' because PBM renders on the Android build of Emacs,
     ;; whereas the stock arrow icons ship only as SVG (unsupported there) and
     ;; silently show nothing.
     ;;
     ;; Three different mechanisms sit behind the buttons:
-    ;;   Alt                 -> `input-decode-map', reusing the modifier bar's
-    ;;                          own `tool-bar-event-apply-meta-modifier'. A tap
-    ;;                          applies M- to whatever is pressed next and pops
-    ;;                          the soft keyboard so there is something to press.
+    ;;   Ctrl, Alt           -> `input-decode-map', reusing the modifier bar's
+    ;;                          own event decoders. A tap applies C- or M- to
+    ;;                          whatever is pressed next and pops the soft
+    ;;                          keyboard so there is something to press.
     ;;   C-g, arrows, search -> `key-translation-map', so a tap emits a real key
     ;;                          and therefore also works in the minibuffer and
     ;;                          in isearch.
@@ -685,7 +685,12 @@ full PATH/env is picked up (same approach as the vterm config above)."
             (require 'material-pbm-icons))
         (error (message "material-pbm-icons install failed: %s" err))))
 
-    (setq tool-bar-button-margin 15)   ; bigger touch targets
+    ;; Touch targets. The pack's glyphs are a fixed 24x24 PBM, so button width
+    ;; is 24 + 2*margin + 2*relief and the margin is the only lever on how wide
+    ;; the row is. Horizontal 8 keeps 13 buttons on one line (13 * 42 = 546px);
+    ;; vertical stays 15 so they are still tall enough to hit. Drop the 8 if the
+    ;; row ever wraps again.
+    (setq tool-bar-button-margin '(8 . 15))
 
     ;; Keep the global tool bar visible in modes that install their own local one.
     (defun greg/kill-local-tool-bar-map ()
@@ -760,8 +765,10 @@ or holds something that is no longer a command just says so when tapped."
     (defvar greg/android-tool-bar-items
       '(("keyboard-esc"             greg-emulate-esc          esc)
         ("keyboard-tab"             greg-emulate-tab          tab)
-        ;; :enable greys the button out while it is armed, which is the only
-        ;; feedback that a modifier is pending.
+        ;; :enable greys a modifier button out while it is armed, which is the
+        ;; only feedback that a modifier is pending.
+        ("alpha-c-box-outline"      event-apply-control-modifier control
+         :enable (modifier-bar-available-p 'control))
         ("alpha-a-box-outline"      event-apply-meta-modifier meta
          :enable (modifier-bar-available-p 'meta))
         ("close-outline"            keyboard-quit             quit)
@@ -779,8 +786,13 @@ or holds something that is no longer a command just says so when tapped."
     (dolist (item greg/android-tool-bar-items)
       (apply #'tool-bar-add-item item))
 
-    ;; Alt. `modifier-bar-mode' normally installs these `input-decode-map'
-    ;; entries; it is off, so install just the one modifier we keep.
+    ;; Ctrl and Alt. `modifier-bar-mode' normally installs these
+    ;; `input-decode-map' entries; it is off, so install just the two modifiers
+    ;; we keep. Note these compose with the soft keyboard, not with the other
+    ;; tool-bar buttons: stock `modifier-bar-button' signals `user-error' if the
+    ;; next event is a tool-bar event that is not itself a modifier.
+    (define-key input-decode-map [tool-bar control]
+                #'tool-bar-event-apply-control-modifier)
     (define-key input-decode-map [tool-bar meta]
                 #'tool-bar-event-apply-meta-modifier)
 
