@@ -61,7 +61,9 @@ Reuses an existing non-vterm window, or splits above if only vterm is visible."
       (let ((buf (find-file-noselect (expand-file-name file))))
         (persp-add-buffer buf)
         (display-buffer buf
-          '((display-buffer-use-some-window display-buffer-above-selected)
+          '((display-buffer-use-some-window display-buffer-in-direction)
+            (direction . above)
+            (window-height . 0.5)
             (inhibit-same-window . t)))))
 
     ;; File queue for opening files from external processes (e.g. Claude Code).
