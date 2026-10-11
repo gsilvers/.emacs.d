@@ -132,6 +132,209 @@ Reuses an existing non-vterm window, or splits above if only vterm is visible."
     (global-set-key (kbd "C-;") #'embark-dwim)
     (global-set-key (kbd "C-h B") #'embark-bindings)
 
+    ;; Consult bindings -- shared by every OS, Android included.
+    (use-package consult
+      :ensure t
+      ;; Replace bindings. Lazily loaded due by `use-package'.
+      :bind (;; C-c bindings in `mode-specific-map'
+	     ("C-c M-x" . consult-mode-command)
+	     ("C-c h" . consult-history)
+	     ("C-c k" . consult-kmacro)
+	     ("C-c m" . consult-man)
+	     ("C-c i" . consult-info)
+	     ([remap Info-search] . consult-info)
+	     ;; C-x bindings in `ctl-x-map'
+	     ("C-x M-:" . consult-complex-command) ;; orig. repeat-complex-command
+	     ("C-x b" . consult-buffer) ;; orig. switch-to-buffer
+	     ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
+	     ("C-x 5 b" . consult-buffer-other-frame) ;; orig. switch-to-buffer-other-frame
+	     ("C-x t b" . consult-buffer-other-tab) ;; orig. switch-to-buffer-other-tab
+	     ("C-x r b" . consult-bookmark) ;; orig. bookmark-jump
+	     ("C-x p b" . consult-project-buffer) ;; orig. project-switch-to-buffer
+	     ;; Custom M-# bindings for fast register access
+	     ("M-#" . consult-register-load)
+	     ("M-'" . consult-register-store) ;; orig. abbrev-prefix-mark (unrelated)
+	     ("C-M-#" . consult-register)
+	     ;; Other custom bindings
+	     ("M-y" . consult-yank-pop) ;; orig. yank-pop
+	     ;; M-g bindings in `goto-map'
+	     ("M-g e" . consult-compile-error)
+	     ("M-g f" . consult-flymake) ;; Alternative: consult-flycheck
+	     ("M-g g" . consult-goto-line) ;; orig. goto-line
+	     ("M-g M-g" . consult-goto-line) ;; orig. goto-line
+	     ("M-g o" . consult-outline) ;; Alternative: consult-org-heading
+	     ("M-g m" . consult-mark)
+	     ("M-g k" . consult-global-mark)
+	     ("M-g i" . consult-imenu)
+	     ("M-g I" . consult-imenu-multi)
+	     ;; M-s bindings in `search-map'
+	     ("M-s d" . consult-find) ;; Alternative: consult-fd
+	     ("M-s c" . consult-locate)
+	     ("M-s g" . consult-grep)
+	     ("M-s G" . consult-git-grep)
+	     ("M-s r" . consult-ripgrep)
+	     ("M-s l" . consult-line)
+	     ("M-s L" . consult-line-multi)
+	     ("M-s k" . consult-keep-lines)
+	     ("M-s u" . consult-focus-lines)
+	     ;; Isearch integration
+	     ("M-s e" . consult-isearch-history)
+	     :map isearch-mode-map
+	     ("M-e" . consult-isearch-history) ;; orig. isearch-edit-string
+	     ("M-s e" . consult-isearch-history) ;; orig. isearch-edit-string
+	     ("M-s l" . consult-line) ;; needed by consult-line to detect isearch
+	     ("M-s L" . consult-line-multi) ;; needed by consult-line to detect isearch
+	     ;; Minibuffer history
+	     :map minibuffer-local-map
+	     ("M-s" . consult-history) ;; orig. next-matching-history-element
+	     ("M-r" . consult-history)) ;; orig. previous-matching-history-element
+
+      ;; Enable automatic preview at point in the *Completions* buffer. This is
+      ;; relevant when you use the default completion UI.
+      :hook (completion-list-mode . consult-preview-at-point-mode)
+
+      ;; The :init configuration is always executed (Not lazy)
+      :init
+
+      ;; Optionally configure the register formatting. This improves the register
+      ;; preview for `consult-register', `consult-register-load',
+      ;; `consult-register-store' and the Emacs built-ins.
+      (setq register-preview-delay 0.5
+	    register-preview-function #'consult-register-format)
+
+      ;; Optionally tweak the register preview window.
+      ;; This adds thin lines, sorting and hides the mode line of the window.
+      (advice-add #'register-preview :override #'consult-register-window)
+
+      ;; Use Consult to select xref locations with preview
+      (setq xref-show-xrefs-function #'consult-xref
+	    xref-show-definitions-function #'consult-xref)
+
+      ;; Configure other variables and modes in the :config section,
+      ;; after lazily loading the package.
+      :config
+
+      ;; Optionally configure preview. The default value
+      ;; is 'any, such that any key triggers the preview.
+      ;; (setq consult-preview-key 'any)
+      ;; (setq consult-preview-key "M-.")
+      ;; (setq consult-preview-key '("S-<down>" "S-<up>"))
+      ;; For some commands and buffer sources it is useful to configure the
+      ;; :preview-key on a per-command basis using the `consult-customize' macro.
+      (consult-customize
+       consult-theme :preview-key '(:debounce 0.2 any)
+       consult-ripgrep consult-git-grep consult-grep
+       consult-bookmark consult-recent-file consult-xref
+       consult--source-bookmark consult--source-file-register
+       consult--source-recent-file consult--source-project-recent-file
+       ;; :preview-key "M-."
+       :preview-key '(:debounce 0.4 any))
+
+      ;; Optionally configure the narrowing key.
+      ;; Both < and C-+ work reasonably well.
+      (setq consult-narrow-key "<") ;; "C-+"
+
+      ;; Optionally make narrowing help available in the minibuffer.
+      ;; You may want to use `embark-prefix-help-command' or which-key instead.
+      ;; (define-key consult-narrow-map (vconcat consult-narrow-key "?") #'consult-narrow-help)
+
+      ;; By default `consult-project-function' uses `project-root' from project.el.
+      ;; Optionally configure a different project root function.
+;;;; 1. project.el (the default)
+      ;; (setq consult-project-function #'consult--default-project--function)
+;;;; 2. vc.el (vc-root-dir)
+      ;; (setq consult-project-function (lambda (_) (vc-root-dir)))
+;;;; 3. locate-dominating-file
+      ;; (setq consult-project-function (lambda (_) (locate-dominating-file "." ".git")))
+;;;; 4. projectile.el (projectile-project-root)
+      ;; (autoload 'projectile-project-root "projectile")
+      ;; (setq consult-project-function (lambda (_) (projectile-project-root)))
+;;;; 5. No project support
+      ;; (setq consult-project-function nil)
+      )
+
+    (use-package eglot
+      :defer t
+      :bind (:map eglot-mode-map
+		  ("C-c l a" . eglot-code-actions)
+		  ("C-c l r" . eglot-rename)
+		  ("C-c l f" . eglot-format)
+		  ("C-c l d" . eldoc))
+      :custom (eglot-report-progress nil)
+      :config
+      (setq read-process-output-max (* 1024 1024))
+      (setq eglot-events-buffer-size 0)
+
+      ;; Force Eglot to use Pyright for python-mode
+      (add-to-list 'eglot-server-programs
+		   `(python-mode . ("basedpyright-langserver" "--stdio")))
+      (add-to-list 'eglot-server-programs
+		   `(python-ts-mode . ("basedpyright-langserver" "--stdio")))
+
+      (add-to-list 'eglot-server-programs
+		   `(typescript-mode . ("typescript-language-server" "--stdio")))
+      (add-to-list 'eglot-server-programs
+		   `(js-mode . ("typescript-language-server" "--stdio"))))
+
+    ;; --------------------------------------------------------------------
+    ;; Eat terminal -- primarily for running Claude Code.
+    ;; Eat is pure Lisp (no compiled module), so unlike vterm (desktop setup)
+    ;; it runs on Android too. It also resizes itself (no manual
+    ;; window-size hook needed) and keeps a large scrollback buffer, so long
+    ;; Claude Code answers can be scrolled back through and searched.
+    (defvar greg/claude-code-shell "/bin/zsh"
+      "Login shell that `greg/claude-code' runs Claude Code through.
+macOS keeps this default; `greg/linux-setup-items' swaps in the account's
+own login shell and `greg/android-setup-items' uses Termux's bash.")
+
+    (use-package eat
+      :ensure t
+      :commands (eat greg/claude-code)
+      :bind ("C-c c" . greg/claude-code)
+      :custom
+      ;; Generous scrollback (in characters) so long Claude answers stay
+      ;; reviewable. Default is 131072; nil would mean unlimited.
+      (eat-term-scrollback-size 1000000)
+      :config
+      ;; Mouse-wheel scrolling through the terminal and its scrollback.
+      (setq eat-enable-mouse t)
+
+      ;; macOS Cmd-V (and C-S-v) should paste *into the terminal* via
+      ;; `eat-yank', which sends the clipboard to the running process.
+      ;; The default global `yank' tries to insert into Eat's output,
+      ;; which is read-only and errors with "text is read-only".
+      ;; (C-y already does the right thing in semi-char mode.)
+      ;; On Linux, s-v is Super-V and C-S-v is the usual terminal paste.
+      (define-key eat-semi-char-mode-map (kbd "s-v") #'eat-yank)
+      (define-key eat-semi-char-mode-map (kbd "C-S-v") #'eat-yank)
+      (define-key eat-char-mode-map (kbd "s-v") #'eat-yank)
+      (define-key eat-char-mode-map (kbd "C-S-v") #'eat-yank)
+
+      (defun greg/claude-code ()
+        "Open or switch to an Eat terminal running Claude Code.
+Each perspective gets its own Claude buffer, named \"*claude:PERSP*\",
+so switching perspectives gives you a separate Claude session.
+Launches in the current Projectile project root when available so Claude
+starts in the right repository, and runs through a login shell
+\(`greg/claude-code-shell') so the full PATH/env is picked up (same
+approach as the vterm config in the desktop setup)."
+        (interactive)
+        (let* ((default-directory
+                (or (and (fboundp 'projectile-project-root)
+                         (ignore-errors (projectile-project-root)))
+                    default-directory))
+               (persp (and (bound-and-true-p persp-mode)
+                           (persp-current-name)))
+               (name (if persp (format "claude:%s" persp) "claude"))
+               (bufname (format "*%s*" name))
+               (existing (get-buffer bufname)))
+          (if (and existing (process-live-p (get-buffer-process existing)))
+              (pop-to-buffer existing)
+            ;; `eat-make' names the buffer "*NAME*" from its first argument.
+            (let ((buf (eat-make name greg/claude-code-shell nil "-l" "-c" "exec claude")))
+              (when persp (persp-add-buffer buf))
+              (pop-to-buffer buf))))))
+
 
     (column-number-mode)
     (global-display-line-numbers-mode 1)
@@ -347,12 +550,12 @@ window whose modeline was clicked to the chosen buffer."
 ;;; ====================================================================================
 
 ;;; ====================================================================================
-;;; Shared Language Setup (called by both macOS and Android)
+;;; Shared Language Setup (called by macOS, Linux and Android)
 ;;; Dart / Flutter support lives here rather than inside a single OS's setup
-;;; so the exact same config runs on both. eglot resolves the language-server
+;;; so the exact same config runs everywhere. eglot resolves the language-server
 ;;; executable from `exec-path' at connect time, so this works anywhere `dart'
-;;; is findable there: the login-shell PATH on macOS, or the Termux bin dir on
-;;; Android (which `greg/android-setup-items' adds to `exec-path'/PATH first).
+;;; is findable there: the login-shell PATH on macOS / Linux, or the Termux bin
+;;; dir on Android (which `greg/android-setup-items' adds to `exec-path'/PATH first).
 (defun greg/dart-setup-items ()
   "Install and configure Dart + Flutter with eglot.
 Portable across environments -- see the section comment above."
@@ -375,14 +578,15 @@ Portable across environments -- see the section comment above."
 ;;; ====================================================================================
 
 ;;; ====================================================================================
-;;; Macos Setup
-(defun greg/macos-setup-items ()
-  "Items to be executed when logged in on macos only"
+;;; Desktop Setup (called by both macOS and Linux)
+;;; What the desktop / laptop machines share beyond the universal setup: vterm
+;;; and the TypeScript / JS / Python modes. The macOS and Linux
+;;; functions below only set the font (and, on Linux, the Claude Code shell)
+;;; and then call this, so the two can't drift apart.
+
+(defun greg/desktop-setup-items ()
+  "Items shared by the desktop / laptop environments (macOS and Linux)."
   (progn
-    (set-face-attribute 'default nil :family "SeriousShanns Nerd Font Mono" :height 160)
-    (set-desktop-size)
-
-
     (use-package vterm
       :ensure t
       :commands vterm
@@ -407,177 +611,6 @@ Portable across environments -- see the section comment above."
                                           (set-process-window-size proc height width))))))
                                 nil t))))
 
-    ;; --------------------------------------------------------------------
-    ;; Eat terminal -- primarily for running Claude Code.
-    ;; Unlike the vterm setup above, Eat resizes itself (no manual
-    ;; window-size hook needed) and keeps a large scrollback buffer, so long
-    ;; Claude Code answers can be scrolled back through and searched.
-    (use-package eat
-      :ensure t
-      :commands (eat greg/claude-code)
-      :bind ("C-c c" . greg/claude-code)
-      :custom
-      ;; Generous scrollback (in characters) so long Claude answers stay
-      ;; reviewable. Default is 131072; nil would mean unlimited.
-      (eat-term-scrollback-size 1000000)
-      :config
-      ;; Mouse-wheel scrolling through the terminal and its scrollback.
-      (setq eat-enable-mouse t)
-
-      ;; macOS Cmd-V (and C-S-v) should paste *into the terminal* via
-      ;; `eat-yank', which sends the clipboard to the running process.
-      ;; The default global `yank' tries to insert into Eat's output,
-      ;; which is read-only and errors with "text is read-only".
-      ;; (C-y already does the right thing in semi-char mode.)
-      (define-key eat-semi-char-mode-map (kbd "s-v") #'eat-yank)
-      (define-key eat-semi-char-mode-map (kbd "C-S-v") #'eat-yank)
-      (define-key eat-char-mode-map (kbd "s-v") #'eat-yank)
-      (define-key eat-char-mode-map (kbd "C-S-v") #'eat-yank)
-
-      (defun greg/claude-code ()
-        "Open or switch to an Eat terminal running Claude Code.
-Each perspective gets its own Claude buffer, named \"*claude:PERSP*\",
-so switching perspectives gives you a separate Claude session.
-Launches in the current Projectile project root when available so Claude
-starts in the right repository, and runs through a login shell so the
-full PATH/env is picked up (same approach as the vterm config above)."
-        (interactive)
-        (let* ((default-directory
-                (or (and (fboundp 'projectile-project-root)
-                         (ignore-errors (projectile-project-root)))
-                    default-directory))
-               (persp (and (bound-and-true-p persp-mode)
-                           (persp-current-name)))
-               (name (if persp (format "claude:%s" persp) "claude"))
-               (bufname (format "*%s*" name))
-               (existing (get-buffer bufname)))
-          (if (and existing (process-live-p (get-buffer-process existing)))
-              (pop-to-buffer existing)
-            ;; `eat-make' names the buffer "*NAME*" from its first argument.
-            (let ((buf (eat-make name "/bin/zsh" nil "-l" "-c" "exec claude")))
-              (when persp (persp-add-buffer buf))
-              (pop-to-buffer buf))))))
-
-    (use-package consult
-      :ensure t
-      ;; Replace bindings. Lazily loaded due by `use-package'.
-      :bind (;; C-c bindings in `mode-specific-map'
-	     ("C-c M-x" . consult-mode-command)
-	     ("C-c h" . consult-history)
-	     ("C-c k" . consult-kmacro)
-	     ("C-c m" . consult-man)
-	     ("C-c i" . consult-info)
-	     ([remap Info-search] . consult-info)
-	     ;; C-x bindings in `ctl-x-map'
-	     ("C-x M-:" . consult-complex-command) ;; orig. repeat-complex-command
-	     ("C-x b" . consult-buffer) ;; orig. switch-to-buffer
-	     ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
-	     ("C-x 5 b" . consult-buffer-other-frame) ;; orig. switch-to-buffer-other-frame
-	     ("C-x t b" . consult-buffer-other-tab) ;; orig. switch-to-buffer-other-tab
-	     ("C-x r b" . consult-bookmark) ;; orig. bookmark-jump
-	     ("C-x p b" . consult-project-buffer) ;; orig. project-switch-to-buffer
-	     ;; Custom M-# bindings for fast register access
-	     ("M-#" . consult-register-load)
-	     ("M-'" . consult-register-store) ;; orig. abbrev-prefix-mark (unrelated)
-	     ("C-M-#" . consult-register)
-	     ;; Other custom bindings
-	     ("M-y" . consult-yank-pop) ;; orig. yank-pop
-	     ;; M-g bindings in `goto-map'
-	     ("M-g e" . consult-compile-error)
-	     ("M-g f" . consult-flymake) ;; Alternative: consult-flycheck
-	     ("M-g g" . consult-goto-line) ;; orig. goto-line
-	     ("M-g M-g" . consult-goto-line) ;; orig. goto-line
-	     ("M-g o" . consult-outline) ;; Alternative: consult-org-heading
-	     ("M-g m" . consult-mark)
-	     ("M-g k" . consult-global-mark)
-	     ("M-g i" . consult-imenu)
-	     ("M-g I" . consult-imenu-multi)
-	     ;; M-s bindings in `search-map'
-	     ("M-s d" . consult-find) ;; Alternative: consult-fd
-	     ("M-s c" . consult-locate)
-	     ("M-s g" . consult-grep)
-	     ("M-s G" . consult-git-grep)
-	     ("M-s r" . consult-ripgrep)
-	     ("M-s l" . consult-line)
-	     ("M-s L" . consult-line-multi)
-	     ("M-s k" . consult-keep-lines)
-	     ("M-s u" . consult-focus-lines)
-	     ;; Isearch integration
-	     ("M-s e" . consult-isearch-history)
-	     :map isearch-mode-map
-	     ("M-e" . consult-isearch-history) ;; orig. isearch-edit-string
-	     ("M-s e" . consult-isearch-history) ;; orig. isearch-edit-string
-	     ("M-s l" . consult-line) ;; needed by consult-line to detect isearch
-	     ("M-s L" . consult-line-multi) ;; needed by consult-line to detect isearch
-	     ;; Minibuffer history
-	     :map minibuffer-local-map
-	     ("M-s" . consult-history) ;; orig. next-matching-history-element
-	     ("M-r" . consult-history)) ;; orig. previous-matching-history-element
-
-      ;; Enable automatic preview at point in the *Completions* buffer. This is
-      ;; relevant when you use the default completion UI.
-      :hook (completion-list-mode . consult-preview-at-point-mode)
-
-      ;; The :init configuration is always executed (Not lazy)
-      :init
-
-      ;; Optionally configure the register formatting. This improves the register
-      ;; preview for `consult-register', `consult-register-load',
-      ;; `consult-register-store' and the Emacs built-ins.
-      (setq register-preview-delay 0.5
-	    register-preview-function #'consult-register-format)
-
-      ;; Optionally tweak the register preview window.
-      ;; This adds thin lines, sorting and hides the mode line of the window.
-      (advice-add #'register-preview :override #'consult-register-window)
-
-      ;; Use Consult to select xref locations with preview
-      (setq xref-show-xrefs-function #'consult-xref
-	    xref-show-definitions-function #'consult-xref)
-
-      ;; Configure other variables and modes in the :config section,
-      ;; after lazily loading the package.
-      :config
-
-      ;; Optionally configure preview. The default value
-      ;; is 'any, such that any key triggers the preview.
-      ;; (setq consult-preview-key 'any)
-      ;; (setq consult-preview-key "M-.")
-      ;; (setq consult-preview-key '("S-<down>" "S-<up>"))
-      ;; For some commands and buffer sources it is useful to configure the
-      ;; :preview-key on a per-command basis using the `consult-customize' macro.
-      (consult-customize
-       consult-theme :preview-key '(:debounce 0.2 any)
-       consult-ripgrep consult-git-grep consult-grep
-       consult-bookmark consult-recent-file consult-xref
-       consult--source-bookmark consult--source-file-register
-       consult--source-recent-file consult--source-project-recent-file
-       ;; :preview-key "M-."
-       :preview-key '(:debounce 0.4 any))
-
-      ;; Optionally configure the narrowing key.
-      ;; Both < and C-+ work reasonably well.
-      (setq consult-narrow-key "<") ;; "C-+"
-
-      ;; Optionally make narrowing help available in the minibuffer.
-      ;; You may want to use `embark-prefix-help-command' or which-key instead.
-      ;; (define-key consult-narrow-map (vconcat consult-narrow-key "?") #'consult-narrow-help)
-
-      ;; By default `consult-project-function' uses `project-root' from project.el.
-      ;; Optionally configure a different project root function.
-;;;; 1. project.el (the default)
-      ;; (setq consult-project-function #'consult--default-project--function)
-;;;; 2. vc.el (vc-root-dir)
-      ;; (setq consult-project-function (lambda (_) (vc-root-dir)))
-;;;; 3. locate-dominating-file
-      ;; (setq consult-project-function (lambda (_) (locate-dominating-file "." ".git")))
-;;;; 4. projectile.el (projectile-project-root)
-      ;; (autoload 'projectile-project-root "projectile")
-      ;; (setq consult-project-function (lambda (_) (projectile-project-root)))
-;;;; 5. No project support
-      ;; (setq consult-project-function nil)
-      )
-
     (use-package typescript-mode
       :ensure t
       :mode "\\.ts\\'"
@@ -599,29 +632,6 @@ full PATH/env is picked up (same approach as the vterm config above)."
       (python-ts-mode . eglot-ensure))
 
 
-    (use-package eglot
-      :defer t
-      :bind (:map eglot-mode-map
-		  ("C-c l a" . eglot-code-actions)
-		  ("C-c l r" . eglot-rename)
-		  ("C-c l f" . eglot-format)
-		  ("C-c l d" . eldoc))
-      :custom (eglot-report-progress nil)
-      :config
-      (setq read-process-output-max (* 1024 1024))
-      (setq eglot-events-buffer-size 0)
-
-      ;; Force Eglot to use Pyright for python-mode
-      (add-to-list 'eglot-server-programs
-		   `(python-mode . ("basedpyright-langserver" "--stdio")))
-      (add-to-list 'eglot-server-programs
-		   `(python-ts-mode . ("basedpyright-langserver" "--stdio")))
-
-      (add-to-list 'eglot-server-programs
-		   `(typescript-mode . ("typescript-language-server" "--stdio")))
-      (add-to-list 'eglot-server-programs
-		   `(js-mode . ("typescript-language-server" "--stdio"))))
-
     (setq-default eglot-workspace-configuration
 		  '(:pyright (:venvPath "."
 					:venv ".venv"
@@ -630,7 +640,48 @@ full PATH/env is picked up (same approach as the vterm config above)."
     ;; Dart / Flutter -- shared with Android (see greg/dart-setup-items).
     (greg/dart-setup-items)
     ))
+;;; End Desktop Setup
+;;; ====================================================================================
+
+;;; ====================================================================================
+;;; Macos Setup
+(defun greg/macos-setup-items ()
+  "Items to be executed when logged in on macos only"
+  (progn
+    (set-face-attribute 'default nil :family "SeriousShanns Nerd Font Mono" :height 160)
+    (set-desktop-size)
+
+    ;; vterm and the TypeScript / JS / Python modes (shared with Linux).
+    (greg/desktop-setup-items)
+    ))
 ;;; End Macos Setup
+;;; ====================================================================================
+
+;;; ====================================================================================
+;;; Linux Setup
+(defun greg/linux-setup-items ()
+  "Items to be executed on a Linux desktop / laptop only.
+Does the same thing as the macOS setup. The only differences are the two
+things a Linux box can't be assumed to have: zsh and the Nerd Font."
+  (progn
+    ;; macOS pins Claude Code to /bin/zsh. Linux uses the account's own login
+    ;; shell instead (where its PATH is set up), falling back to bash.
+    (setq greg/claude-code-shell
+          (or (getenv "SHELL") (executable-find "bash") "/bin/sh"))
+
+    ;; Same font as macOS when it's installed (e.g. in ~/.local/share/fonts).
+    ;; Skipped in a terminal frame (emacs -nw / over SSH), where the terminal
+    ;; owns the font.
+    (when (display-graphic-p)
+      (if (find-font (font-spec :family "SeriousShanns Nerd Font Mono"))
+          (set-face-attribute 'default nil :family "SeriousShanns Nerd Font Mono" :height 160)
+        (message "SeriousShanns Nerd Font Mono is not installed; using the default font")))
+    (set-desktop-size)
+
+    ;; vterm and the TypeScript / JS / Python modes (shared with macOS).
+    (greg/desktop-setup-items)
+    ))
+;;; End Linux Setup
 ;;; ====================================================================================
 
 ;;; ====================================================================================
@@ -641,6 +692,12 @@ full PATH/env is picked up (same approach as the vterm config above)."
     (push "/data/data/com.termux/files/usr/bin" exec-path)
     (setenv "PATH" (format "%s:%s" "/data/data/com.termux/files/usr/bin"
 			   (getenv "PATH")))
+
+    ;; Eat (universal setup) runs Termux's bash: M-x eat for a terminal, and
+    ;; C-c c for Claude Code if `claude' is installed in Termux.
+    (let ((termux-bash "/data/data/com.termux/files/usr/bin/bash"))
+      (setq eat-shell termux-bash
+            greg/claude-code-shell termux-bash))
 
     ;; Dart / Flutter support (shared with macOS). Placed after the Termux
     ;; bin dir has been added to `exec-path'/PATH above, so eglot can find
@@ -838,20 +895,19 @@ or holds something that is no longer a command just says so when tapped."
 ;;; Actual initialization Happens Here!
 ;;; ====================================================================================
 (greg/universal-setup-items)
-(if (eq system-type `darwin)
-    (progn
-      (message (format "Loading Mac Config: %s" system-type))
-      (greg/macos-setup-items)
-      )
-  (if (eq system-type `android)
-      (progn
-	(message (format "Loading Android Config: %s" system-type))
-	(greg/android-setup-items)
-	)
-    (progn
-      (message (format "Unexpected Operating System Type Encountered: %s" system-type))
-      (display-warning :warning (format "Unexpected Operating System Type Encountered: %s" system-type))
-      )))
+(cond
+ ((eq system-type 'darwin)
+  (message (format "Loading Mac Config: %s" system-type))
+  (greg/macos-setup-items))
+ ((eq system-type 'android)
+  (message (format "Loading Android Config: %s" system-type))
+  (greg/android-setup-items))
+ ((eq system-type 'gnu/linux)
+  (message (format "Loading Linux Config: %s" system-type))
+  (greg/linux-setup-items))
+ (t
+  (message (format "Unexpected Operating System Type Encountered: %s" system-type))
+  (display-warning :warning (format "Unexpected Operating System Type Encountered: %s" system-type))))
 
 
 (provide 'init)
