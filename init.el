@@ -312,6 +312,26 @@ own login shell and `greg/android-setup-items' uses Termux's bash.")
       (define-key eat-char-mode-map (kbd "s-v") #'eat-yank)
       (define-key eat-char-mode-map (kbd "C-S-v") #'eat-yank)
 
+      (defvar greg/claude-code-email-loop-project "~/Dokuments/Engineering_Journal/"
+        "Project root where `greg/claude-code' also starts the email check loop.")
+
+      (defvar greg/claude-code-email-loop-prompt "/check-email"
+        "Initial prompt Claude Code gets in `greg/claude-code-email-loop-project'.")
+
+      (defun greg/claude-code-command ()
+        "Shell command that starts Claude Code in `default-directory'.
+In `greg/claude-code-email-loop-project' it passes
+`greg/claude-code-email-loop-prompt' as the initial prompt, so the
+session checks email right away; the skill then schedules 9am/4pm re-runs."
+        (if (string= (file-truename default-directory)
+                     (file-truename greg/claude-code-email-loop-project))
+            (progn
+              (message "Claude Code: starting email check loop (%s)"
+                       greg/claude-code-email-loop-prompt)
+              (concat "exec claude "
+                      (shell-quote-argument greg/claude-code-email-loop-prompt)))
+          "exec claude"))
+
       (defun greg/claude-code ()
         "Open or switch to an Eat terminal running Claude Code.
 Each perspective gets its own Claude buffer, named \"*claude:PERSP*\",
@@ -333,7 +353,8 @@ approach as the vterm config in the desktop setup)."
           (if (and existing (process-live-p (get-buffer-process existing)))
               (pop-to-buffer existing)
             ;; `eat-make' names the buffer "*NAME*" from its first argument.
-            (let ((buf (eat-make name greg/claude-code-shell nil "-l" "-c" "exec claude")))
+            (let ((buf (eat-make name greg/claude-code-shell nil "-l" "-c"
+                                 (greg/claude-code-command))))
               (when persp (persp-add-buffer buf))
               (pop-to-buffer buf))))))
 
