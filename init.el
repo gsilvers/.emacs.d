@@ -769,12 +769,12 @@ things a Linux box can't be assumed to have: zsh and the Nerd Font."
         (error (message "material-pbm-icons install failed: %s" err))))
 
     ;; Touch targets. The pack's glyphs are 24x24 PBMs, but Emacs scales them by
-    ;; `image-scaling-factor' (`auto': `frame-char-width' / 10), so button width
-    ;; is 24*scale + 2*margin + 2*relief, and a bigger default font can wrap the
-    ;; row. Horizontal 4 makes room for 14 buttons on one line; vertical only
-    ;; changes the height, so raising it is safe. Drop the 4 if the row ever
-    ;; wraps again. For bigger icons, set `image-scaling-factor' above the `auto'
-    ;; value and check that 14 * button width still fits in `frame-pixel-width'.
+    ;; `image-scaling-factor', so button width is 24*scale + 2*margin + 2*relief.
+    ;; At scale 3.2 and horizontal margin 4, the row of 14 needs a
+    ;; `frame-pixel-width' of about 1220. If it wraps, lower the scale from the
+    ;; quick menu or drop the 4. Vertical only changes the height, so raising it
+    ;; is safe.
+    (setq image-scaling-factor 3.2)
     (setq tool-bar-button-margin '(4 . 20))
 
     ;; Keep the global tool bar visible in modes that install their own local one.
@@ -855,11 +855,33 @@ or holds something that is no longer a command just says so when tapped."
           (org-cycle-overview)
         (org-fold-show-all)))
 
+    (defun greg/android-adjust-image-scale (delta)
+      "Change `image-scaling-factor' by DELTA and redraw images at the new size."
+      ;; Round to one decimal so repeated taps don't accumulate float error.
+      (setq image-scaling-factor
+            (max 0.1 (/ (round (* 10 (+ image-scaling-factor delta))) 10.0)))
+      ;; Cached images keep their old size, since the factor isn't part of the
+      ;; cache key.
+      (clear-image-cache t)
+      (message "Image scale: %.1f" image-scaling-factor))
+
+    (defun greg/android-image-scale-up ()
+      "Increase `image-scaling-factor' by 0.1."
+      (interactive)
+      (greg/android-adjust-image-scale 0.1))
+
+    (defun greg/android-image-scale-down ()
+      "Decrease `image-scaling-factor' by 0.1."
+      (interactive)
+      (greg/android-adjust-image-scale -0.1))
+
     (defvar greg/android-quick-menu-items
-      '(("IELM"            . ielm)
-        ("Eshell"          . eshell)
-        ("Font scale up"   . text-scale-increase)
-        ("Font scale down" . text-scale-decrease))
+      '(("IELM"             . ielm)
+        ("Eshell"           . eshell)
+        ("Font scale up"    . text-scale-increase)
+        ("Font scale down"  . text-scale-decrease)
+        ("Image scale up"   . greg/android-image-scale-up)
+        ("Image scale down" . greg/android-image-scale-down))
       "Label and command pairs always shown in the tool-bar quick menu.")
 
     (defvar greg/android-quick-menu-mode-items
