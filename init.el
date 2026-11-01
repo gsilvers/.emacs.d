@@ -527,6 +527,33 @@ window whose modeline was clicked to the chosen buffer."
       (setq which-key-idle-delay 1))
     (setq ivy-initial-inputs-alist nil)
 
+    ;; Org slides: present an Org file, with each heading as a slide. `M-x
+    ;; org-tree-slide-mode' starts and ends the show; C-> and C-< move between
+    ;; slides. Android also puts next and previous on the tool bar.
+    (use-package org-tree-slide
+      :ensure t
+      :custom (org-tree-slide-slide-in-effect nil))
+
+    (defun greg/slides-on ()
+      "Make the current buffer readable as a slide."
+      (display-line-numbers-mode -1)
+      (text-scale-set 2))
+
+    (defun greg/slides-off ()
+      "Undo `greg/slides-on'."
+      (display-line-numbers-mode 1)
+      (text-scale-set 0))
+
+    (add-hook 'org-tree-slide-play-hook #'greg/slides-on)
+    (add-hook 'org-tree-slide-stop-hook #'greg/slides-off)
+
+    (defun greg/slide-next ()
+      "Start the slideshow, or go to the next slide if it is running."
+      (interactive)
+      (if (bound-and-true-p org-tree-slide-mode)
+          (org-tree-slide-move-next-tree)
+        (org-tree-slide-mode 1)))
+
     ;; SVG editing and preview
     (add-to-list 'auto-mode-alist '("\\.svg\\'" . nxml-mode))
 
@@ -882,33 +909,9 @@ or holds something that is no longer a command just says so when tapped."
     (global-set-key (kbd "C-x M-s") #'read-only-mode)
 
     ;; ---- Org slides --------------------------------------------------------
-    ;; Present an Org file from the phone: each heading is a slide. In an Org
+    ;; The show itself is set up in `greg/universal-setup-items'. In an Org
     ;; buffer, button 1 starts the show and then goes forward, button 2 goes
     ;; back. `M-x org-tree-slide-mode' ends it.
-    (use-package org-tree-slide
-      :ensure t
-      :custom (org-tree-slide-slide-in-effect nil))
-
-    (defun greg/slides-on ()
-      "Make the current buffer readable as a slide."
-      (display-line-numbers-mode -1)
-      (text-scale-set 2))
-
-    (defun greg/slides-off ()
-      "Undo `greg/slides-on'."
-      (display-line-numbers-mode 1)
-      (text-scale-set 0))
-
-    (add-hook 'org-tree-slide-play-hook #'greg/slides-on)
-    (add-hook 'org-tree-slide-stop-hook #'greg/slides-off)
-
-    (defun greg/slide-next ()
-      "Start the slideshow, or go to the next slide if it is running."
-      (interactive)
-      (if (bound-and-true-p org-tree-slide-mode)
-          (org-tree-slide-move-next-tree)
-        (org-tree-slide-mode 1)))
-
     (setq greg/android-tool-bar-custom-commands
           '(greg/slide-next org-tree-slide-move-previous-tree))
 
