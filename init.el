@@ -748,12 +748,14 @@ things a Linux box can't be assumed to have: zsh and the Nerd Font."
             (require 'material-pbm-icons))
         (error (message "material-pbm-icons install failed: %s" err))))
 
-    ;; Touch targets. The pack's glyphs are a fixed 24x24 PBM, so button width
-    ;; is 24 + 2*margin + 2*relief and the margin is the only lever on how wide
-    ;; the row is. Horizontal 8 keeps 13 buttons on one line (13 * 42 = 546px);
-    ;; vertical stays 15 so they are still tall enough to hit. Drop the 8 if the
-    ;; row ever wraps again.
-    (setq tool-bar-button-margin '(8 . 15))
+    ;; Touch targets. The pack's glyphs are 24x24 PBMs, but Emacs scales them by
+    ;; `image-scaling-factor' (`auto': `frame-char-width' / 10), so button width
+    ;; is 24*scale + 2*margin + 2*relief, and a bigger default font can wrap the
+    ;; row. Horizontal 8 keeps 13 buttons on one line; vertical only changes the
+    ;; height, so raising it is safe. Drop the 8 if the row ever wraps again.
+    ;; For bigger icons, set `image-scaling-factor' above the `auto' value and
+    ;; check that 13 * button width still fits in `frame-pixel-width'.
+    (setq tool-bar-button-margin '(8 . 20))
 
     ;; Keep the global tool bar visible in modes that install their own local one.
     (defun greg/kill-local-tool-bar-map ()
@@ -805,6 +807,7 @@ Turns wrapping ON via `visual-line-mode' (word wrap, no truncation) or OFF
 
     ;; The two numbered buttons are yours to program, e.g.
     ;;   (setq greg/android-tool-bar-custom-commands '(eshell greg/toggle-line-wrap))
+    ;; They currently drive Org slides; see "Org slides" below.
     (defcustom greg/android-tool-bar-custom-commands nil
       "Commands run by the numbered quick-action tool-bar buttons.
 Slot N (1-based) is run by the numeric-N button.  A slot that is empty
@@ -877,6 +880,37 @@ or holds something that is no longer a command just says so when tapped."
     (global-set-key (kbd "M-s M-g") (if (executable-find "rg") #'consult-ripgrep #'consult-grep))
     (global-set-key (kbd "C-x M-g") #'greg/android-toggle-touch-screen-keyboard)
     (global-set-key (kbd "C-x M-s") #'read-only-mode)
+
+    ;; ---- Org slides --------------------------------------------------------
+    ;; Present an Org file from the phone: each heading is a slide. In an Org
+    ;; buffer, button 1 starts the show and then goes forward, button 2 goes
+    ;; back. `M-x org-tree-slide-mode' ends it.
+    (use-package org-tree-slide
+      :ensure t
+      :custom (org-tree-slide-slide-in-effect nil))
+
+    (defun greg/slides-on ()
+      "Make the current buffer readable as a slide."
+      (display-line-numbers-mode -1)
+      (text-scale-set 2))
+
+    (defun greg/slides-off ()
+      "Undo `greg/slides-on'."
+      (display-line-numbers-mode 1)
+      (text-scale-set 0))
+
+    (add-hook 'org-tree-slide-play-hook #'greg/slides-on)
+    (add-hook 'org-tree-slide-stop-hook #'greg/slides-off)
+
+    (defun greg/slide-next ()
+      "Start the slideshow, or go to the next slide if it is running."
+      (interactive)
+      (if (bound-and-true-p org-tree-slide-mode)
+          (org-tree-slide-move-next-tree)
+        (org-tree-slide-mode 1)))
+
+    (setq greg/android-tool-bar-custom-commands
+          '(greg/slide-next org-tree-slide-move-previous-tree))
 
     ;; ---- Launching other Android apps --------------------------------------
     ;; `android-app-launcher' drives Android's activity manager to start other
