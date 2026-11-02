@@ -547,13 +547,6 @@ window whose modeline was clicked to the chosen buffer."
     (add-hook 'org-tree-slide-play-hook #'greg/slides-on)
     (add-hook 'org-tree-slide-stop-hook #'greg/slides-off)
 
-    (defun greg/slide-next ()
-      "Start the slideshow, or go to the next slide if it is running."
-      (interactive)
-      (if (bound-and-true-p org-tree-slide-mode)
-          (org-tree-slide-move-next-tree)
-        (org-tree-slide-mode 1)))
-
     ;; SVG editing and preview
     (add-to-list 'auto-mode-alist '("\\.svg\\'" . nxml-mode))
 
@@ -747,7 +740,7 @@ things a Linux box can't be assumed to have: zsh and the Nerd Font."
     (global-set-key (kbd "<volume-down>") 'scroll-up-command)
 
     ;; ---- Touch tool bar ----------------------------------------------------
-    ;; One row of thirteen buttons is the whole touch control surface: the
+    ;; One row of fourteen buttons is the whole touch control surface: the
     ;; modifier bar is off, so this bar is it. Icons come from
     ;; `material-pbm-icons' because PBM renders on the Android build of Emacs,
     ;; whereas the stock arrow icons ship only as SVG (unsupported there) and
@@ -776,13 +769,13 @@ things a Linux box can't be assumed to have: zsh and the Nerd Font."
         (error (message "material-pbm-icons install failed: %s" err))))
 
     ;; Touch targets. The pack's glyphs are 24x24 PBMs, but Emacs scales them by
-    ;; `image-scaling-factor' (`auto': `frame-char-width' / 10), so button width
-    ;; is 24*scale + 2*margin + 2*relief, and a bigger default font can wrap the
-    ;; row. Horizontal 8 keeps 13 buttons on one line; vertical only changes the
-    ;; height, so raising it is safe. Drop the 8 if the row ever wraps again.
-    ;; For bigger icons, set `image-scaling-factor' above the `auto' value and
-    ;; check that 13 * button width still fits in `frame-pixel-width'.
-    (setq tool-bar-button-margin '(8 . 20))
+    ;; `image-scaling-factor', so button width is 24*scale + 2*margin + 2*relief.
+    ;; At scale 3.2 and horizontal margin 4, the row of 14 needs a
+    ;; `frame-pixel-width' of about 1220. If it wraps, lower the scale from the
+    ;; quick menu or drop the 4. Vertical only changes the height, so raising it
+    ;; is safe.
+    (setq image-scaling-factor 3.2)
+    (setq tool-bar-button-margin '(4 . 20))
 
     ;; Keep the global tool bar visible in modes that install their own local one.
     (defun greg/kill-local-tool-bar-map ()
@@ -834,7 +827,8 @@ Turns wrapping ON via `visual-line-mode' (word wrap, no truncation) or OFF
 
     ;; The two numbered buttons are yours to program, e.g.
     ;;   (setq greg/android-tool-bar-custom-commands '(eshell greg/toggle-line-wrap))
-    ;; They currently drive Org slides; see "Org slides" below.
+    ;; They currently drive Org slides and are greyed out outside a show; see
+    ;; "Org slides" below.
     (defcustom greg/android-tool-bar-custom-commands nil
       "Commands run by the numbered quick-action tool-bar buttons.
 Slot N (1-based) is run by the numeric-N button.  A slot that is empty
@@ -850,6 +844,64 @@ or holds something that is no longer a command just says so when tapped."
                   (call-interactively command)
                 (message "Tool-bar slot %d is unset (see `greg/android-tool-bar-custom-commands')"
                          (1+ n))))))))
+
+    (defvar-local greg/org-headings-collapsed nil
+      "Non-nil when `greg/org-toggle-all-headings' last collapsed this buffer.")
+
+    (defun greg/org-toggle-all-headings ()
+      "Collapse all Org headings, or expand them if the last tap collapsed them."
+      (interactive)
+      (if (setq greg/org-headings-collapsed (not greg/org-headings-collapsed))
+          (org-cycle-overview)
+        (org-fold-show-all)))
+
+    (defun greg/android-adjust-image-scale (delta)
+      "Change `image-scaling-factor' by DELTA and redraw images at the new size."
+      ;; Round to one decimal so repeated taps don't accumulate float error.
+      (setq image-scaling-factor
+            (max 0.1 (/ (round (* 10 (+ image-scaling-factor delta))) 10.0)))
+      ;; Cached images keep their old size, since the factor isn't part of the
+      ;; cache key.
+      (clear-image-cache t)
+      (message "Image scale: %.1f" image-scaling-factor))
+
+    (defun greg/android-image-scale-up ()
+      "Increase `image-scaling-factor' by 0.1."
+      (interactive)
+      (greg/android-adjust-image-scale 0.1))
+
+    (defun greg/android-image-scale-down ()
+      "Decrease `image-scaling-factor' by 0.1."
+      (interactive)
+      (greg/android-adjust-image-scale -0.1))
+
+    (defvar greg/android-quick-menu-items
+      '(("IELM"             . ielm)
+        ("Eshell"           . eshell)
+        ("Font scale up"    . text-scale-increase)
+        ("Font scale down"  . text-scale-decrease)
+        ("Image scale up"   . greg/android-image-scale-up)
+        ("Image scale down" . greg/android-image-scale-down))
+      "Label and command pairs always shown in the tool-bar quick menu.")
+
+    (defvar greg/android-quick-menu-mode-items
+      '((org-mode
+         ("Org tree slide mode"       . org-tree-slide-mode)
+         ("Show/hide previews"        . org-toggle-inline-images)
+         ("Expand/shrink all headers" . greg/org-toggle-all-headings)))
+      "Extra quick menu items, as (MODE (LABEL . COMMAND)...) entries.")
+
+    (defun greg/android-quick-menu ()
+      "Pop a tappable menu of commands for the current buffer and run the choice."
+      (interactive)
+      (let ((panes (list (cons "Commands" greg/android-quick-menu-items))))
+        (pcase-dolist (`(,mode . ,items) greg/android-quick-menu-mode-items)
+          (when (derived-mode-p mode)
+            (push (cons (symbol-name mode) items) panes)))
+        (let ((command (x-popup-menu (list '(20 20) (selected-window))
+                                     (cons "Quick menu" panes))))
+          (when command
+            (call-interactively command)))))
 
     ;; The row, left to right. Each entry is (ICON COMMAND EVENT . PROPS): EVENT is the
     ;; tool-bar event symbol the translations below hang off. Where a button is
@@ -871,8 +923,11 @@ or holds something that is no longer a command just says so when tapped."
         ("arrow-right"              forward-char              right)
         ("magnify"                  consult-line              search)
         ("keyboard-outline"         greg/android-toggle-touch-screen-keyboard keyboard)
-        ("numeric-1-circle-outline" greg/android-tool-bar-custom-command-1 slot-1)
-        ("numeric-2-circle-outline" greg/android-tool-bar-custom-command-2 slot-2))
+        ("menu"                     greg/android-quick-menu   quick-menu)
+        ("numeric-1-circle-outline" greg/android-tool-bar-custom-command-1 slot-1
+         :enable (bound-and-true-p org-tree-slide-mode))
+        ("numeric-2-circle-outline" greg/android-tool-bar-custom-command-2 slot-2
+         :enable (bound-and-true-p org-tree-slide-mode)))
       "Single-row button list for the Android touch tool bar.")
 
     (setq tool-bar-map (make-sparse-keymap))
@@ -909,11 +964,11 @@ or holds something that is no longer a command just says so when tapped."
     (global-set-key (kbd "C-x M-s") #'read-only-mode)
 
     ;; ---- Org slides --------------------------------------------------------
-    ;; The show itself is set up in `greg/universal-setup-items'. In an Org
-    ;; buffer, button 1 starts the show and then goes forward, button 2 goes
-    ;; back. `M-x org-tree-slide-mode' ends it.
+    ;; The show itself is set up in `greg/universal-setup-items'. The quick menu
+    ;; starts and ends it. During a show, button 1 goes forward and button 2
+    ;; goes back; the rest of the time they are greyed out.
     (setq greg/android-tool-bar-custom-commands
-          '(greg/slide-next org-tree-slide-move-previous-tree))
+          '(org-tree-slide-move-next-tree org-tree-slide-move-previous-tree))
 
     ;; ---- Launching other Android apps --------------------------------------
     ;; `android-app-launcher' drives Android's activity manager to start other
