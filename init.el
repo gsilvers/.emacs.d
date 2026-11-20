@@ -896,23 +896,23 @@ or holds something that is no longer a command just says so when tapped."
       (interactive)
       (greg/android-adjust-image-scale -0.1))
 
-    (defun greg/open-daily-note ()
-      "Open today's note, ~/Organization/02_Documents/YYYY-MM-DD.org.
+    (defun greg/open-monthly-note ()
+      "Open this month's note, ~/Organization/02_Documents/YYYY-MM.org.
 Switches to its buffer if it is already open, and visits the file if it
 exists. Otherwise it opens an empty buffer for it, and the file is
 created on the first save."
       (interactive)
-      (find-file (expand-file-name (format-time-string "%Y-%m-%d.org")
+      (find-file (expand-file-name (format-time-string "%Y-%m.org")
                                    "~/Organization/02_Documents/")))
 
     (defvar greg/android-quick-menu-items
-      '(("Open daily note"  . greg/open-daily-note)
-        ("IELM"             . ielm)
-        ("Eshell"           . eshell)
-        ("Font scale up"    . text-scale-increase)
-        ("Font scale down"  . text-scale-decrease)
-        ("Image scale up"   . greg/android-image-scale-up)
-        ("Image scale down" . greg/android-image-scale-down))
+      '(("Open monthly note" . greg/open-monthly-note)
+        ("IELM"              . ielm)
+        ("Eshell"            . eshell)
+        ("Font scale up"     . text-scale-increase)
+        ("Font scale down"   . text-scale-decrease)
+        ("Image scale up"    . greg/android-image-scale-up)
+        ("Image scale down"  . greg/android-image-scale-down))
       "Label and command pairs always shown in the tool-bar quick menu.")
 
     (defvar greg/android-quick-menu-mode-items
